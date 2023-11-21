@@ -44,7 +44,6 @@ Get this help message:
 ## Development
 
 Create a `.env` file with your configuration, at the bare minimum you need
-a Discord token for `TOKEN` and an Moder8or Cookie for `COOKIE` (Need at least `PHPSESSID`, `logged-in-sig` and `logged-in-user`, looks like: `PHPSESSID=12345; logged-in-sig=54321; logged-in-user=example%40example.com`).
+a Discord token for `TOKEN`.
 
-Logins are currently good for a year.
 You can either `docker compose up --build` to run with a mysql database, or just `go run main.go` to run with a sqlite database.
