@@ -5,7 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	globals "github.com/tyzbit/go-discord-modtools/globals"
+	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // BotReadyHandler is called when the bot is considered ready to use the Discord session
@@ -121,6 +121,9 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
 		globals.Moderate: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.Moderate(i.User, i.Message)
+		},
+		globals.Query: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.CheckUserReputation(i.User)
 		},
 		globals.CheckUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CheckUserReputation(i.User)
