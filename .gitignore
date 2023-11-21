@@ -1,0 +1,6 @@
+.env
+.DS_Store
+.vscode
+__debug_bin
+go-discord-modtools*
+local.db
