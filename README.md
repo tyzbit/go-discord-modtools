@@ -41,10 +41,6 @@ Get this help message:
 
 `/help`
 
-### NOTES
-
-- It can take up to a few minutes for Moder8or to save a page, so if you don't get a link immediately, please be patient.
-
 ## Development
 
 Create a `.env` file with your configuration, at the bare minimum you need
