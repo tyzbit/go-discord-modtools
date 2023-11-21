@@ -36,15 +36,17 @@ type InteractionEvent struct {
 
 // This is the representation of a moderation action
 type ModerationEvent struct {
-	CreatedAt  time.Time
-	UUID       string `gorm:"primaryKey;uniqueIndex"`
-	ServerID   string `gorm:"index"`
-	ServerName string
-	User       discordgo.User
-	Message    discordgo.Message
-	Action     string
-	Reason     string
-	Moderator  discordgo.User
+	CreatedAt       time.Time
+	UUID            string `gorm:"primaryKey;uniqueIndex"`
+	ServerID        string `gorm:"index"`
+	ServerName      string
+	UserID          string
+	UserName        string
+	MessageContents string
+	Action          string
+	Reason          string
+	ModeratorID     string
+	ModeratorName   string
 }
 
 type ModeratedUser struct {
@@ -52,8 +54,8 @@ type ModeratedUser struct {
 	UUID             string `gorm:"primaryKey;uniqueIndex"`
 	ServerID         string `gorm:"index"`
 	ServerName       string
-	User             discordgo.User
-	Message          discordgo.Message
+	UserID           string
+	UserName         string
 	ModerationEvents []ModerationEvent `gorm:"foreignKey:UUID"`
 	Reputation       int64
 }
@@ -90,11 +92,11 @@ type ServerRegistration struct {
 }
 
 type ServerConfig struct {
-	DiscordId                   string            `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
-	Name                        string            `pretty:"Server Name" gorm:"default:default"`
-	NotifyWhenReputationIsBelow sql.NullInt32     `pretty:"Notify when a user's reputation falls below this" gorm:"default:5"`
-	NotifyWhenReputationIsAbove sql.NullInt32     `pretty:"Notify when a user's reputation is greater than this" gorm:"default:3"`
-	EvidenceChannel             discordgo.Channel `pretty:"Channel to document evidence in"`
+	DiscordId                   string        `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
+	Name                        string        `pretty:"Server Name" gorm:"default:default"`
+	NotifyWhenReputationIsBelow sql.NullInt32 `pretty:"Notify when a user's reputation falls below this" gorm:"default:5"`
+	NotifyWhenReputationIsAbove sql.NullInt32 `pretty:"Notify when a user's reputation is greater than this" gorm:"default:3"`
+	EvidenceChannelID           string        `pretty:"Channel to document evidence in"`
 	UpdatedAt                   time.Time
 }
 
