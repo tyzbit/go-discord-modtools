@@ -37,7 +37,7 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(m *discordgo.Message) error {
 		//File: ,
 		// Embed: m.Embeds[],
 	}
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannel.ID, &ms)
+	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelID, &ms)
 	if err != nil {
 		return err
 	}
@@ -58,14 +58,17 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(m *disco
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{User: *m.Author}).First(&user)
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
 
-	if user.User.ID == "" {
-		return fmt.Errorf("unable to look up user %s(%s)", user.User.Username, &user.User.ID)
+	if user.UserID == "" {
+		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
 	}
 
 	user.Reputation = user.Reputation + 1
-	bot.UpdateModeratedUser(user)
+	err = bot.UpdateModeratedUser(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -76,8 +79,23 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(m *disco
 		return fmt.Errorf("message was not provied")
 	}
 
-	// TODO: mirror message to other channel
-	// TODO: decrease user rep
+	err := bot.CollectMessageAsEvidence(m)
+	if err != nil {
+		return err
+	}
+
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
+
+	if user.UserID == "" {
+		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
+	}
+
+	user.Reputation = user.Reputation - 1
+	err = bot.UpdateModeratedUser(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -87,9 +105,14 @@ func (bot *ModeratorBot) CheckUserReputationUsingMessage(m *discordgo.Message) (
 		return 0, fmt.Errorf("message was not provied")
 	}
 
-	// TODO: look up user in DB
-	// TODO: return embed with info
-	return 0, nil
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
+
+	if user.UserID == "" {
+		return 0, fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
+	}
+
+	return user.Reputation, nil
 }
 
 // App command (where the target is a user), returns User reputation
@@ -98,13 +121,21 @@ func (bot *ModeratorBot) CheckUserReputation(u *discordgo.User) (reputation int6
 		return 0, fmt.Errorf("message was not provied")
 	}
 
-	// TODO: look up user in DB
-	// TODO: return embed with info
-	return 0, nil
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.ID}).First(&user)
+
+	if user.UserID == "" {
+		return 0, fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
+	}
+
+	return user.Reputation, nil
 }
 
 func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
-	// TODO: Update user in DB
+	tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.UserID}).Updates(u)
 
+	if tx.RowsAffected != 1 {
+		return fmt.Errorf("did not update one user row as expected, updated %v rows", tx.RowsAffected)
+	}
 	return nil
 }
