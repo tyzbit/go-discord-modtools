@@ -5,14 +5,14 @@ import (
 )
 
 const (
-	// Commands
+	// Commands (max 32 in length)
 	Stats                                          = "stats"
 	Query                                          = "query"
 	Settings                                       = "settings"
 	Moderate                                       = "moderate"
-	CollectMessageAsEvidence                       = "Collect message as evidence"
-	CollectMessageAsEvidenceThenIncreaseReputation = "Collect message as evidence then increase user's reputation (good behavior)"
-	CollectMessageAsEvidenceThenDecreaseReputation = "Collect message as evidence then decrease user's reputation (bad behavior)"
+	CollectMessageAsEvidence                       = "Collect message as evidence only"
+	CollectMessageAsEvidenceThenIncreaseReputation = "Increase user's reputation"
+	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user's reputation"
 	CheckUserReputationUsingMessage                = "Check user's reputation"
 	CheckUserReputation                            = "Check reputation"
 	// TODO: actions that delete messages, ban users etc
