@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -10,18 +9,14 @@ import (
 // /moderate slash command, it needs a *discordgo.User at a minimum, either by
 // direct reference or in relation to a *discordgo.Message
 func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
-	var err error
-
 	if i.Interaction.Member.User == nil {
-		err = errors.Join(fmt.Errorf("user was not provided"))
-	}
-
-	if i.Message == nil {
-		err = errors.Join(fmt.Errorf("message was not provided"))
+		return fmt.Errorf("user was not provided")
+	} else if i.Message == nil {
+		return fmt.Errorf("message was not provided")
 	}
 
 	// TODO: show embed with options
-	return err
+	return nil
 }
 
 // App command, copies message details to a configured channel
@@ -36,10 +31,10 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 		Embeds:     i.Message.Embeds,
 		TTS:        i.Message.TTS,
 		Components: i.Message.Components,
-		// Files: m.Attachments,
+		//Files: m.Attachments,
 		// AllowedMentions,
 		Reference: i.Message.MessageReference,
-		// File: ,
+		//File: ,
 		// Embed: m.Embeds[],
 	}
 	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
