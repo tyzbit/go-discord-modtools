@@ -29,6 +29,7 @@ var (
 		&bot.ServerRegistration{},
 		&bot.ServerConfig{},
 		&bot.ModerationEvent{},
+		&bot.ModeratedUser{},
 		&bot.MessageEvent{},
 		&bot.InteractionEvent{},
 	}
