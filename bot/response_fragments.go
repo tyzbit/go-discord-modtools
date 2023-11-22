@@ -9,6 +9,7 @@ import (
 
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
 func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
+	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
 	return &discordgo.InteractionResponseData{
 		Flags: discordgo.MessageFlagsEphemeral,
 		Components: []discordgo.MessageComponent{
@@ -29,7 +30,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder:  getTagValue(sc, "EvidenceChannelSettingID", "pretty"),
+						Placeholder:  globals.EvidenceChannelSettingID + ": #" + channel.Name,
 						MenuType:     discordgo.ChannelSelectMenu,
 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
 						CustomID:     globals.EvidenceChannelSettingID,
