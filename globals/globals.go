@@ -10,10 +10,10 @@ const (
 	Query                                          = "query"
 	Settings                                       = "settings"
 	Moderate                                       = "moderate"
-	CollectMessageAsEvidence                       = "Collect message as evidence only"
-	CollectMessageAsEvidenceThenIncreaseReputation = "Increase user's reputation"
-	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user's reputation"
-	CheckUserReputationUsingMessage                = "Check user's reputation"
+	CollectMessageAsEvidence                       = "Collect evidence"
+	CollectMessageAsEvidenceThenIncreaseReputation = "Increse user rep"
+	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user rep"
+	CheckUserReputationUsingMessage                = "Check user rep"
 	CheckUserReputation                            = "Check reputation"
 	// TODO: actions that delete messages, ban users etc
 	// TODO: (extra credit) make a command that manages custom commands that drop a premade message
@@ -24,8 +24,8 @@ const (
 	ReasonOption  = "reason"
 
 	// Settings
-	NotifyWhenReputationIsBelowSetting = "Notify when reputation is below"
-	NotifyWhenReputationIsAboveSetting = "Notify when reputation is above"
+	NotifyWhenReputationIsBelowSetting = "Low rep notification"
+	NotifyWhenReputationIsAboveSetting = "High rep notification"
 	EvidenceChannelSetting             = "Evidence channel"
 
 	// Colors
@@ -44,6 +44,10 @@ Configure the bot:
 Look up a user (more coming soon):
 
 ` + "`/query`" + `
+
+Directly moderate up a user (more coming soon):
+
+` + "`/moderate`" + `
 
 Get stats for the bot:
 
