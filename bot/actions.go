@@ -14,7 +14,7 @@ import (
 func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
 	if i.Interaction.Member.User == nil {
 		return fmt.Errorf("user was not provided")
-	} else if i.Message == nil {
+	} else if i.Interaction.Message == nil {
 		return fmt.Errorf("message was not provided")
 	}
 
@@ -44,19 +44,26 @@ func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
 
 // App command, copies message details to a configured channel
 func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate) error {
-	if i.Message == nil {
+	message := i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
+	if message == nil {
 		return fmt.Errorf("message was not provied")
 	}
 
-	sc := bot.getServerConfig(i.Message.GuildID)
+	sc := bot.getServerConfig(i.Interaction.GuildID)
 	ms := discordgo.MessageSend{
-		Content:    i.Message.Content,
-		Embeds:     i.Message.Embeds,
-		TTS:        i.Message.TTS,
-		Components: i.Message.Components,
+		Content: message.Content,
+		Embeds: []*discordgo.MessageEmbed{{
+			Fields: []*discordgo.MessageEmbedField{{
+				Name:   "Username",
+				Value:  message.Author.Username,
+				Inline: true,
+			}},
+		}},
+		TTS:        message.TTS,
+		Components: message.Components,
 		//Files: m.Attachments,
 		// AllowedMentions,
-		Reference: i.Message.MessageReference,
+		Reference: message.MessageReference,
 		//File: ,
 		// Embed: m.Embeds[],
 	}
