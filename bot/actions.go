@@ -129,7 +129,7 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 		},
 	})
 
-	return "", nil
+	return "", err
 }
 
 func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
