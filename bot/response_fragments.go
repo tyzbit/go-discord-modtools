@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	globals "github.com/tyzbit/go-discord-modtools/globals"
 )
@@ -12,20 +14,16 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						Label:    getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty"),
-						Style:    discordgo.TextInputShort,
-						CustomID: globals.NotifyWhenReputationIsBelowSetting,
-					},
-				},
-			},
-			discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						Label:    getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty"),
-						Style:    discordgo.TextInputShort,
-						CustomID: globals.NotifyWhenReputationIsAboveSetting,
-					},
+					discordgo.Button{
+						Label: getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty") +
+							fmt.Sprintf(", current: %v", sc.NotifyWhenReputationIsBelowSetting.Int32),
+						Style:    discordgo.PrimaryButton,
+						CustomID: globals.NotifyWhenReputationIsBelowSetting},
+					discordgo.Button{
+						Label: getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty") +
+							fmt.Sprintf(", current: %v", sc.NotifyWhenReputationIsAboveSetting.Int32),
+						Style:    discordgo.PrimaryButton,
+						CustomID: globals.NotifyWhenReputationIsAboveSetting},
 				},
 			},
 			discordgo.ActionsRow{
