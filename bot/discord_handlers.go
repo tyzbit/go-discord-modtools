@@ -113,30 +113,36 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					},
 				},
 			})
-
 			if err != nil {
 				log.Errorf("error responding to help command "+globals.Help+", err: %v", err)
 			}
 		},
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
+		// TODO: error will be handled once the functions are ready
 		globals.Moderate: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.Moderate(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.Query: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CheckUserReputation(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.CheckUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CheckUserReputation(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.CheckUserReputationUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CheckUserReputation(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.CollectMessageAsEvidence: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CollectMessageAsEvidence(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.CollectMessageAsEvidenceThenDecreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CollectMessageAsEvidenceThenDecreaseReputation(i)
 		},
+		// TODO: error will be handled once the functions are ready
 		globals.CollectMessageAsEvidenceThenIncreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CollectMessageAsEvidenceThenIncreaseReputation(i)
 		},
@@ -162,7 +168,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 				administrator := false
 
 			out:
-				//TODO: allow adding, removing and looking up admins in the DB
+				// TODO: allow adding, removing and looking up admins in the DB
 				for _, id := range bot.Config.AdminIds {
 					if i.User.ID == id {
 						administrator = true
@@ -190,7 +196,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 							},
 						},
 					})
-
 					if err != nil {
 						log.Errorf("error responding to slash command "+globals.Stats+", err: %v", err)
 					}
@@ -215,7 +220,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					},
 				},
 			})
-
 			if err != nil {
 				log.Errorf("error responding to slash command "+globals.Stats+", err: %v", err)
 			}

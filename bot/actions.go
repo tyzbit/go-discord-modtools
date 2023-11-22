@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -9,14 +10,18 @@ import (
 // /moderate slash command, it needs a *discordgo.User at a minimum, either by
 // direct reference or in relation to a *discordgo.Message
 func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
+	var err error
+
 	if i.Interaction.Member.User == nil {
-		return fmt.Errorf("user was not provided")
-	} else if i.Message == nil {
-		return fmt.Errorf("message was not provided")
+		err = errors.Join(fmt.Errorf("user was not provided"))
+	}
+
+	if i.Message == nil {
+		err = errors.Join(fmt.Errorf("message was not provided"))
 	}
 
 	// TODO: show embed with options
-	return nil
+	return err
 }
 
 // App command, copies message details to a configured channel
@@ -31,10 +36,10 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 		Embeds:     i.Message.Embeds,
 		TTS:        i.Message.TTS,
 		Components: i.Message.Components,
-		//Files: m.Attachments,
+		// Files: m.Attachments,
 		// AllowedMentions,
 		Reference: i.Message.MessageReference,
-		//File: ,
+		// File: ,
 		// Embed: m.Embeds[],
 	}
 	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
@@ -48,10 +53,6 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 // App command (where the target is a message), copies message details to a
 // configured channel then increases the message author's reputation
 func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *discordgo.InteractionCreate) error {
-	if i.Message == nil {
-		return fmt.Errorf("message was not provied")
-	}
-
 	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
@@ -75,10 +76,6 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *disco
 // App command (where the target is a message), copies message details to a
 // configured channel then decreases the message author's reputation
 func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *discordgo.InteractionCreate) error {
-	if i.Message == nil {
-		return fmt.Errorf("message was not provied")
-	}
-
 	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
@@ -102,7 +99,7 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *disco
 // App command (where the target is a message), returns User reputation
 func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (reputation string, err error) {
 	if i.Interaction.Member.User.ID == "" {
-		return "", fmt.Errorf("message was not provied")
+		return "", fmt.Errorf("user was not provied")
 	}
 
 	user := ModeratedUser{}
@@ -132,9 +129,11 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 		},
 	})
 
-	return "", nil
+	return "", err
 }
 
+// UpdateModeratedUser updates moderated user status in the database.
+// It is allowed to fail
 func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
 	tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.UserID}).Updates(u)
 
