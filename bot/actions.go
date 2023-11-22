@@ -132,6 +132,8 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 	return "", err
 }
 
+// UpdateModeratedUser updates moderated user status in the database.
+// It is allowed to fail
 func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
 	tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.UserID}).Updates(u)
 
