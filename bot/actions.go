@@ -53,10 +53,6 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 // App command (where the target is a message), copies message details to a
 // configured channel then increases the message author's reputation
 func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *discordgo.InteractionCreate) error {
-	if i.Message == nil {
-		return fmt.Errorf("message was not provied")
-	}
-
 	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
@@ -80,10 +76,6 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *disco
 // App command (where the target is a message), copies message details to a
 // configured channel then decreases the message author's reputation
 func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *discordgo.InteractionCreate) error {
-	if i.Message == nil {
-		return fmt.Errorf("message was not provied")
-	}
-
 	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
