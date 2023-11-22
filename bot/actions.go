@@ -100,18 +100,15 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *disco
 }
 
 // App command (where the target is a message), returns User reputation
-func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (reputation int64, err error) {
+func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (reputation string, err error) {
 	if i.Interaction.Member.User.ID == "" {
-		return 0, fmt.Errorf("message was not provied")
+		return "", fmt.Errorf("message was not provied")
 	}
 
 	user := ModeratedUser{}
 	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
-	if user.UserID == "" {
-		return 0, fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
-	}
-
+	reputation = fmt.Sprintf("%v", user.Reputation)
 	// TODO: I'm testing modals here for some reason but this response
 	// should probably just be an ephemeral message.
 	err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -125,7 +122,7 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 						CustomID:    "12345",
 						Label:       "Reputation",
 						Style:       discordgo.TextInputShort,
-						Placeholder: "this user is amazing",
+						Placeholder: "this user is amazing, their reputation is " + reputation,
 						Required:    true,
 						MinLength:   1,
 						MaxLength:   4,
@@ -135,7 +132,7 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 		},
 	})
 
-	return user.Reputation, nil
+	return "", nil
 }
 
 func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
