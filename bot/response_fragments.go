@@ -7,6 +7,44 @@ import (
 	globals "github.com/tyzbit/go-discord-modtools/globals"
 )
 
+// lowReputationValues returns a []discordgo.SelectMenuOption for low rep values
+func lowReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption) {
+	for i := -10; i <= 10; i++ {
+
+		description := ""
+		if sc.NotifyWhenReputationIsBelowSetting.Valid && int32(i) == sc.NotifyWhenReputationIsBelowSetting.Int32 {
+			description = "Current value"
+		}
+
+		options = append(options, discordgo.SelectMenuOption{
+			Label:       fmt.Sprint(i),
+			Description: description,
+			Value:       fmt.Sprint(i),
+		})
+	}
+	return options
+
+}
+
+// highReputationValues returns a []discordgo.SelectMenuOption for high rep values
+func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption) {
+	for i := -10; i <= 10; i++ {
+
+		description := ""
+		if sc.NotifyWhenReputationIsAboveSetting.Valid && int32(i) == sc.NotifyWhenReputationIsAboveSetting.Int32 {
+			description = "Current value"
+		}
+
+		options = append(options, discordgo.SelectMenuOption{
+			Label:       fmt.Sprint(i),
+			Description: description,
+			Value:       fmt.Sprint(i),
+		})
+	}
+	return options
+
+}
+
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
 func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
 	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
@@ -15,16 +53,20 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					discordgo.Button{
-						Label: getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty") +
-							fmt.Sprintf(", current: %v", sc.NotifyWhenReputationIsBelowSetting.Int32),
-						Style:    discordgo.PrimaryButton,
-						CustomID: globals.NotifyWhenReputationIsBelowSetting},
-					discordgo.Button{
-						Label: getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty") +
-							fmt.Sprintf(", current: %v", sc.NotifyWhenReputationIsAboveSetting.Int32),
-						Style:    discordgo.PrimaryButton,
-						CustomID: globals.NotifyWhenReputationIsAboveSetting},
+					discordgo.SelectMenu{
+						Placeholder: getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty"),
+						CustomID:    globals.NotifyWhenReputationIsBelowSetting,
+						Options:     lowReputationValues(sc),
+					},
+				},
+			},
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.SelectMenu{
+						Placeholder: getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty"),
+						CustomID:    globals.NotifyWhenReputationIsAboveSetting,
+						Options:     highReputationValues(sc),
+					},
 				},
 			},
 			discordgo.ActionsRow{

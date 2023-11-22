@@ -176,45 +176,6 @@ func (bot *ModeratorBot) respondToSettingsChoice(i *discordgo.InteractionCreate,
 	}
 }
 
-func (bot *ModeratorBot) getValueUsingModal(i *discordgo.InteractionCreate,
-	setting string) {
-	guild, err := bot.DG.Guild(i.Interaction.GuildID)
-	if err != nil {
-		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
-		return
-	}
-
-	// TODO: show modal, get input for setting
-	value := 10
-	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
-	var interactionErr error
-
-	bot.createInteractionEvent(InteractionEvent{
-		UserID:        i.Member.User.ID,
-		Username:      i.Member.User.Username,
-		InteractionId: i.Message.ID,
-		ChannelId:     i.Message.ChannelID,
-		ServerID:      i.Interaction.GuildID,
-		ServerName:    guild.Name,
-	})
-
-	if !ok {
-		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.settingsFailureIntegrationResponse(),
-		})
-	} else {
-		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.SettingsIntegrationResponse(sc),
-		})
-	}
-
-	if interactionErr != nil {
-		log.Errorf("error responding to settings interaction, err: %v", interactionErr)
-	}
-}
-
 // updateServersWatched updates the servers watched value
 // in both the local bot stats and in the database. It is allowed to fail
 func (bot *ModeratorBot) updateServersWatched() error {

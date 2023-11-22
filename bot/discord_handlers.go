@@ -367,11 +367,13 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// 	typingStop <- true
 		// },
 		// Settings buttons/choices
-		globals.NotifyWhenReputationIsAboveSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.getValueUsingModal(i, "notify_when_reputation_is_above_setting")
-		},
 		globals.NotifyWhenReputationIsBelowSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.getValueUsingModal(i, "notify_when_reputation_is_below_setting")
+			mcd := i.MessageComponentData()
+			bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
+		},
+		globals.NotifyWhenReputationIsAboveSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.respondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
 		},
 		globals.EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()

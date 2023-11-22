@@ -4,7 +4,10 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/tyzbit/go-discord-modtools/globals"
 )
+
+// TODO: I think all of these need to log events
 
 // /moderate slash command, it needs a *discordgo.User at a minimum, either by
 // direct reference or in relation to a *discordgo.Message
@@ -126,6 +129,102 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 
 	return "", err
 }
+
+// // Good modal example, but this will be a dropdown
+// func (bot *ModeratorBot) ShowLowReputationModal(i *discordgo.InteractionCreate) {
+// 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+// 		Type: discordgo.InteractionResponseModal,
+// 		Data: &discordgo.InteractionResponseData{
+// 			CustomID: globals.ShowLowReputationModal,
+// 			Title:    "What should the new value be?",
+// 			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+// 				Components: []discordgo.MessageComponent{
+// 					discordgo.TextInput{
+// 						CustomID:    "12345",
+// 						Label:       "Reputation",
+// 						Style:       discordgo.TextInputShort,
+// 						Placeholder: "this user is amazing",
+// 						Required:    true,
+// 						MinLength:   1,
+// 						MaxLength:   4,
+// 					},
+// 				},
+// 			}},
+// 		},
+// 	})
+// }
+
+func (bot *ModeratorBot) ShowLowReputationModal(i *discordgo.InteractionCreate) {
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.NotifyWhenReputationIsBelowSetting,
+			Title:    "What should the new value be?",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "12345",
+						Label:       "Reputation",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "this user is amazing",
+						Required:    true,
+						MinLength:   1,
+						MaxLength:   4,
+					},
+				},
+			}},
+		},
+	})
+}
+
+func (bot *ModeratorBot) ShowHighReputationModal(i *discordgo.InteractionCreate) {
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.NotifyWhenReputationIsAboveSetting,
+			Title:    "What should the new value be?",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "12345",
+						Label:       "Reputation",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "this user is amazing",
+						Required:    true,
+						MinLength:   1,
+						MaxLength:   4,
+					},
+				},
+			}},
+		},
+	})
+}
+
+// func (bot *ModeratorBot) SetValueUsingModal(i *discordgo.InteractionCreate) {
+// 	guild, err := bot.DG.Guild(i.Interaction.GuildID)
+// 	if err != nil {
+// 		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
+// 		return
+// 	}
+
+// 	// The first of two events because after choosing the option, the user
+// 	// inputs a value in a modal.
+// 	bot.createInteractionEvent(InteractionEvent{
+// 		UserID:        i.Member.User.ID,
+// 		Username:      i.Member.User.Username,
+// 		InteractionId: i.Message.ID,
+// 		ChannelId:     i.Message.ChannelID,
+// 		ServerID:      i.Interaction.GuildID,
+// 		ServerName:    guild.Name,
+// 	})
+
+// 	mcd := i.MessageComponentData()
+// 	if mcd.CustomID == globals.ShowLowReputationModal {
+// 		bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
+// 	} else if mcd.CustomID == globals.ShowHighReputationModal {
+// 		bot.respondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
+// 	}
+// }
 
 // UpdateModeratedUser updates moderated user status in the database.
 // It is allowed to fail
