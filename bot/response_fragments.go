@@ -49,7 +49,7 @@ func (bot *ModeratorBot) settingsFailureIntegrationResponse() *discordgo.Interac
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title: "Unable to update setting",
-				Color: globals.FrenchGray,
+				Color: globals.Purple,
 			},
 		},
 	}
@@ -63,7 +63,7 @@ func (bot *ModeratorBot) settingsDMFailureIntegrationResponse() *discordgo.Inter
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title: "The bot does not have any per-user settings",
-				Color: globals.FrenchGray,
+				Color: globals.Purple,
 			},
 		},
 	}

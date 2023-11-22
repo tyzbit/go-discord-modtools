@@ -108,7 +108,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 						{
 							Title:       "Moder8or Bot Help",
 							Description: globals.BotHelpText,
-							Color:       globals.FrenchGray,
+							Color:       globals.Purple,
 						},
 					},
 				},
@@ -185,7 +185,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 							Embeds: []*discordgo.MessageEmbed{
 								{
 									Title: "Stats are not available in DMs",
-									Color: globals.FrenchGray,
+									Color: globals.Purple,
 								},
 							},
 						},
@@ -210,7 +210,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 						{
 							Title:  "🏛️ Moder8or Bot Stats",
 							Fields: structToPrettyDiscordFields(stats, directMessage),
-							Color:  globals.FrenchGray,
+							Color:  globals.Purple,
 						},
 					},
 				},

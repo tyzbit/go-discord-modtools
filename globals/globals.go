@@ -30,6 +30,7 @@ const (
 
 	// Colors
 	FrenchGray = 13424349
+	Purple     = 7283691
 
 	// Shown to the user when `/help` is called
 	BotHelpText = `**Usage**
