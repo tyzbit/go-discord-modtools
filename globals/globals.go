@@ -9,7 +9,8 @@ const (
 	Stats                                          = "stats"
 	Query                                          = "query"
 	Settings                                       = "settings"
-	Moderate                                       = "moderate"
+	ModerateUser                                   = "Moderate user"
+	ModerateMessage                                = "Moderate message"
 	CollectMessageAsEvidence                       = "Collect evidence"
 	CollectMessageAsEvidenceThenIncreaseReputation = "Increse user rep"
 	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user rep"
@@ -27,6 +28,10 @@ const (
 	NotifyWhenReputationIsBelowSetting = "Low rep notification"
 	NotifyWhenReputationIsAboveSetting = "High rep notification"
 	EvidenceChannelSettingID           = "Evidence channel"
+
+	// Modal
+	ModerateModal       = "Moderate user modal"
+	ModerateModalReason = "Reason"
 
 	// Colors
 	FrenchGray = 13424349
@@ -77,25 +82,6 @@ var (
 			Description: "How to use this bot",
 		},
 		{
-			Name:        Moderate,
-			Description: "Perform a moderation action directly",
-			Type:        discordgo.ChatApplicationCommand,
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Name:        UserOption,
-					Description: "User to take a moderation action against (if there is no related message)",
-					Type:        discordgo.ApplicationCommandOptionString,
-					Required:    true,
-				},
-				{
-					Name:        ReasonOption,
-					Description: "Reason for moderation (if there is no related message)",
-					Type:        discordgo.ApplicationCommandOptionString,
-					Required:    true,
-				},
-			},
-		},
-		{
 			Name:        Query,
 			Description: "Check a user's reputation information",
 			Type:        discordgo.ChatApplicationCommand,
@@ -107,6 +93,14 @@ var (
 					Required:    true,
 				},
 			},
+		},
+		{
+			Name:        Stats,
+			Description: "Show bot stats",
+		},
+		{
+			Name:        Settings,
+			Description: "Change settings",
 		},
 		{
 			Name: CollectMessageAsEvidence,
@@ -129,12 +123,12 @@ var (
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name:        Stats,
-			Description: "Show bot stats",
+			Name: ModerateMessage,
+			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name:        Settings,
-			Description: "Change settings",
+			Name: ModerateUser,
+			Type: discordgo.UserApplicationCommand,
 		},
 	}
 	RegisteredCommands = make([]*discordgo.ApplicationCommand, len(Commands))

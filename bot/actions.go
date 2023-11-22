@@ -18,7 +18,27 @@ func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
 		return fmt.Errorf("message was not provided")
 	}
 
-	// TODO: show embed with options
+	mcd := i.MessageComponentData()
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.ModerateModal,
+			Title:    "Moderate " + mcd.Values[0],
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    globals.ModerateModalReason,
+						Label:       "Reason",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "Why are you moderating this user or content?",
+						Required:    true,
+						MinLength:   1,
+						MaxLength:   500,
+					},
+				},
+			}},
+		},
+	})
 	return nil
 }
 
@@ -103,56 +123,17 @@ func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (re
 	user := ModeratedUser{}
 	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
-	reputation = fmt.Sprintf("%v", user.Reputation)
-	// TODO: I'm testing modals here for some reason but this response
-	// should probably just be an ephemeral message.
-	err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseModal,
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: "12345",
-			Title:    "Modal test",
-			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "12345",
-						Label:       "Reputation",
-						Style:       discordgo.TextInputShort,
-						Placeholder: "this user is amazing, their reputation is " + reputation,
-						Required:    true,
-						MinLength:   1,
-						MaxLength:   4,
-					},
-				},
-			}},
+			CustomID: globals.CheckUserReputation,
+			Flags:    discordgo.MessageFlagsEphemeral,
+			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
 		},
 	})
 
 	return "", err
 }
-
-// // Good modal example, but this will be a dropdown
-// func (bot *ModeratorBot) ShowLowReputationModal(i *discordgo.InteractionCreate) {
-// 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-// 		Type: discordgo.InteractionResponseModal,
-// 		Data: &discordgo.InteractionResponseData{
-// 			CustomID: globals.ShowLowReputationModal,
-// 			Title:    "What should the new value be?",
-// 			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
-// 				Components: []discordgo.MessageComponent{
-// 					discordgo.TextInput{
-// 						CustomID:    "12345",
-// 						Label:       "Reputation",
-// 						Style:       discordgo.TextInputShort,
-// 						Placeholder: "this user is amazing",
-// 						Required:    true,
-// 						MinLength:   1,
-// 						MaxLength:   4,
-// 					},
-// 				},
-// 			}},
-// 		},
-// 	})
-// }
 
 func (bot *ModeratorBot) ShowLowReputationModal(i *discordgo.InteractionCreate) {
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
