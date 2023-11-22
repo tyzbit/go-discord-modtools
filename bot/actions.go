@@ -99,7 +99,7 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *disco
 // App command (where the target is a message), returns User reputation
 func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (reputation string, err error) {
 	if i.Interaction.Member.User.ID == "" {
-		return "", fmt.Errorf("message was not provied")
+		return "", fmt.Errorf("user was not provied")
 	}
 
 	user := ModeratedUser{}
