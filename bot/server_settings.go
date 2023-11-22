@@ -101,9 +101,12 @@ func (bot *ModeratorBot) updateInactiveRegistrations(activeGuilds []*discordgo.G
 func (bot *ModeratorBot) getServerConfig(guildId string) ServerConfig {
 	// Default server config in case guild lookup fails, these are used for DMs
 	sc := ServerConfig{
-		DiscordId: "",
-		Name:      "",
-		UpdatedAt: time.Now(),
+		DiscordId:                          "",
+		Name:                               "",
+		UpdatedAt:                          time.Now(),
+		NotifyWhenReputationIsBelowSetting: sql.NullInt32{Int32: -5, Valid: true},
+		NotifyWhenReputationIsAboveSetting: sql.NullInt32{Int32: 3, Valid: true},
+		EvidenceChannelSettingID:           "",
 	}
 	// If this fails, we'll return a default server
 	// config, which is expected
@@ -144,6 +147,45 @@ func (bot *ModeratorBot) respondToSettingsChoice(i *discordgo.InteractionCreate,
 		return
 	}
 
+	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
+	var interactionErr error
+
+	bot.createInteractionEvent(InteractionEvent{
+		UserID:        i.Member.User.ID,
+		Username:      i.Member.User.Username,
+		InteractionId: i.Message.ID,
+		ChannelId:     i.Message.ChannelID,
+		ServerID:      i.Interaction.GuildID,
+		ServerName:    guild.Name,
+	})
+
+	if !ok {
+		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: bot.settingsFailureIntegrationResponse(),
+		})
+	} else {
+		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: bot.SettingsIntegrationResponse(sc),
+		})
+	}
+
+	if interactionErr != nil {
+		log.Errorf("error responding to settings interaction, err: %v", interactionErr)
+	}
+}
+
+func (bot *ModeratorBot) getValueUsingModal(i *discordgo.InteractionCreate,
+	setting string) {
+	guild, err := bot.DG.Guild(i.Interaction.GuildID)
+	if err != nil {
+		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
+		return
+	}
+
+	// TODO: show modal, get input for setting
+	value := 10
 	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
 	var interactionErr error
 

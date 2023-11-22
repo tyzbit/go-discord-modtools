@@ -26,7 +26,7 @@ const (
 	// Settings
 	NotifyWhenReputationIsBelowSetting = "Low rep notification"
 	NotifyWhenReputationIsAboveSetting = "High rep notification"
-	EvidenceChannelSetting             = "Evidence channel"
+	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Colors
 	FrenchGray = 13424349

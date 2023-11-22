@@ -29,9 +29,10 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: getTagValue(sc, "EvidenceChannelSetting", "pretty"),
-						MenuType:    discordgo.ChannelSelectMenu,
-						CustomID:    globals.EvidenceChannelSetting,
+						Placeholder:  getTagValue(sc, "EvidenceChannelSettingID", "pretty"),
+						MenuType:     discordgo.ChannelSelectMenu,
+						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
+						CustomID:     globals.EvidenceChannelSettingID,
 					},
 				},
 			},
