@@ -35,7 +35,7 @@ const (
 	BotHelpText = `**Usage**
 	Right click (Desktop) or long press (mobile) a message and select Apps, then select a moderation action for the message.
 
-- You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see- You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see or select "Take snapshot" to take a snapshot of the live page.
+You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see- You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see or select "Take snapshot" to take a snapshot of the live page.
 
 Configure the bot:
 
