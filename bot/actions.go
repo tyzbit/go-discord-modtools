@@ -8,10 +8,10 @@ import (
 
 // /moderate slash command, it needs a *discordgo.User at a minimum, either by
 // direct reference or in relation to a *discordgo.Message
-func (bot *ModeratorBot) Moderate(u *discordgo.User, m *discordgo.Message) error {
-	if u == nil {
+func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
+	if i.Interaction.Member.User == nil {
 		return fmt.Errorf("user was not provided")
-	} else if m == nil {
+	} else if i.Message == nil {
 		return fmt.Errorf("message was not provided")
 	}
 
@@ -20,20 +20,20 @@ func (bot *ModeratorBot) Moderate(u *discordgo.User, m *discordgo.Message) error
 }
 
 // App command, copies message details to a configured channel
-func (bot *ModeratorBot) CollectMessageAsEvidence(m *discordgo.Message) error {
-	if m == nil {
+func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate) error {
+	if i.Message == nil {
 		return fmt.Errorf("message was not provied")
 	}
 
-	sc := bot.getServerConfig(m.GuildID)
+	sc := bot.getServerConfig(i.Message.GuildID)
 	ms := discordgo.MessageSend{
-		Content:    m.Content,
-		Embeds:     m.Embeds,
-		TTS:        m.TTS,
-		Components: m.Components,
+		Content:    i.Message.Content,
+		Embeds:     i.Message.Embeds,
+		TTS:        i.Message.TTS,
+		Components: i.Message.Components,
 		//Files: m.Attachments,
 		// AllowedMentions,
-		Reference: m.MessageReference,
+		Reference: i.Message.MessageReference,
 		//File: ,
 		// Embed: m.Embeds[],
 	}
@@ -47,18 +47,18 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(m *discordgo.Message) error {
 
 // App command (where the target is a message), copies message details to a
 // configured channel then increases the message author's reputation
-func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(m *discordgo.Message) error {
-	if m == nil {
+func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *discordgo.InteractionCreate) error {
+	if i.Message == nil {
 		return fmt.Errorf("message was not provied")
 	}
 
-	err := bot.CollectMessageAsEvidence(m)
+	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
 	if user.UserID == "" {
 		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
@@ -74,18 +74,18 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(m *disco
 
 // App command (where the target is a message), copies message details to a
 // configured channel then decreases the message author's reputation
-func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(m *discordgo.Message) error {
-	if m == nil {
+func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *discordgo.InteractionCreate) error {
+	if i.Message == nil {
 		return fmt.Errorf("message was not provied")
 	}
 
-	err := bot.CollectMessageAsEvidence(m)
+	err := bot.CollectMessageAsEvidence(i)
 	if err != nil {
 		return err
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
 	if user.UserID == "" {
 		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
@@ -100,33 +100,40 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(m *disco
 }
 
 // App command (where the target is a message), returns User reputation
-func (bot *ModeratorBot) CheckUserReputationUsingMessage(m *discordgo.Message) (reputation int64, err error) {
-	if m == nil {
+func (bot *ModeratorBot) CheckUserReputation(i *discordgo.InteractionCreate) (reputation int64, err error) {
+	if i.Interaction.Member.User.ID == "" {
 		return 0, fmt.Errorf("message was not provied")
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: m.Author.ID}).First(&user)
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
 	if user.UserID == "" {
 		return 0, fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
 	}
 
-	return user.Reputation, nil
-}
-
-// App command (where the target is a user), returns User reputation
-func (bot *ModeratorBot) CheckUserReputation(u *discordgo.User) (reputation int64, err error) {
-	if u == nil {
-		return 0, fmt.Errorf("message was not provied")
-	}
-
-	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.ID}).First(&user)
-
-	if user.UserID == "" {
-		return 0, fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
-	}
+	// TODO: I'm testing modals here for some reason but this response
+	// should probably just be an ephemeral message.
+	err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: "12345",
+			Title:    "Modal test",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "12345",
+						Label:       "Reputation",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "this user is amazing",
+						Required:    true,
+						MinLength:   1,
+						MaxLength:   4,
+					},
+				},
+			}},
+		},
+	})
 
 	return user.Reputation, nil
 }

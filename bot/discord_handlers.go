@@ -120,25 +120,25 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
 		globals.Moderate: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.Moderate(i.User, i.Message)
+			bot.Moderate(i)
 		},
 		globals.Query: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CheckUserReputation(i.User)
+			bot.CheckUserReputation(i)
 		},
 		globals.CheckUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CheckUserReputation(i.User)
+			bot.CheckUserReputation(i)
 		},
 		globals.CheckUserReputationUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CheckUserReputationUsingMessage(i.Message)
+			bot.CheckUserReputation(i)
 		},
 		globals.CollectMessageAsEvidence: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CollectMessageAsEvidence(i.Message)
+			bot.CollectMessageAsEvidence(i)
 		},
 		globals.CollectMessageAsEvidenceThenDecreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CollectMessageAsEvidenceThenDecreaseReputation(i.Message)
+			bot.CollectMessageAsEvidenceThenDecreaseReputation(i)
 		},
 		globals.CollectMessageAsEvidenceThenIncreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CollectMessageAsEvidenceThenIncreaseReputation(i.Message)
+			bot.CollectMessageAsEvidenceThenIncreaseReputation(i)
 		},
 		// Stats does not create an InteractionEvent
 		globals.Stats: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
