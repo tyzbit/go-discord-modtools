@@ -37,7 +37,7 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(m *discordgo.Message) error {
 		//File: ,
 		// Embed: m.Embeds[],
 	}
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelID, &ms)
+	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
 		return err
 	}

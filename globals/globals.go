@@ -24,9 +24,9 @@ const (
 	ReasonOption  = "reason"
 
 	// Settings
-	NotifyWhenReputationIsBelow = "Notify when reputation is below"
-	NotifyWhenReputationIsAbove = "Notify when reputation is above"
-	EvidenceChannel             = "Evidence channel"
+	NotifyWhenReputationIsBelowSetting = "Notify when reputation is below"
+	NotifyWhenReputationIsAboveSetting = "Notify when reputation is above"
+	EvidenceChannelSetting             = "Evidence channel"
 
 	// Colors
 	FrenchGray = 13424349

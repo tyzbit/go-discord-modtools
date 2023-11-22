@@ -92,12 +92,12 @@ type ServerRegistration struct {
 }
 
 type ServerConfig struct {
-	DiscordId                   string        `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
-	Name                        string        `pretty:"Server Name" gorm:"default:default"`
-	NotifyWhenReputationIsBelow sql.NullInt32 `pretty:"Notify when a user's reputation falls below this" gorm:"default:5"`
-	NotifyWhenReputationIsAbove sql.NullInt32 `pretty:"Notify when a user's reputation is greater than this" gorm:"default:3"`
-	EvidenceChannelID           string        `pretty:"Channel to document evidence in"`
-	UpdatedAt                   time.Time
+	DiscordId                          string        `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
+	Name                               string        `pretty:"Server Name" gorm:"default:default"`
+	NotifyWhenReputationIsBelowSetting sql.NullInt32 `pretty:"Notify when a user's reputation falls below this" gorm:"default:5"`
+	NotifyWhenReputationIsAboveSetting sql.NullInt32 `pretty:"Notify when a user's reputation is greater than this" gorm:"default:3"`
+	EvidenceChannelSettingID           string        `pretty:"Channel to document evidence in"`
+	UpdatedAt                          time.Time
 }
 
 // Stats

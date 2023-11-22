@@ -362,6 +362,19 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// 	// This only has an effect if the message is not ephemeral
 		// 	typingStop <- true
 		// },
+		// Settings buttons/choices
+		globals.NotifyWhenReputationIsAboveSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.respondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
+		},
+		globals.NotifyWhenReputationIsBelowSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
+		},
+		globals.EvidenceChannelSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
+		},
 	}
 
 	switch i.Type {

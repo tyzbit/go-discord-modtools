@@ -13,27 +13,27 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.TextInput{
-						Label:    getTagValue(sc, "NotifyWhenReputationIsBelow", "pretty"),
+						Label:    getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty"),
 						Style:    discordgo.TextInputShort,
-						CustomID: globals.NotifyWhenReputationIsBelow,
+						CustomID: globals.NotifyWhenReputationIsBelowSetting,
 					},
 				},
 			},
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.TextInput{
-						Label:    getTagValue(sc, "NotifyWhenReputationIsAbove", "pretty"),
+						Label:    getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty"),
 						Style:    discordgo.TextInputShort,
-						CustomID: globals.NotifyWhenReputationIsAbove,
+						CustomID: globals.NotifyWhenReputationIsAboveSetting,
 					},
 				},
 			},
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: getTagValue(sc, "EvidenceChannel", "pretty"),
+						Placeholder: getTagValue(sc, "EvidenceChannelSetting", "pretty"),
 						MenuType:    discordgo.ChannelSelectMenu,
-						CustomID:    globals.EvidenceChannel,
+						CustomID:    globals.EvidenceChannelSetting,
 					},
 				},
 			},
