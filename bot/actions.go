@@ -11,10 +11,107 @@ import (
 
 // TODO: I think all of these need to log events
 
-// /moderate slash command, it needs a *discordgo.User at a minimum, either by
-// direct reference or in relation to a *discordgo.Message
-func (bot *ModeratorBot) ModerateMenu(i *discordgo.InteractionCreate) {
-	if i.Interaction.Member.User == nil && i.Interaction.Message == nil {
+// Moderation modal menu
+func (bot *ModeratorBot) ModerateMenuFromMessage(i *discordgo.InteractionCreate) {
+	message := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
+	if message.ID == "" {
+		log.Warn("no user nor message was provided")
+	}
+
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.ModerateUsingMessage,
+			Title:    "Moderate user",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    "12345",
+						Label:       "Reputation",
+						Style:       discordgo.TextInputShort,
+						Placeholder: "this user is amazing",
+						Required:    true,
+						MinLength:   1,
+						MaxLength:   4,
+					},
+				},
+			}},
+		},
+	})
+
+	// _ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	// 	Type: discordgo.InteractionResponseChannelMessageWithSource,
+	// 	Data: &discordgo.InteractionResponseData{
+	// 		CustomID: globals.ModerateModal,
+	// 		Title:    "Moderate " + i.Member.User.Username,
+	// 		Embeds: []*discordgo.MessageEmbed{{
+	// 			Title: "Embed!",
+	// 			Fields: []*discordgo.MessageEmbedField{{
+	// 				Name:  "Field1!",
+	// 				Value: "Value!",
+	// 			}},
+	// 		}},
+	// 		Components: []discordgo.MessageComponent{
+	// 			discordgo.ActionsRow{
+	// 				Components: []discordgo.MessageComponent{
+	// 					discordgo.SelectMenu{
+	// 						Placeholder: "User",
+	// 						MenuType:    discordgo.UserSelectMenu,
+	// 						CustomID:    i.Member.User.ID,
+	// 						Options: []discordgo.SelectMenuOption{{
+	// 							Label: "UserID",
+	// 							Value: "Saved",
+	// 						}},
+	// 					},
+	// 				},
+	// 			},
+	// 			discordgo.ActionsRow{
+	// 				Components: []discordgo.MessageComponent{
+	// 					discordgo.SelectMenu{
+	// 						Placeholder:  "Channel",
+	// 						MenuType:     discordgo.ChannelSelectMenu,
+	// 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
+	// 						CustomID:     message.ChannelID,
+	// 						Options: []discordgo.SelectMenuOption{{
+	// 							Label: "Channel",
+	// 							Value: "Saved",
+	// 						}},
+	// 					},
+	// 				},
+	// 			},
+	// 			discordgo.ActionsRow{
+	// 				Components: []discordgo.MessageComponent{
+	// 					discordgo.SelectMenu{
+	// 						Placeholder: "Message",
+	// 						CustomID:    message.ID,
+	// 						Options: []discordgo.SelectMenuOption{{
+	// 							Label: "Message",
+	// 							Value: "Saved",
+	// 						}},
+	// 					},
+	// 				},
+	// 			},
+	// 			discordgo.ActionsRow{
+	// 				Components: []discordgo.MessageComponent{
+	// 					discordgo.TextInput{
+	// 						CustomID:    globals.ReasonOption,
+	// 						Label:       "Reason",
+	// 						Style:       discordgo.TextInputShort,
+	// 						Placeholder: "Why are you moderating this user or content?",
+	// 						Required:    true,
+	// 						MinLength:   1,
+	// 						MaxLength:   500,
+	// 					},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// })
+
+}
+
+func (bot *ModeratorBot) ModerateMenuFromUser(i *discordgo.InteractionCreate) {
+	if i.Interaction.Member.User == nil {
 		log.Warn("no user nor message was provided")
 	}
 
@@ -30,25 +127,39 @@ func (bot *ModeratorBot) ModerateMenu(i *discordgo.InteractionCreate) {
 					Value: "Value!",
 				}},
 			}},
-			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					discordgo.TextInput{
-						CustomID:    "12345",
-						Label:       "Reason",
-						Style:       discordgo.TextInputShort,
-						Placeholder: "Why are you moderating this user or content?",
-						Required:    true,
-						MinLength:   1,
-						MaxLength:   500,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.SelectMenu{
+							Placeholder: "User",
+							CustomID:    i.Member.User.ID,
+							Options: []discordgo.SelectMenuOption{{
+								Label: "UserID",
+								Value: "Saved",
+							}},
+						},
 					},
 				},
-			}},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    globals.ReasonOption,
+							Label:       "Reason",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "Why are you moderating this user or content?",
+							Required:    true,
+							MinLength:   1,
+							MaxLength:   500,
+						},
+					},
+				},
+			},
 		},
 	})
 }
 
-func (bot *ModeratorBot) ModerateAction(i *discordgo.InteractionCreate) {
-	bot.CollectMessageAsEvidenceFromModal(i)
+func (bot *ModeratorBot) ModerateActionFromMessage(i *discordgo.InteractionCreate) {
+	bot.CollectMessageAsEvidenceFromMessageModal(i)
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -69,14 +180,58 @@ func (bot *ModeratorBot) ModerateAction(i *discordgo.InteractionCreate) {
 			}},
 		},
 	})
+}
 
+func (bot *ModeratorBot) ModerateActionFromUser(i *discordgo.InteractionCreate) {
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Moderation action here",
+			Embeds: []*discordgo.MessageEmbed{{
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name:   "Moderator Username",
+						Value:  i.Interaction.Member.User.Username,
+						Inline: true,
+					},
+					{
+						Name:   "Channel",
+						Value:  fmt.Sprintf("<#" + i.Interaction.ChannelID + ">"),
+						Inline: true,
+					},
+				},
+			}},
+		},
+	})
 }
 
 // App command, copies message details to a configured channel
-func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate) error {
+func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate) {
 	message := i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
+	sc := bot.getServerConfig(i.GuildID)
 	if message == nil {
-		return fmt.Errorf("message was not provied")
+		log.Warn("message was not provided")
+	}
+
+	ms := discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{{
+			Title: "Title goes here",
+			Fields: []*discordgo.MessageEmbedField{
+				{
+					Name:  "User",
+					Value: fmt.Sprintf("<@%s>", message.Author.ID),
+				},
+				{
+					Name:  "Link to original message",
+					Value: fmt.Sprintf("https://discord.com/channels/%s/%s/%s", message.GuildID, message.ChannelID, message.ID),
+				},
+			},
+		}},
+	}
+
+	message, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	if err != nil {
+		log.Warn("Unable to send message %w", err)
 	}
 
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -111,15 +266,18 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 
 		},
 	})
-
-	return nil
 }
 
 // Modal command, copies message details to a configured channel
-func (bot *ModeratorBot) CollectMessageAsEvidenceFromModal(i *discordgo.InteractionCreate) error {
+func (bot *ModeratorBot) CollectMessageAsEvidenceFromMessageModal(i *discordgo.InteractionCreate) {
 	data := i.Interaction.ModalSubmitData()
 
-	reason := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+	userID := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+	channelID := data.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.SelectMenu).CustomID
+	messageID := data.Components[2].(*discordgo.ActionsRow).Components[0].(*discordgo.SelectMenu).CustomID
+	reason := data.Components[3].(*discordgo.ActionsRow).Components[0].(*discordgo.SelectMenu).CustomID
+
+	sc := bot.getServerConfig(i.GuildID)
 
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -128,53 +286,26 @@ func (bot *ModeratorBot) CollectMessageAsEvidenceFromModal(i *discordgo.Interact
 		},
 	})
 
-	return nil
-}
+	ms := discordgo.MessageSend{
+		Embeds: []*discordgo.MessageEmbed{{
+			Title: "Title goes here",
+			Fields: []*discordgo.MessageEmbedField{
+				{
+					Name:  "User",
+					Value: fmt.Sprintf("<@%s>", userID),
+				},
+				{
+					Name:  "Link to original message",
+					Value: fmt.Sprintf("https://discord.com/channels/%s/%s/%s", sc.DiscordId, channelID, messageID),
+				},
+			},
+		}},
+	}
 
-// App command (where the target is a message), copies message details to a
-// configured channel then increases the message author's reputation
-func (bot *ModeratorBot) CollectMessageAsEvidenceThenIncreaseReputation(i *discordgo.InteractionCreate) error {
-	err := bot.CollectMessageAsEvidence(i)
+	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
-		return err
+		log.Warn("Unable to send message %w", err)
 	}
-
-	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
-
-	if user.UserID == "" {
-		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
-	}
-
-	user.Reputation = user.Reputation + 1
-	err = bot.UpdateModeratedUser(user)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// App command (where the target is a message), copies message details to a
-// configured channel then decreases the message author's reputation
-func (bot *ModeratorBot) CollectMessageAsEvidenceThenDecreaseReputation(i *discordgo.InteractionCreate) error {
-	err := bot.CollectMessageAsEvidence(i)
-	if err != nil {
-		return err
-	}
-
-	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
-
-	if user.UserID == "" {
-		return fmt.Errorf("unable to look up user %s(%s)", user.UserName, user.UserID)
-	}
-
-	user.Reputation = user.Reputation - 1
-	err = bot.UpdateModeratedUser(user)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // App command (where the target is a message), returns User reputation
@@ -243,32 +374,6 @@ func (bot *ModeratorBot) ShowHighReputationModal(i *discordgo.InteractionCreate)
 		},
 	})
 }
-
-// func (bot *ModeratorBot) SetValueUsingModal(i *discordgo.InteractionCreate) {
-// 	guild, err := bot.DG.Guild(i.Interaction.GuildID)
-// 	if err != nil {
-// 		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
-// 		return
-// 	}
-
-// 	// The first of two events because after choosing the option, the user
-// 	// inputs a value in a modal.
-// 	bot.createInteractionEvent(InteractionEvent{
-// 		UserID:        i.Member.User.ID,
-// 		Username:      i.Member.User.Username,
-// 		InteractionId: i.Message.ID,
-// 		ChannelId:     i.Message.ChannelID,
-// 		ServerID:      i.Interaction.GuildID,
-// 		ServerName:    guild.Name,
-// 	})
-
-// 	mcd := i.MessageComponentData()
-// 	if mcd.CustomID == globals.ShowLowReputationModal {
-// 		bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
-// 	} else if mcd.CustomID == globals.ShowHighReputationModal {
-// 		bot.respondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
-// 	}
-// }
 
 // UpdateModeratedUser updates moderated user status in the database.
 // It is allowed to fail

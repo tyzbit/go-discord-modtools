@@ -6,21 +6,20 @@ import (
 
 const (
 	// Commands (max 32 in length)
-	Stats                                          = "stats"
-	Query                                          = "query"
-	Settings                                       = "settings"
-	ModerateUsingUser                              = "Moderate user"
-	ModerateUsingMessage                           = "Moderate message"
-	CollectMessageAsEvidence                       = "Collect evidence"
-	CollectMessageAsEvidenceThenIncreaseReputation = "Increse user rep"
-	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user rep"
-	CheckUserReputationUsingMessage                = "Check user rep"
-	CheckUserReputation                            = "Check reputation"
+	Stats                           = "stats"
+	Query                           = "query"
+	Settings                        = "settings"
+	ModerateUsingUser               = "Moderate user"
+	ModerateUsingMessage            = "Moderate message"
+	CollectMessageAsEvidence        = "Collect evidence"
+	CheckUserReputationUsingMessage = "Check user rep"
+	CheckUserReputation             = "Check reputation"
 	// TODO: actions that delete messages, ban users etc
 	// TODO: (extra credit) make a command that manages custom commands that drop a premade message
 	Help = "help"
 
 	UserOption    = "user"
+	ChannelOption = "channel"
 	MessageOption = "message"
 	ReasonOption  = "reason"
 

@@ -114,16 +114,16 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 				},
 			})
 			if err != nil {
-				log.Errorf("error responding to help command "+globals.Help+", err: %v", err)
+				log.Errorf("error responding to hexlp command "+globals.Help+", err: %v", err)
 			}
 		},
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
 		// TODO: error will be handled once the functions are ready
 		globals.ModerateUsingUser: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateMenu(i)
+			bot.ModerateMenuFromUser(i)
 		},
 		globals.ModerateUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateMenu(i)
+			bot.ModerateMenuFromMessage(i)
 		},
 		// TODO: error will be handled once the functions are ready
 		globals.Query: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -140,14 +140,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// TODO: error will be handled once the functions are ready
 		globals.CollectMessageAsEvidence: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.CollectMessageAsEvidence(i)
-		},
-		// TODO: error will be handled once the functions are ready
-		globals.CollectMessageAsEvidenceThenDecreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CollectMessageAsEvidenceThenDecreaseReputation(i)
-		},
-		// TODO: error will be handled once the functions are ready
-		globals.CollectMessageAsEvidenceThenIncreaseReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.CollectMessageAsEvidenceThenIncreaseReputation(i)
 		},
 		// Stats does not create an InteractionEvent
 		globals.Stats: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -269,106 +261,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	buttonHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		// globals.Retry: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		// 	typingStop := make(chan bool, 1)
-		// 	go bot.typeInChannel(typingStop, i.ChannelID)
-
-		// 	// Remove retry button
-		// 	i.Message.Components = []discordgo.MessageComponent{}
-
-		// 	guild, err := bot.DG.Guild(i.Interaction.GuildID)
-		// 	if err != nil {
-		// 		guild.Name = "None"
-		// 	}
-		// 	bot.createInteractionEvent(InteractionEvent{
-		// 		UserID:        i.Member.User.ID,
-		// 		Username:      i.Member.User.Username,
-		// 		InteractionId: i.Message.ID,
-		// 		ChannelId:     i.Message.ChannelID,
-		// 		ServerID:      guild.ID,
-		// 		ServerName:    guild.Name,
-		// 	})
-
-		// 	interactionErr := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		// 		Type: discordgo.InteractionResponseUpdateMessage,
-		// 		Data: &discordgo.InteractionResponseData{
-		// 			Embeds:     i.Message.Embeds,
-		// 			Components: i.Message.Components,
-		// 			Flags:      i.Message.Flags,
-		// 		},
-		// 	})
-		// 	if interactionErr != nil {
-		// 		log.Errorf("error responding to moderation message messagesToSend interaction, err: %v", interactionErr)
-		// 	}
-
-		// 	var messagesToBeSent []*discordgo.MessageSend
-		// 	var messageResponses []*discordgo.MessageSend
-		// 	var errs []error
-		// 	if i.Interaction != nil {
-		// 		i.Interaction.Message.GuildID = guild.ID
-		// 		messagesToBeSent = append(messagesToBeSent, messageResponses...)
-		// 	} else {
-		// 		i.Message.GuildID = guild.ID
-		// 		messagesToBeSent = append(messagesToBeSent, messageResponses...)
-		// 	}
-
-		// 	for _, err := range errs {
-		// 		if err != nil {
-		// 			log.Errorf("problem handling moderate request: %v", err)
-		// 		}
-		// 	}
-
-		// 	// This is necessary because the type is unknown
-		// 	if len(messagesToBeSent) == 0 {
-		// 		log.Warn("retry used but no messagesToSend was generated")
-		// 		typingStop <- true
-		// 		return
-		// 	}
-
-		// 	for index, messagesToSend := range messagesToBeSent {
-		// 		m := discordgo.Message{
-		// 			Member: &discordgo.Member{
-		// 				User: &discordgo.User{
-		// 					ID: i.Member.User.ID,
-		// 				},
-		// 			},
-		// 			GuildID:   i.GuildID,
-		// 			ChannelID: i.ChannelID,
-		// 		}
-
-		// 		if len(errs) >= index+1 {
-		// 			if errs[index] != nil {
-		// 				guild.Name = "None"
-		// 				guild.ID = "0"
-		// 			}
-		// 		}
-		// 		bot.createMessageEvent(MessageEvent{
-		// 			AuthorId:       s.State.User.ID,
-		// 			AuthorUsername: i.Member.User.Username,
-		// 			MessageId:      i.Message.ID,
-		// 			ChannelId:      i.Message.ChannelID,
-		// 			ServerID:       guild.ID,
-		// 			ServerName:     guild.Name,
-		// 		})
-
-		// 		err = bot.sendModerateResponse(&m, messagesToSend)
-
-		// 		if err != nil {
-		// 			log.Errorf("problem sending message: %v", err)
-		// 		}
-		// 		bot.createModerationEvent(ModerationEvent{
-		// 			ServerID:   guild.ID,
-		// 			ServerName: guild.Name,
-		// 			Message:    *i.Message,
-		// 			Action:     action,
-		// 			User:       *i.User,
-		// 			Reason:     reason,
-		// 		})
-		// 	}
-
-		// 	// This only has an effect if the message is not ephemeral
-		// 	typingStop <- true
-		// },
 		// Settings buttons/choices
 		globals.NotifyWhenReputationIsBelowSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
@@ -385,8 +277,11 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.ModerateModal: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateAction(i)
+		globals.ModerateUsingUser: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModerateActionFromUser(i)
+		},
+		globals.ModerateUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModerateActionFromMessage(i)
 		},
 	}
 
