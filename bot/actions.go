@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
@@ -12,23 +13,27 @@ import (
 
 // /moderate slash command, it needs a *discordgo.User at a minimum, either by
 // direct reference or in relation to a *discordgo.Message
-func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
-	if i.Interaction.Member.User == nil {
-		return fmt.Errorf("user was not provided")
-	} else if i.Interaction.Message == nil {
-		return fmt.Errorf("message was not provided")
+func (bot *ModeratorBot) ModerateMenu(i *discordgo.InteractionCreate) {
+	if i.Interaction.Member.User == nil && i.Interaction.Message == nil {
+		log.Warn("no user nor message was provided")
 	}
 
-	mcd := i.MessageComponentData()
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
 			CustomID: globals.ModerateModal,
-			Title:    "Moderate " + mcd.Values[0],
+			Title:    "Moderate " + i.Member.User.Username,
+			Embeds: []*discordgo.MessageEmbed{{
+				Title: "Embed!",
+				Fields: []*discordgo.MessageEmbedField{{
+					Name:  "Field1!",
+					Value: "Value!",
+				}},
+			}},
 			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.TextInput{
-						CustomID:    globals.ModerateModalReason,
+						CustomID:    "12345",
 						Label:       "Reason",
 						Style:       discordgo.TextInputShort,
 						Placeholder: "Why are you moderating this user or content?",
@@ -40,7 +45,31 @@ func (bot *ModeratorBot) Moderate(i *discordgo.InteractionCreate) error {
 			}},
 		},
 	})
-	return nil
+}
+
+func (bot *ModeratorBot) ModerateAction(i *discordgo.InteractionCreate) {
+	bot.CollectMessageAsEvidenceFromModal(i)
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Moderation action here",
+			Embeds: []*discordgo.MessageEmbed{{
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name:   "Moderator Username",
+						Value:  i.Interaction.Member.User.Username,
+						Inline: true,
+					},
+					{
+						Name:   "Channel",
+						Value:  fmt.Sprintf("<#" + i.Interaction.ChannelID + ">"),
+						Inline: true,
+					},
+				},
+			}},
+		},
+	})
+
 }
 
 // App command, copies message details to a configured channel
@@ -49,41 +78,6 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 	if message == nil {
 		return fmt.Errorf("message was not provied")
 	}
-
-	// sc := bot.getServerConfig(i.Interaction.GuildID)
-	// ms := discordgo.MessageSend{
-	// 	Content: message.Content,
-	// 	Embeds: []*discordgo.MessageEmbed{{
-	// 		Fields: []*discordgo.MessageEmbedField{
-	// 			{
-	// 				Name:   "Username",
-	// 				Value:  message.Author.Username,
-	// 				Inline: true,
-	// 			},
-	// 			{
-	// 				Name:   "Channel",
-	// 				Value:  fmt.Sprintf("<#" + message.ChannelID + ">"),
-	// 				Inline: true,
-	// 			},
-	// 			{
-	// 				Name:   "Timestamp",
-	// 				Value:  message.Timestamp.Format(time.RFC1123Z),
-	// 				Inline: false,
-	// 			},
-	// 		},
-	// 	}},
-	// 	TTS:        message.TTS,
-	// 	Components: message.Components,
-	// 	//Files: m.Attachments,
-	// 	// AllowedMentions,
-	// 	Reference: message.MessageReference,
-	// 	//File: ,
-	// 	// Embed: m.Embeds[],
-	// }
-	// _, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
-	// if err != nil {
-	// 	return err
-	// }
 
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -115,6 +109,22 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 			//File: ,
 			// Embed: m.Embeds[],
 
+		},
+	})
+
+	return nil
+}
+
+// Modal command, copies message details to a configured channel
+func (bot *ModeratorBot) CollectMessageAsEvidenceFromModal(i *discordgo.InteractionCreate) error {
+	data := i.Interaction.ModalSubmitData()
+
+	reason := data.Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "reason was " + reason,
 		},
 	})
 

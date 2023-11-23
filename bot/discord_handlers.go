@@ -120,10 +120,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
 		// TODO: error will be handled once the functions are ready
 		globals.ModerateUsingUser: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.Moderate(i)
+			bot.ModerateMenu(i)
 		},
 		globals.ModerateUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.Moderate(i)
+			bot.ModerateMenu(i)
 		},
 		// TODO: error will be handled once the functions are ready
 		globals.Query: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -384,6 +384,12 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 	}
 
+	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		globals.ModerateModal: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModerateAction(i)
+		},
+	}
+
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
@@ -391,6 +397,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		}
 	case discordgo.InteractionMessageComponent:
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
+			h(s, i)
+		}
+	case discordgo.InteractionModalSubmit:
+		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
 			h(s, i)
 		}
 	}

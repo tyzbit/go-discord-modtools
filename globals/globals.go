@@ -30,8 +30,7 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Modal
-	ModerateModal       = "Moderate user modal"
-	ModerateModalReason = "Reason"
+	ModerateModal = "Moderate user modal"
 
 	// Colors
 	FrenchGray = 13424349
