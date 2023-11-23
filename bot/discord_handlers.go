@@ -119,10 +119,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		// bot.createModerationEvent can handle both the moderate slash command and the app menu function
 		// TODO: error will be handled once the functions are ready
-		globals.ModerateUser: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		globals.ModerateUsingUser: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.Moderate(i)
 		},
-		globals.ModerateMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		globals.ModerateUsingMessage: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.Moderate(i)
 		},
 		// TODO: error will be handled once the functions are ready

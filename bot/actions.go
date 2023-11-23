@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/tyzbit/go-discord-modtools/globals"
@@ -49,28 +50,73 @@ func (bot *ModeratorBot) CollectMessageAsEvidence(i *discordgo.InteractionCreate
 		return fmt.Errorf("message was not provied")
 	}
 
-	sc := bot.getServerConfig(i.Interaction.GuildID)
-	ms := discordgo.MessageSend{
-		Content: message.Content,
-		Embeds: []*discordgo.MessageEmbed{{
-			Fields: []*discordgo.MessageEmbedField{{
-				Name:   "Username",
-				Value:  message.Author.Username,
-				Inline: true,
+	// sc := bot.getServerConfig(i.Interaction.GuildID)
+	// ms := discordgo.MessageSend{
+	// 	Content: message.Content,
+	// 	Embeds: []*discordgo.MessageEmbed{{
+	// 		Fields: []*discordgo.MessageEmbedField{
+	// 			{
+	// 				Name:   "Username",
+	// 				Value:  message.Author.Username,
+	// 				Inline: true,
+	// 			},
+	// 			{
+	// 				Name:   "Channel",
+	// 				Value:  fmt.Sprintf("<#" + message.ChannelID + ">"),
+	// 				Inline: true,
+	// 			},
+	// 			{
+	// 				Name:   "Timestamp",
+	// 				Value:  message.Timestamp.Format(time.RFC1123Z),
+	// 				Inline: false,
+	// 			},
+	// 		},
+	// 	}},
+	// 	TTS:        message.TTS,
+	// 	Components: message.Components,
+	// 	//Files: m.Attachments,
+	// 	// AllowedMentions,
+	// 	Reference: message.MessageReference,
+	// 	//File: ,
+	// 	// Embed: m.Embeds[],
+	// }
+	// _, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	// if err != nil {
+	// 	return err
+	// }
+
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: message.Content,
+			Embeds: []*discordgo.MessageEmbed{{
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name:   "Username",
+						Value:  message.Author.Username,
+						Inline: true,
+					},
+					{
+						Name:   "Channel",
+						Value:  fmt.Sprintf("<#" + message.ChannelID + ">"),
+						Inline: true,
+					},
+					{
+						Name:   "Timestamp",
+						Value:  message.Timestamp.Format(time.RFC1123Z),
+						Inline: false,
+					},
+				},
 			}},
-		}},
-		TTS:        message.TTS,
-		Components: message.Components,
-		//Files: m.Attachments,
-		// AllowedMentions,
-		Reference: message.MessageReference,
-		//File: ,
-		// Embed: m.Embeds[],
-	}
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
-	if err != nil {
-		return err
-	}
+			TTS:        message.TTS,
+			Components: message.Components,
+			//Files: m.Attachments,
+			// AllowedMentions,
+			//File: ,
+			// Embed: m.Embeds[],
+
+		},
+	})
 
 	return nil
 }

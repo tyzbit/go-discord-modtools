@@ -54,7 +54,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty"),
+						Placeholder: getTagValue(sc, "NotifyWhenReputationIsBelowSetting", "pretty") + fmt.Sprintf(": %v", sc.NotifyWhenReputationIsBelowSetting.Int32),
 						CustomID:    globals.NotifyWhenReputationIsBelowSetting,
 						Options:     lowReputationValues(sc),
 					},
@@ -63,7 +63,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty"),
+						Placeholder: getTagValue(sc, "NotifyWhenReputationIsAboveSetting", "pretty") + fmt.Sprintf(": %v", sc.NotifyWhenReputationIsAboveSetting.Int32),
 						CustomID:    globals.NotifyWhenReputationIsAboveSetting,
 						Options:     highReputationValues(sc),
 					},

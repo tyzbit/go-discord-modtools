@@ -9,8 +9,8 @@ const (
 	Stats                                          = "stats"
 	Query                                          = "query"
 	Settings                                       = "settings"
-	ModerateUser                                   = "Moderate user"
-	ModerateMessage                                = "Moderate message"
+	ModerateUsingUser                              = "Moderate user"
+	ModerateUsingMessage                           = "Moderate message"
 	CollectMessageAsEvidence                       = "Collect evidence"
 	CollectMessageAsEvidenceThenIncreaseReputation = "Increse user rep"
 	CollectMessageAsEvidenceThenDecreaseReputation = "Decrease user rep"
@@ -107,14 +107,6 @@ var (
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: CollectMessageAsEvidenceThenIncreaseReputation,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
-			Name: CollectMessageAsEvidenceThenDecreaseReputation,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
 			Name: CheckUserReputationUsingMessage,
 			Type: discordgo.MessageApplicationCommand,
 		},
@@ -123,11 +115,11 @@ var (
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: ModerateMessage,
+			Name: ModerateUsingMessage,
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: ModerateUser,
+			Name: ModerateUsingUser,
 			Type: discordgo.UserApplicationCommand,
 		},
 	}
