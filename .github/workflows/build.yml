@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - initial-development # will change to develop when the app is more stable
     tags:
       - "*"
 
@@ -27,6 +28,9 @@ jobs:
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
             docker build -t ghcr.io/${{ github.repository }}:latest .
             docker push ghcr.io/${{ github.repository }}:latest
+          elif [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            docker build -t ghcr.io/${{ github.repository }}:develop .
+            docker push ghcr.io/${{ github.repository }}:develop
           else
             docker build -t ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }} .
             docker push ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }}
