@@ -32,7 +32,7 @@ func (bot *ModeratorBot) ModerateMenuFromMessage(i *discordgo.InteractionCreate)
 						Placeholder: "this user is amazing",
 						Required:    true,
 						MinLength:   1,
-						MaxLength:   4,
+						MaxLength:   300,
 					},
 				},
 			}},
