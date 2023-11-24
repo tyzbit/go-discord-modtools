@@ -2,10 +2,8 @@ package bot
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -98,7 +96,7 @@ func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
 }
 
 // deleteAllCommands is referenced in bot.go (but is probably commented out)
-func (bot *ModeratorBot) deleteAllCommands() {
+func (bot *ModeratorBot) DeleteAllCommands() {
 	globalCommands, err := bot.DG.ApplicationCommands(bot.DG.State.User.ID, "")
 	if err != nil {
 		log.Fatalf("could not fetch registered global commands: %v", err)
@@ -109,15 +107,4 @@ func (bot *ModeratorBot) deleteAllCommands() {
 			log.Panicf("cannot delete '%v' command: %v", command.Name, err)
 		}
 	}
-}
-
-// getDomainName receives a URL and returns the FQDN
-func getDomainName(s string) (string, error) {
-	url, err := url.Parse(s)
-	if err != nil {
-		return "", fmt.Errorf("unable to determine domain name for url: %v", s)
-	}
-
-	hostname := strings.TrimPrefix(url.Hostname(), "www.")
-	return hostname, nil
 }

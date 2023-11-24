@@ -14,13 +14,13 @@ const (
 	GetUserInfoFromChatCommandContext = "query"
 
 	// User commands
-	GetUserInfoFromUserContext = "Check reputation"
+	GetUserInfoFromUserContext = "Check info"
 	ModerateFromUserContext    = "Moderate user"
 
 	// Message commands
-	GetUserInfoFromMessageContext                     = "Check user rep"
-	ModerateFromMessageContext                        = "Moderate message"
-	SaveEvidenceFromModalSubmissionFromMessageContext = "Collect evidence"
+	GetUserInfoFromMessageContext  = "Get user info"
+	ModerateFromMessageContext     = "Moderate content"
+	SaveEvidenceFromMessageContext = "Save evidence"
 
 	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
@@ -36,12 +36,16 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Modals
-	ShowModerationModalFromUserContext    = "Moderate"
-	ShowModerationModalFromMessageContext = "Moderate this user"
+	RespondToModerationModalFromUserContext    = "Moderate"
+	RespondToModerationModalFromMessageContext = "Moderate this user"
 
 	// Colors
 	FrenchGray = 13424349
 	Purple     = 7283691
+
+	// Text fragments
+	ModerationSuccessful   = "Moderation action saved"
+	ModerationUnSuccessful = "There was a problem saving moderation action"
 
 	// Shown to the user when `/help` is called
 	BotHelpText = `**Usage**
@@ -109,7 +113,7 @@ var (
 			Description: "Change settings",
 		},
 		{
-			Name: SaveEvidenceFromModalSubmissionFromMessageContext,
+			Name: SaveEvidenceFromMessageContext,
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{

@@ -137,9 +137,9 @@ func (bot *ModeratorBot) updateServerSetting(guildID string, setting string,
 	return bot.getServerConfig(guildID), ok
 }
 
-// respondToSettingsChoice updates a server setting according to the
+// RespondToSettingsChoice updates a server setting according to the
 // column name (setting) and the value
-func (bot *ModeratorBot) respondToSettingsChoice(i *discordgo.InteractionCreate,
+func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	setting string, value interface{}) {
 	guild, err := bot.DG.Guild(i.Interaction.GuildID)
 	if err != nil {

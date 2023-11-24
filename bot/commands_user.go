@@ -17,7 +17,7 @@ func (bot *ModeratorBot) ModerateFromUserContext(i *discordgo.InteractionCreate)
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.ShowModerationModalFromUserContext,
+			CustomID: globals.RespondToModerationModalFromUserContext,
 			Title:    "Moderate " + i.Member.User.Username,
 			Embeds: []*discordgo.MessageEmbed{{
 				Title: "Embed!",
@@ -58,14 +58,15 @@ func (bot *ModeratorBot) ModerateFromUserContext(i *discordgo.InteractionCreate)
 }
 
 // App command (where the target is a message), returns User reputation
-func (bot *ModeratorBot) GetUserInfoFromUserContext(i *discordgo.InteractionCreate) (reputation string, err error) {
+func (bot *ModeratorBot) GetUserInfoFromUserContext(i *discordgo.InteractionCreate) {
 	if i.Interaction.Member.User.ID == "" {
-		return "", fmt.Errorf("user was not provied")
+		log.Warn("user was not provided")
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Message.Author.ID}).First(&user)
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
+	// TODO: Add more user information
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -74,6 +75,4 @@ func (bot *ModeratorBot) GetUserInfoFromUserContext(i *discordgo.InteractionCrea
 			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
 		},
 	})
-
-	return "", err
 }

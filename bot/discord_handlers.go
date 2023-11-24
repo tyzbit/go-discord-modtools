@@ -16,7 +16,7 @@ func (bot *ModeratorBot) BotReadyHandler(s *discordgo.Session, r *discordgo.Read
 	// Use this to clean up commands if IDs have changed
 	// TODO remove later if unnecessary
 	// log.Debug("removing all commands")
-	// bot.deleteAllCommands()
+	// bot.DeleteAllCommands()
 	// var err error
 	// globals.RegisteredCommands, err = bot.DG.ApplicationCommandBulkOverwrite(bot.DG.State.User.ID, "", globals.Commands)
 	log.Debug("registering slash commands")
@@ -97,6 +97,7 @@ func (bot *ModeratorBot) GuildDeleteHandler(s *discordgo.Session, gd *discordgo.
 // InteractionInit configures all interactive commands
 func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// Technically app actions are commands too, but those are in commands_message.go and commands_user.go
+	// We don't pass the session to these because you can get that from bot.DG
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		globals.Help: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetHelpFromChatCommandContext(i)
@@ -128,8 +129,8 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			bot.GetUserInfoFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.SaveEvidenceFromModalSubmissionFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SaveEvidenceFromModalSubmissionFromMessageContext(i)
+		globals.SaveEvidenceFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.SaveEvidenceFromMessageContext(i)
 		},
 	}
 
@@ -137,24 +138,24 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// Settings buttons/choices
 		globals.NotifyWhenReputationIsBelowSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
-			bot.respondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
+			bot.RespondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
 		},
 		globals.NotifyWhenReputationIsAboveSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
-			bot.respondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
+			bot.RespondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
 		},
 		globals.EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
-			bot.respondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
+			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
 		},
 	}
 
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.ShowModerationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ShowModerationModalFromUserContext(i)
+		globals.RespondToModerationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModerationModalFromUserContext(i)
 		},
-		globals.ShowModerationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ShowModerationModalFromMessageContext(i)
+		globals.RespondToModerationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModerationModalFromMessageContext(i)
 		},
 	}
 

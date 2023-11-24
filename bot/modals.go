@@ -8,49 +8,42 @@ import (
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
-func (bot *ModeratorBot) ShowModerationModalFromMessageContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModerationModalFromMessageContext(i *discordgo.InteractionCreate) {
+	// TODO: check status and change message base on status
+	// Drop a message in the evidence channel
 	bot.SaveEvidenceFromModalSubmission(i)
+
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Moderation action here",
-			Embeds: []*discordgo.MessageEmbed{{
-				Fields: []*discordgo.MessageEmbedField{
-					{
-						Name:   "Moderator Username",
-						Value:  i.Interaction.Member.User.Username,
-						Inline: true,
-					},
-					{
-						Name:   "Channel",
-						Value:  fmt.Sprintf("<#" + i.Interaction.ChannelID + ">"),
-						Inline: true,
-					},
+			Flags: discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Moderation action saved!",
+					Description: globals.ModerationSuccessful,
+					Color:       globals.Purple,
 				},
-			}},
+			},
 		},
 	})
 }
 
-func (bot *ModeratorBot) ShowModerationModalFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModerationModalFromUserContext(i *discordgo.InteractionCreate) {
+	// TODO: check status and change message base on status
+	// Drop a message in the evidence channel
+	bot.SaveEvidenceFromModalSubmission(i)
+
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Moderation action here",
-			Embeds: []*discordgo.MessageEmbed{{
-				Fields: []*discordgo.MessageEmbedField{
-					{
-						Name:   "Moderator Username",
-						Value:  i.Interaction.Member.User.Username,
-						Inline: true,
-					},
-					{
-						Name:   "Channel",
-						Value:  fmt.Sprintf("<#" + i.Interaction.ChannelID + ">"),
-						Inline: true,
-					},
+			Flags: discordgo.MessageFlagsEphemeral,
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Moderation action saved!",
+					Description: globals.ModerationSuccessful,
+					Color:       globals.Purple,
 				},
-			}},
+			},
 		},
 	})
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (b ModeratorBot) StartHealthAPI() {
+func (b *ModeratorBot) StartHealthAPI() {
 	app := gin.New()
 	app.Use(
 		// Disable logging for healthcheck endpoint and favicon
