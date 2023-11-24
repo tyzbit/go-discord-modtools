@@ -6,30 +6,38 @@ import (
 
 const (
 	// Commands (max 32 in length)
-	Stats                           = "stats"
-	Query                           = "query"
-	Settings                        = "settings"
-	ModerateUsingUser               = "Moderate user"
-	ModerateUsingMessage            = "Moderate message"
-	CollectMessageAsEvidence        = "Collect evidence"
-	CheckUserReputationUsingMessage = "Check user rep"
-	CheckUserReputation             = "Check reputation"
+	// These all function as IDs, they are sometimes shown to the user
+	// Chat commands
+	Help                              = "help"
+	Stats                             = "stats"
+	Settings                          = "settings"
+	GetUserInfoFromChatCommandContext = "query"
+
+	// User commands
+	GetUserInfoFromUserContext = "Check reputation"
+	ModerateFromUserContext    = "Moderate user"
+
+	// Message commands
+	GetUserInfoFromMessageContext                     = "Check user rep"
+	ModerateFromMessageContext                        = "Moderate message"
+	SaveEvidenceFromModalSubmissionFromMessageContext = "Collect evidence"
+
+	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
 	// TODO: (extra credit) make a command that manages custom commands that drop a premade message
-	Help = "help"
-
 	UserOption    = "user"
 	ChannelOption = "channel"
 	MessageOption = "message"
 	ReasonOption  = "reason"
 
-	// Settings
+	// Settings (the names affect the column names in the DB)
 	NotifyWhenReputationIsBelowSetting = "Low rep notification"
 	NotifyWhenReputationIsAboveSetting = "High rep notification"
 	EvidenceChannelSettingID           = "Evidence channel"
 
-	// Modal
-	ModerateModal = "Moderate user modal"
+	// Modals
+	ShowModerationModalFromUserContext    = "Moderate"
+	ShowModerationModalFromMessageContext = "Moderate this user"
 
 	// Colors
 	FrenchGray = 13424349
@@ -80,7 +88,7 @@ var (
 			Description: "How to use this bot",
 		},
 		{
-			Name:        Query,
+			Name:        GetUserInfoFromChatCommandContext,
 			Description: "Check a user's reputation information",
 			Type:        discordgo.ChatApplicationCommand,
 			Options: []*discordgo.ApplicationCommandOption{
@@ -101,23 +109,23 @@ var (
 			Description: "Change settings",
 		},
 		{
-			Name: CollectMessageAsEvidence,
+			Name: SaveEvidenceFromModalSubmissionFromMessageContext,
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: CheckUserReputationUsingMessage,
+			Name: GetUserInfoFromMessageContext,
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: CheckUserReputation,
+			Name: GetUserInfoFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: ModerateUsingMessage,
+			Name: ModerateFromMessageContext,
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: ModerateUsingUser,
+			Name: ModerateFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 	}
