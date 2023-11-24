@@ -147,5 +147,5 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 
 // TODO: fill
 func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.InteractionCreate) {
-
+	return
 }

@@ -108,11 +108,11 @@ func (bot *ModeratorBot) ModerateFromMessageContext(i *discordgo.InteractionCrea
 // App command, copies message details to a configured channel
 // TODO: fill out function
 func (bot *ModeratorBot) GetUserInfoFromMessageContext(i *discordgo.InteractionCreate) {
-
+	return
 }
 
 // App command, copies message details to a
 // TODO: fill out function
 func (bot *ModeratorBot) SaveEvidenceFromModalSubmissionFromMessageContext(i *discordgo.InteractionCreate) {
-
+	return
 }
