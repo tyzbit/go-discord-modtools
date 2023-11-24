@@ -7,6 +7,8 @@ import (
 const (
 	// Commands (max 32 in length)
 	// These all function as IDs, they are sometimes shown to the user
+	// They must be unique among similar types (ex: all command IDs must be unique)
+
 	// Chat commands
 	Help                              = "help"
 	Stats                             = "stats"
@@ -14,13 +16,15 @@ const (
 	GetUserInfoFromChatCommandContext = "query"
 
 	// User commands
-	GetUserInfoFromUserContext = "Check info"
-	ModerateFromUserContext    = "Moderate user"
+	GetUserInfoFromUserContext        = "Check info"
+	IncreaseReputationFromUserContext = "Increase reputation"
+	DecreaseReputationFromUserContext = "Decrease reputation"
 
 	// Message commands
-	GetUserInfoFromMessageContext  = "Get user info"
-	ModerateFromMessageContext     = "Moderate content"
-	SaveEvidenceFromMessageContext = "Save evidence"
+	GetUserInfoFromMessageContext        = "Get user info"
+	IncreaseReputationFromMessageContext = "Increase user reputation"
+	DecreaseReputationFromMessageContext = "Decrease user reputation"
+	SaveEvidenceFromMessageContext       = "Save as evidence"
 
 	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
@@ -36,8 +40,13 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Modals
-	RespondToModerationModalFromUserContext    = "Moderate"
-	RespondToModerationModalFromMessageContext = "Moderate this user"
+	RespondToIncreaseReputationModalFromUserContext    = "Moderate positively"
+	RespondToDecreaseReputationModalFromUserContext    = "Moderate negatively"
+	RespondToIncreaseReputationModalFromMessageContext = "Moderate this user positively"
+	RespondToDecreaseReputationModalFromMessageContext = "Moderate this user negatively"
+
+	// Modal options
+	ChangeReputation = "Change reputation"
 
 	// Colors
 	FrenchGray = 13424349
@@ -86,7 +95,7 @@ var (
 		false: discordgo.SecondaryButton,
 	}
 	SettingFailedResponseMessage = "Error changing setting"
-	Commands                     = []*discordgo.ApplicationCommand{
+	ChatCommands                 = []*discordgo.ApplicationCommand{
 		{
 			Name:        Help,
 			Description: "How to use this bot",
@@ -112,26 +121,41 @@ var (
 			Name:        Settings,
 			Description: "Change settings",
 		},
-		{
-			Name: SaveEvidenceFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
-			Name: GetUserInfoFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
+	}
+	UserCommands = []*discordgo.ApplicationCommand{
 		{
 			Name: GetUserInfoFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: ModerateFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
+			Name: IncreaseReputationFromUserContext,
+			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: ModerateFromUserContext,
+			Name: DecreaseReputationFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 	}
-	RegisteredCommands = make([]*discordgo.ApplicationCommand, len(Commands))
+	MessageCommands = []*discordgo.ApplicationCommand{
+		{
+			Name: GetUserInfoFromMessageContext,
+			Type: discordgo.MessageApplicationCommand,
+		},
+		{
+			Name: SaveEvidenceFromMessageContext,
+			Type: discordgo.MessageApplicationCommand,
+		},
+		{
+			Name: IncreaseReputationFromMessageContext,
+			Type: discordgo.UserApplicationCommand,
+		},
+		{
+			Name: DecreaseReputationFromMessageContext,
+			Type: discordgo.UserApplicationCommand,
+		},
+	}
+
+	RegisteredCommands = make([]*discordgo.ApplicationCommand,
+		len(ChatCommands)+len(UserCommands)+len(MessageCommands))
+	Commands = append(append(ChatCommands, UserCommands...), MessageCommands...)
 )

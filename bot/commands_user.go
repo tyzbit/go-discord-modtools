@@ -9,7 +9,7 @@ import (
 )
 
 // TODO: I think all of these need to log events
-func (bot *ModeratorBot) ModerateFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) IncreaseReputationFromUserContext(i *discordgo.InteractionCreate) {
 	if i.Interaction.Member.User == nil {
 		log.Warn("no user nor message was provided")
 	}
@@ -17,7 +17,55 @@ func (bot *ModeratorBot) ModerateFromUserContext(i *discordgo.InteractionCreate)
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.RespondToModerationModalFromUserContext,
+			CustomID: globals.RespondToIncreaseReputationModalFromUserContext,
+			Title:    "Moderate " + i.Member.User.Username,
+			Embeds: []*discordgo.MessageEmbed{{
+				Title: "Embed!",
+				Fields: []*discordgo.MessageEmbedField{{
+					Name:  "Field1!",
+					Value: "Value!",
+				}},
+			}},
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.SelectMenu{
+							Placeholder: "User",
+							CustomID:    i.Member.User.ID,
+							Options: []discordgo.SelectMenuOption{{
+								Label: "UserID",
+								Value: "Saved",
+							}},
+						},
+					},
+				},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    globals.ReasonOption,
+							Label:       "Reason",
+							Style:       discordgo.TextInputShort,
+							Placeholder: "Why are you moderating this user or content?",
+							Required:    true,
+							MinLength:   1,
+							MaxLength:   500,
+						},
+					},
+				},
+			},
+		},
+	})
+}
+
+func (bot *ModeratorBot) DecreaseReputationFromUserContext(i *discordgo.InteractionCreate) {
+	if i.Interaction.Member.User == nil {
+		log.Warn("no user nor message was provided")
+	}
+
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.RespondToIncreaseReputationModalFromUserContext,
 			Title:    "Moderate " + i.Member.User.Username,
 			Embeds: []*discordgo.MessageEmbed{{
 				Title: "Embed!",

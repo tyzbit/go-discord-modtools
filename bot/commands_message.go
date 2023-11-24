@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -10,74 +9,46 @@ import (
 )
 
 // Moderation modal menu
-func (bot *ModeratorBot) ModerateFromMessageContext(i *discordgo.InteractionCreate) {
-	message := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
-	if message.ID == "" {
-		log.Warn("message was provided")
+func (bot *ModeratorBot) SaveEvidenceFromMessageContext(i *discordgo.InteractionCreate) {
+	return
+}
+
+func (bot *ModeratorBot) GetUserInfoFromMessageContext(i *discordgo.InteractionCreate) {
+	if i.Interaction.Member.User.ID == "" {
+		log.Warn("user was not provided")
 	}
 
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
+
+	// TODO: Add more user information
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.RespondToModerationModalFromMessageContext,
-			Title:    "Moderate " + i.Member.User.Username,
-			Embeds: []*discordgo.MessageEmbed{{
-				Title: "Embed!",
-				Fields: []*discordgo.MessageEmbedField{{
-					Name:  "Field1!",
-					Value: "Value!",
-				}},
-			}},
+			CustomID: globals.GetUserInfoFromUserContext,
+			Flags:    discordgo.MessageFlagsEphemeral,
+			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
+		},
+	})
+}
+
+func (bot *ModeratorBot) IncreaseReputationFromMessageContext(i *discordgo.InteractionCreate) {
+	// Currently, you can only use TextInput in modal action rows builders.
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.IncreaseReputationFromMessageContext,
+			Title:    "Additional details",
 			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.SelectMenu{
-							Placeholder: "User",
-							MenuType:    discordgo.UserSelectMenu,
-							CustomID:    i.Member.User.ID,
-							Options: []discordgo.SelectMenuOption{{
-								Label: "UserID",
-								Value: "Saved",
-							}},
-						},
-					},
-				},
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.SelectMenu{
-							Placeholder:  "Channel",
-							MenuType:     discordgo.ChannelSelectMenu,
-							ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
-							CustomID:     message.ChannelID,
-							Options: []discordgo.SelectMenuOption{{
-								Label: "Channel",
-								Value: "Saved",
-							}},
-						},
-					},
-				},
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.SelectMenu{
-							Placeholder: "Message",
-							CustomID:    message.ID,
-							Options: []discordgo.SelectMenuOption{{
-								Label: "Message",
-								Value: "Saved",
-							}},
-						},
-					},
-				},
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						discordgo.TextInput{
 							CustomID:    globals.ReasonOption,
 							Label:       "Reason",
-							Style:       discordgo.TextInputShort,
-							Placeholder: "Why are you moderating this user or content?",
-							Required:    true,
-							MinLength:   1,
-							MaxLength:   500,
+							Style:       discordgo.TextInputParagraph,
+							Placeholder: "Reason for moderation (optional, shown in configured evidence channel)",
+							Required:    false,
+							MaxLength:   300,
 						},
 					},
 				},
@@ -86,72 +57,27 @@ func (bot *ModeratorBot) ModerateFromMessageContext(i *discordgo.InteractionCrea
 	})
 }
 
-func (bot *ModeratorBot) GetUserInfoFromMessageContext(i *discordgo.InteractionCreate) {
-	return
-}
-
-func (bot *ModeratorBot) SaveEvidenceFromMessageContext(i *discordgo.InteractionCreate) {
-	message := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
-
-	fields := []*discordgo.MessageEmbedField{
-		{
-			Name:   "Original message timestamp",
-			Value:  fmt.Sprintf("%s (<t:%v:R>)", message.Timestamp.Format(time.RFC1123Z), message.Timestamp.Unix()),
-			Inline: false,
-		},
-		{
-			Name:   "Author of message",
-			Value:  fmt.Sprintf("<@%s>", message.Author.ID),
-			Inline: true,
-		},
-		{
-			Name:   "Link to original message",
-			Value:  fmt.Sprintf("https://discord.com/channels/%s/%s/%s", i.GuildID, message.ChannelID, message.ID),
-			Inline: true,
-		},
-		{
-			Name:  "Content of original message",
-			Value: message.Content,
-		},
-	}
-	if len(message.Attachments) > 0 {
-		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  "Attachments",
-			Value: fmt.Sprintf("%v", len(message.Attachments)),
-		})
-		for _, attachment := range message.Attachments {
-			fields = append(fields, &discordgo.MessageEmbedField{
-				Name:  attachment.Filename,
-				Value: attachment.URL,
-			})
-		}
-	}
-	// TODO: more information
-	ms := discordgo.MessageSend{
-		Embeds: []*discordgo.MessageEmbed{{
-			Title: "Moder8s Evidence",
-			Description: fmt.Sprintf("Collected by <@%s> on %s (<t:%v:R>)",
-				i.Interaction.Member.User.ID,
-				time.Now().Format(time.RFC1123Z),
-				time.Now().Unix(),
-			),
-			Fields: fields,
-			Color:  globals.Purple,
-		}},
-	}
-
-	sc := bot.getServerConfig(i.GuildID)
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
-	if err != nil {
-		log.Warn("Unable to send message %w", err)
-	}
-
-	// TODO: more information
+func (bot *ModeratorBot) DecreaseReputationFromMessageContext(i *discordgo.InteractionCreate) {
+	// Currently, you can only use TextInput in modal action rows builders.
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			Content: "Evidence saved to <#" + sc.EvidenceChannelSettingID + ">",
-			Flags:   discordgo.MessageFlagsEphemeral,
+			CustomID: globals.DecreaseReputationFromMessageContext,
+			Title:    "Additional details",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    globals.ReasonOption,
+							Label:       "Reason",
+							Style:       discordgo.TextInputParagraph,
+							Placeholder: "Reason for moderation (optional, shown in configured evidence channel)",
+							Required:    false,
+							MaxLength:   300,
+						},
+					},
+				},
+			},
 		},
 	})
 }

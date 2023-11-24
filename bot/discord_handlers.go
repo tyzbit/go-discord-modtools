@@ -99,6 +99,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	// Technically app actions are commands too, but those are in commands_message.go and commands_user.go
 	// We don't pass the session to these because you can get that from bot.DG
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		// Chat commands (slash commands)
 		globals.Help: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetHelpFromChatCommandContext(i)
 		},
@@ -110,27 +111,39 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			bot.SetSettingsFromChatCommandContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.ModerateFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateFromUserContext(i)
-		},
-		globals.ModerateFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateFromMessageContext(i)
-		},
-		// TODO: error will be handled once the functions are ready
 		globals.GetUserInfoFromChatCommandContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromChatCommandContext(i)
 		},
+
+		// User actions (right click or long-press user)
 		// TODO: error will be handled once the functions are ready
 		globals.GetUserInfoFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromUserContext(i)
+		},
+		// TODO: error will be handled once the functions are ready
+		globals.IncreaseReputationFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.IncreaseReputationFromUserContext(i)
+		},
+		// TODO: error will be handled once the functions are ready
+		globals.DecreaseReputationFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DecreaseReputationFromUserContext(i)
+		},
+
+		// Message actions (right click or long-press message)
+		globals.SaveEvidenceFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.SaveEvidenceFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
 		globals.GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.SaveEvidenceFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SaveEvidenceFromMessageContext(i)
+		globals.IncreaseReputationFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.IncreaseReputationFromMessageContext(i)
+		},
+		// TODO: error will be handled once the functions are ready
+		globals.DecreaseReputationFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DecreaseReputationFromMessageContext(i)
 		},
 	}
 
@@ -151,11 +164,17 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.RespondToModerationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModerationModalFromUserContext(i)
+		globals.RespondToIncreaseReputationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToIncreaseReputationModalFromUserContext(i)
 		},
-		globals.RespondToModerationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModerationModalFromMessageContext(i)
+		globals.RespondToDecreaseReputationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToDecreaseReputationModalFromUserContext(i)
+		},
+		globals.RespondToIncreaseReputationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToIncreaseReputationModalFromMessageContext(i)
+		},
+		globals.RespondToDecreaseReputationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToDecreaseReputationModalFromMessageContext(i)
 		},
 	}
 
