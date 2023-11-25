@@ -148,7 +148,7 @@ func (bot *ModeratorBot) updateServersWatched() error {
 	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}
 	updateStatusData.Activities = make([]*discordgo.Activity, 1)
 	updateStatusData.Activities[0] = &discordgo.Activity{
-		Name: fmt.Sprintf("%v servers", serversActive),
+		Name: fmt.Sprintf("%v %v", serversActive, handlePlural("server", "s", int(serversActive))),
 		Type: discordgo.ActivityTypeWatching,
 		URL:  moderaterRepoUrl,
 	}

@@ -108,3 +108,11 @@ func (bot *ModeratorBot) DeleteAllCommands() {
 		}
 	}
 }
+
+// handlePlural returns the provided `src` and add `suf` if `count` is more than 1
+func handlePlural(src, suf string, count int) string {
+	if count > 1 {
+		return src + suf
+	}
+	return src
+}
