@@ -31,10 +31,15 @@ const (
 	MessageOption = "message"
 	ReasonOption  = "reason"
 
+	// Buttons
 	// Settings (the names affect the column names in the DB)
 	NotifyWhenReputationIsBelowSetting = "Low rep notification"
 	NotifyWhenReputationIsAboveSetting = "High rep notification"
 	EvidenceChannelSettingID           = "Evidence channel"
+
+	// Moderation buttons
+	IncreaseUserReputation = "+REP"
+	DecreaseUserReputation = "-REP"
 
 	// Modals
 
@@ -122,7 +127,7 @@ var (
 		},
 		{
 			Name: DocumentBehaviorFromUserContext,
-			Type: discordgo.MessageApplicationCommand,
+			Type: discordgo.UserApplicationCommand,
 		},
 	}
 	MessageCommands = []*discordgo.ApplicationCommand{
