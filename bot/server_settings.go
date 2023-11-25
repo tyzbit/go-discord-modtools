@@ -137,46 +137,6 @@ func (bot *ModeratorBot) updateServerSetting(guildID string, setting string,
 	return bot.getServerConfig(guildID), ok
 }
 
-// RespondToSettingsChoice updates a server setting according to the
-// column name (setting) and the value
-func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
-	setting string, value interface{}) {
-	guild, err := bot.DG.Guild(i.Interaction.GuildID)
-	if err != nil {
-		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
-		return
-	}
-
-	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
-	var interactionErr error
-
-	bot.createInteractionEvent(InteractionEvent{
-		UserID:        i.Member.User.ID,
-		Username:      i.Member.User.Username,
-		InteractionId: i.Message.ID,
-		ChannelId:     i.Message.ChannelID,
-		ServerID:      i.Interaction.GuildID,
-		ServerName:    guild.Name,
-	})
-
-	if !ok {
-		reason := "Unable to save settings"
-		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.generalErrorDisplayedToTheUser(reason),
-		})
-	} else {
-		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.SettingsIntegrationResponse(sc),
-		})
-	}
-
-	if interactionErr != nil {
-		log.Errorf("error responding to settings interaction, err: %v", interactionErr)
-	}
-}
-
 // updateServersWatched updates the servers watched value
 // in both the local bot stats and in the database. It is allowed to fail
 func (bot *ModeratorBot) updateServersWatched() error {

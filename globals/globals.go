@@ -38,8 +38,8 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Moderation buttons
-	IncreaseUserReputation = "+REP"
-	DecreaseUserReputation = "-REP"
+	IncreaseUserReputation = "⬆️ Reputation"
+	DecreaseUserReputation = "⬇️ Reputation"
 
 	// Modals
 

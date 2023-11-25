@@ -49,7 +49,8 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 		},
 		{
 			Name: "Collected by",
-			Value: fmt.Sprintf("<@%s> at %s n(<t:%v:R>)",
+			Value: fmt.Sprintf(`<@%s>
+								%s (<t:%v:R>)`,
 				i.Interaction.Member.User.ID,
 				time.Now().Format(time.RFC1123Z),
 				time.Now().Unix()),
@@ -101,7 +102,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title:       "Log message",
+					Title:       "Create evidence report",
 					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", data.Author.ID),
 					Color:       globals.Purple,
 					Fields:      fields,

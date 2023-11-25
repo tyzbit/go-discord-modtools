@@ -43,7 +43,6 @@ func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption
 		})
 	}
 	return options
-
 }
 
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
