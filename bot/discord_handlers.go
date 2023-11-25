@@ -114,36 +114,24 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		globals.GetUserInfoFromChatCommandContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromChatCommandContext(i)
 		},
+		// Message actions (right click or long-press message)
+		globals.DocumentBehaviorFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DocumentBehaviorFromUserContext(i)
+		},
 
 		// User actions (right click or long-press user)
 		// TODO: error will be handled once the functions are ready
 		globals.GetUserInfoFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromUserContext(i)
 		},
-		// TODO: error will be handled once the functions are ready
-		globals.ModeratePositivelyFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModeratePositivelyFromUserContext(i)
-		},
-		// TODO: error will be handled once the functions are ready
-		globals.ModerateNegativelyFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateNegativelyFromUserContext(i)
-		},
 
 		// Message actions (right click or long-press message)
-		globals.SaveEvidenceFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SaveEvidenceFromMessageContext(i)
+		globals.DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DocumentBehaviorFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
 		globals.GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromMessageContext(i)
-		},
-		// TODO: error will be handled once the functions are ready
-		globals.ModeratePositivelyFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModeratePositivelyFromMessageContext(i)
-		},
-		// TODO: error will be handled once the functions are ready
-		globals.ModerateNegativelyFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ModerateNegativelyFromMessageContext(i)
 		},
 	}
 
@@ -163,20 +151,11 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 	}
 
-	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.RespondToModeratePositivelyModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModeratePositivelyModalFromUserContext(i)
-		},
-		globals.RespondToModerateNegativelyModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModerateNegativelyModalFromUserContext(i)
-		},
-		globals.RespondToModeratePositivelyModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModeratePositivelyModalFromMessageContext(i)
-		},
-		globals.RespondToModerateNegativelyModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToModerateNegativelyModalFromMessageContext(i)
-		},
-	}
+	// modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+	// 	globals.DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	// 		bot.DocumentBehaviorFromModalSubmission(i)
+	// 	},
+	// }
 
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
@@ -187,9 +166,9 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
 			h(s, i)
 		}
-	case discordgo.InteractionModalSubmit:
-		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
-			h(s, i)
-		}
+		// case discordgo.InteractionModalSubmit:
+		// 	if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
+		// 		h(s, i)
+		// 	}
 	}
 }

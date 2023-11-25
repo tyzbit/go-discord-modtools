@@ -84,34 +84,6 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 	}
 }
 
-// settingsFailureIntegrationResponse returns a *discordgo.InteractionResponseData
-// stating that a failure to update settings has occured
-func (bot *ModeratorBot) settingsFailureIntegrationResponse() *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Flags: discordgo.MessageFlagsEphemeral,
-		Embeds: []*discordgo.MessageEmbed{
-			{
-				Title: "Unable to update setting",
-				Color: globals.Purple,
-			},
-		},
-	}
-}
-
-// settingsFailureIntegrationResponse returns a *discordgo.InteractionResponseData
-// stating that a failure to update settings has occured
-func (bot *ModeratorBot) settingsDMFailureIntegrationResponse() *discordgo.InteractionResponseData {
-	return &discordgo.InteractionResponseData{
-		Flags: discordgo.MessageFlagsEphemeral,
-		Embeds: []*discordgo.MessageEmbed{
-			{
-				Title: "The bot does not have any per-user settings",
-				Color: globals.Purple,
-			},
-		},
-	}
-}
-
 func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
 	if i.Interaction.Member.User.ID == "" {
 		log.Warn("user was not provided")
@@ -124,5 +96,18 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 		CustomID: globals.GetUserInfoFromUserContext,
 		Flags:    discordgo.MessageFlagsEphemeral,
 		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
+	}
+}
+
+func (bot *ModeratorBot) generalErrorDisplayedToTheUser(reason string) *discordgo.InteractionResponseData {
+	return &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title:       "There was an issue",
+				Description: reason,
+				Color:       globals.DarkRed,
+			},
+		},
+		Flags: discordgo.MessageFlagsEphemeral,
 	}
 }

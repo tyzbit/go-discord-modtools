@@ -8,85 +8,9 @@ import (
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
-func (bot *ModeratorBot) RespondToModeratePositivelyModalFromUserContext(i *discordgo.InteractionCreate) {
-	// TODO: check status and change message base on status
-	// Drop a message in the evidence channel
-	bot.SaveEvidenceFromModalSubmission(i)
-
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: globals.ModerationSuccessful,
-					Color: globals.Purple,
-				},
-			},
-		},
-	})
-}
-
-func (bot *ModeratorBot) RespondToModerateNegativelyModalFromUserContext(i *discordgo.InteractionCreate) {
-	// TODO: check status and change message base on status
-	// Drop a message in the evidence channel
-	bot.SaveEvidenceFromModalSubmission(i)
-
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: globals.ModerationSuccessful,
-					Color: globals.Purple,
-				},
-			},
-		},
-	})
-}
-
-func (bot *ModeratorBot) RespondToModeratePositivelyModalFromMessageContext(i *discordgo.InteractionCreate) {
-	// TODO: check status and change message base on status
-	// Drop a message in the evidence channel
-	bot.SaveEvidenceFromModalSubmission(i)
-
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: globals.ModerationSuccessful,
-					Color: globals.Purple,
-				},
-			},
-		},
-	})
-}
-
-func (bot *ModeratorBot) RespondToModerateNegativelyModalFromMessageContext(i *discordgo.InteractionCreate) {
-	// TODO: check status and change message base on status
-	// Drop a message in the evidence channel
-	bot.SaveEvidenceFromModalSubmission(i)
-
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: globals.ModerationSuccessful,
-					Color: globals.Purple,
-				},
-			},
-		},
-	})
-}
-
-// TODO: align with SaveEvidenceFromMessageContext when in a good state
+// TODO: align with DocumentBehaviorFromMessageContext when in a good state
 // Modal command, copies message details to a configured channel
-func (bot *ModeratorBot) SaveEvidenceFromModalSubmission(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) DocumentBehaviorFromModalSubmission(i *discordgo.InteractionCreate) {
 	data := i.Interaction.ModalSubmitData()
 
 	// message := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
@@ -189,7 +113,7 @@ func (bot *ModeratorBot) SaveEvidenceFromModalSubmission(i *discordgo.Interactio
 		}},
 	}
 
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	_, err = bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
 		log.Warn("Unable to send message %w", err)
 	}

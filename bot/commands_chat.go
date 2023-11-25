@@ -108,10 +108,11 @@ func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.Interaction
 func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.InteractionCreate) {
 	log.Debug("handling settings request")
 	if i.GuildID == "" {
+		reason := "The bot does not have any per-user settings"
 		// This is a DM, so settings cannot be changed
 		err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: bot.settingsDMFailureIntegrationResponse(),
+			Data: bot.generalErrorDisplayedToTheUser(reason),
 		})
 		if err != nil {
 			log.Errorf("error responding to settings DM"+globals.Settings+", err: %v", err)

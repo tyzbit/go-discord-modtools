@@ -1,62 +1,34 @@
 package bot
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // Moderation modal menu
-func (bot *ModeratorBot) SaveEvidenceFromMessageContext(i *discordgo.InteractionCreate) {
-	return
-}
+func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.InteractionCreate) {
+	data := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
+	if data.ID == "" {
+		reason := "No message was provided"
+		log.Warn(reason)
+		_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: bot.generalErrorDisplayedToTheUser(reason)})
+		return
+	}
 
-func (bot *ModeratorBot) ModeratePositivelyFromMessageContext(i *discordgo.InteractionCreate) {
-	// Currently, you can only use TextInput in modal action rows builders.
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseModal,
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.ModeratePositivelyFromMessageContext,
-			Title:    "Additional details (Moderating positively)",
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.TextInput{
-							CustomID:    globals.ReasonOption,
-							Label:       "Reason",
-							Style:       discordgo.TextInputParagraph,
-							Placeholder: "Reason for moderation (optional, posted to evidence channel)",
-							Required:    false,
-							MaxLength:   300,
-						},
-					},
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       fmt.Sprintf("Log user behavior for %s (ID: %v)", data.Author.Username, data.Author.ID),
+					Description: "Document user behavior - good, bad, or noteworthy",
 				},
 			},
-		},
-	})
-}
-
-func (bot *ModeratorBot) ModerateNegativelyFromMessageContext(i *discordgo.InteractionCreate) {
-	// Currently, you can only use TextInput in modal action rows builders.
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseModal,
-		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.ModerateNegativelyFromMessageContext,
-			Title:    "Additional details",
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.TextInput{
-							CustomID:    globals.ReasonOption,
-							Label:       "Reason",
-							Style:       discordgo.TextInputParagraph,
-							Placeholder: "Reason for moderation (optional, shown in configured evidence channel)",
-							Required:    false,
-							MaxLength:   300,
-						},
-					},
-				},
-			},
+			Flags: discordgo.MessageFlagsEphemeral,
 		},
 	})
 }

@@ -160,9 +160,10 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	})
 
 	if !ok {
+		reason := "Unable to save settings"
 		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.settingsFailureIntegrationResponse(),
+			Data: bot.generalErrorDisplayedToTheUser(reason),
 		})
 	} else {
 		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

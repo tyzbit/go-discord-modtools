@@ -16,15 +16,12 @@ const (
 	GetUserInfoFromChatCommandContext = "query"
 
 	// User commands
-	GetUserInfoFromUserContext        = "Check info"
-	ModeratePositivelyFromUserContext = "Moderate User (⬆️rep)"
-	ModerateNegativelyFromUserContext = "Moderate User (⬇️rep)"
+	GetUserInfoFromUserContext      = "Check info"
+	DocumentBehaviorFromUserContext = "Save evidence"
 
 	// Message commands
-	GetUserInfoFromMessageContext        = "Get user info"
-	ModeratePositivelyFromMessageContext = "Moderate (⬆️rep)"
-	ModerateNegativelyFromMessageContext = "Moderate (⬇️rep)"
-	SaveEvidenceFromMessageContext       = "Save as evidence"
+	GetUserInfoFromMessageContext      = "Get user info"
+	DocumentBehaviorFromMessageContext = "Save as evidence"
 
 	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
@@ -40,17 +37,13 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Modals
-	RespondToModeratePositivelyModalFromUserContext    = "Moderate positively"
-	RespondToModerateNegativelyModalFromUserContext    = "Moderate negatively"
-	RespondToModeratePositivelyModalFromMessageContext = "Moderate this user positively"
-	RespondToModerateNegativelyModalFromMessageContext = "Moderate this user negatively"
 
 	// Modal options
-	ChangeReputation = "Change reputation"
 
 	// Colors
 	FrenchGray = 13424349
 	Purple     = 7283691
+	DarkRed    = 9109504
 
 	// Text fragments
 	ModerationSuccessful   = "Moderation action saved"
@@ -128,12 +121,8 @@ var (
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: ModeratePositivelyFromUserContext,
-			Type: discordgo.UserApplicationCommand,
-		},
-		{
-			Name: ModerateNegativelyFromUserContext,
-			Type: discordgo.UserApplicationCommand,
+			Name: DocumentBehaviorFromUserContext,
+			Type: discordgo.MessageApplicationCommand,
 		},
 	}
 	MessageCommands = []*discordgo.ApplicationCommand{
@@ -142,15 +131,7 @@ var (
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: SaveEvidenceFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
-			Name: ModeratePositivelyFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
-			Name: ModerateNegativelyFromMessageContext,
+			Name: DocumentBehaviorFromMessageContext,
 			Type: discordgo.MessageApplicationCommand,
 		},
 	}
