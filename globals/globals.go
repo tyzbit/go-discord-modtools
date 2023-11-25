@@ -17,13 +17,13 @@ const (
 
 	// User commands
 	GetUserInfoFromUserContext        = "Check info"
-	IncreaseReputationFromUserContext = "Increase reputation"
-	DecreaseReputationFromUserContext = "Decrease reputation"
+	ModeratePositivelyFromUserContext = "Moderate User (⬆️rep)"
+	ModerateNegativelyFromUserContext = "Moderate User (⬇️rep)"
 
 	// Message commands
 	GetUserInfoFromMessageContext        = "Get user info"
-	IncreaseReputationFromMessageContext = "Increase user reputation"
-	DecreaseReputationFromMessageContext = "Decrease user reputation"
+	ModeratePositivelyFromMessageContext = "Moderate (⬆️rep)"
+	ModerateNegativelyFromMessageContext = "Moderate (⬇️rep)"
 	SaveEvidenceFromMessageContext       = "Save as evidence"
 
 	// Premade Option IDs (semi-reusable)
@@ -40,10 +40,10 @@ const (
 	EvidenceChannelSettingID           = "Evidence channel"
 
 	// Modals
-	RespondToIncreaseReputationModalFromUserContext    = "Moderate positively"
-	RespondToDecreaseReputationModalFromUserContext    = "Moderate negatively"
-	RespondToIncreaseReputationModalFromMessageContext = "Moderate this user positively"
-	RespondToDecreaseReputationModalFromMessageContext = "Moderate this user negatively"
+	RespondToModeratePositivelyModalFromUserContext    = "Moderate positively"
+	RespondToModerateNegativelyModalFromUserContext    = "Moderate negatively"
+	RespondToModeratePositivelyModalFromMessageContext = "Moderate this user positively"
+	RespondToModerateNegativelyModalFromMessageContext = "Moderate this user negatively"
 
 	// Modal options
 	ChangeReputation = "Change reputation"
@@ -128,11 +128,11 @@ var (
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: IncreaseReputationFromUserContext,
+			Name: ModeratePositivelyFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 		{
-			Name: DecreaseReputationFromUserContext,
+			Name: ModerateNegativelyFromUserContext,
 			Type: discordgo.UserApplicationCommand,
 		},
 	}
@@ -146,12 +146,12 @@ var (
 			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: IncreaseReputationFromMessageContext,
-			Type: discordgo.UserApplicationCommand,
+			Name: ModeratePositivelyFromMessageContext,
+			Type: discordgo.MessageApplicationCommand,
 		},
 		{
-			Name: DecreaseReputationFromMessageContext,
-			Type: discordgo.UserApplicationCommand,
+			Name: ModerateNegativelyFromMessageContext,
+			Type: discordgo.MessageApplicationCommand,
 		},
 	}
 

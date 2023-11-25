@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 	globals "github.com/tyzbit/go-discord-modtools/globals"
 )
 
@@ -108,5 +109,20 @@ func (bot *ModeratorBot) settingsDMFailureIntegrationResponse() *discordgo.Inter
 				Color: globals.Purple,
 			},
 		},
+	}
+}
+
+func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
+	if i.Interaction.Member.User.ID == "" {
+		log.Warn("user was not provided")
+	}
+
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
+
+	return &discordgo.InteractionResponseData{
+		CustomID: globals.GetUserInfoFromUserContext,
+		Flags:    discordgo.MessageFlagsEphemeral,
+		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
 	}
 }

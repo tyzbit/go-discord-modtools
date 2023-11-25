@@ -8,7 +8,7 @@ import (
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
-func (bot *ModeratorBot) RespondToIncreaseReputationModalFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModeratePositivelyModalFromUserContext(i *discordgo.InteractionCreate) {
 	// TODO: check status and change message base on status
 	// Drop a message in the evidence channel
 	bot.SaveEvidenceFromModalSubmission(i)
@@ -27,7 +27,7 @@ func (bot *ModeratorBot) RespondToIncreaseReputationModalFromUserContext(i *disc
 	})
 }
 
-func (bot *ModeratorBot) RespondToDecreaseReputationModalFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModerateNegativelyModalFromUserContext(i *discordgo.InteractionCreate) {
 	// TODO: check status and change message base on status
 	// Drop a message in the evidence channel
 	bot.SaveEvidenceFromModalSubmission(i)
@@ -46,7 +46,7 @@ func (bot *ModeratorBot) RespondToDecreaseReputationModalFromUserContext(i *disc
 	})
 }
 
-func (bot *ModeratorBot) RespondToIncreaseReputationModalFromMessageContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModeratePositivelyModalFromMessageContext(i *discordgo.InteractionCreate) {
 	// TODO: check status and change message base on status
 	// Drop a message in the evidence channel
 	bot.SaveEvidenceFromModalSubmission(i)
@@ -65,7 +65,7 @@ func (bot *ModeratorBot) RespondToIncreaseReputationModalFromMessageContext(i *d
 	})
 }
 
-func (bot *ModeratorBot) RespondToDecreaseReputationModalFromMessageContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) RespondToModerateNegativelyModalFromMessageContext(i *discordgo.InteractionCreate) {
 	// TODO: check status and change message base on status
 	// Drop a message in the evidence channel
 	bot.SaveEvidenceFromModalSubmission(i)
@@ -133,7 +133,7 @@ func (bot *ModeratorBot) SaveEvidenceFromModalSubmission(i *discordgo.Interactio
 	// ms := discordgo.MessageSend{
 	// 	Embeds: []*discordgo.MessageEmbed{{
 	// 		Title: "Moder8s Evidence",
-	// 		Description: fmt.Sprintf("Collected by <@%s> on %s (<t:%v:R>)",
+	// 		Description: fmt.Sprintf("Collected by <@%s> at %s \\n(<t:%v:R>)",
 	// 			i.Interaction.Member.User.ID,
 	// 			time.Now().Format(time.RFC1123Z),
 	// 			time.Now().Unix(),

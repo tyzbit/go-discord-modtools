@@ -121,12 +121,12 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			bot.GetUserInfoFromUserContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.IncreaseReputationFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.IncreaseReputationFromUserContext(i)
+		globals.ModeratePositivelyFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModeratePositivelyFromUserContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.DecreaseReputationFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.DecreaseReputationFromUserContext(i)
+		globals.ModerateNegativelyFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModerateNegativelyFromUserContext(i)
 		},
 
 		// Message actions (right click or long-press message)
@@ -138,12 +138,12 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			bot.GetUserInfoFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.IncreaseReputationFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.IncreaseReputationFromMessageContext(i)
+		globals.ModeratePositivelyFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModeratePositivelyFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.DecreaseReputationFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.DecreaseReputationFromMessageContext(i)
+		globals.ModerateNegativelyFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ModerateNegativelyFromMessageContext(i)
 		},
 	}
 
@@ -164,17 +164,17 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.RespondToIncreaseReputationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToIncreaseReputationModalFromUserContext(i)
+		globals.RespondToModeratePositivelyModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModeratePositivelyModalFromUserContext(i)
 		},
-		globals.RespondToDecreaseReputationModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToDecreaseReputationModalFromUserContext(i)
+		globals.RespondToModerateNegativelyModalFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModerateNegativelyModalFromUserContext(i)
 		},
-		globals.RespondToIncreaseReputationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToIncreaseReputationModalFromMessageContext(i)
+		globals.RespondToModeratePositivelyModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModeratePositivelyModalFromMessageContext(i)
 		},
-		globals.RespondToDecreaseReputationModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.RespondToDecreaseReputationModalFromMessageContext(i)
+		globals.RespondToModerateNegativelyModalFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.RespondToModerateNegativelyModalFromMessageContext(i)
 		},
 	}
 

@@ -5,6 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// This whole file can probably be deleted (artifacts from copying from the other project)
+
 // sendModerateResponse sends the message with a result from Moder8or
 func (bot *ModeratorBot) sendModerateResponse(userMessage *discordgo.Message, messagesToSend *discordgo.MessageSend) error {
 	username := ""

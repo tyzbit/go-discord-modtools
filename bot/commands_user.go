@@ -1,15 +1,13 @@
 package bot
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // TODO: I think all of these need to log events
-func (bot *ModeratorBot) IncreaseReputationFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) ModeratePositivelyFromUserContext(i *discordgo.InteractionCreate) {
 	if i.Interaction.Member.User == nil {
 		log.Warn("no user nor message was provided")
 	}
@@ -17,7 +15,7 @@ func (bot *ModeratorBot) IncreaseReputationFromUserContext(i *discordgo.Interact
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.RespondToIncreaseReputationModalFromUserContext,
+			CustomID: globals.RespondToModeratePositivelyModalFromUserContext,
 			Title:    "Moderate " + i.Member.User.Username,
 			Embeds: []*discordgo.MessageEmbed{{
 				Title: "Embed!",
@@ -57,7 +55,7 @@ func (bot *ModeratorBot) IncreaseReputationFromUserContext(i *discordgo.Interact
 	})
 }
 
-func (bot *ModeratorBot) DecreaseReputationFromUserContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) ModerateNegativelyFromUserContext(i *discordgo.InteractionCreate) {
 	if i.Interaction.Member.User == nil {
 		log.Warn("no user nor message was provided")
 	}
@@ -65,7 +63,7 @@ func (bot *ModeratorBot) DecreaseReputationFromUserContext(i *discordgo.Interact
 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.RespondToIncreaseReputationModalFromUserContext,
+			CustomID: globals.RespondToModeratePositivelyModalFromUserContext,
 			Title:    "Moderate " + i.Member.User.Username,
 			Embeds: []*discordgo.MessageEmbed{{
 				Title: "Embed!",
@@ -107,20 +105,11 @@ func (bot *ModeratorBot) DecreaseReputationFromUserContext(i *discordgo.Interact
 
 // App command (where the target is a message), returns User reputation
 func (bot *ModeratorBot) GetUserInfoFromUserContext(i *discordgo.InteractionCreate) {
-	if i.Interaction.Member.User.ID == "" {
-		log.Warn("user was not provided")
-	}
-
-	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
-
-	// TODO: Add more user information
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.GetUserInfoFromUserContext,
-			Flags:    discordgo.MessageFlagsEphemeral,
-			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
-		},
+		Data: bot.userInfoIntegrationresponse(i),
 	})
+	if err != nil {
+		log.Errorf("error responding to user info (message context), err: %v", err)
+	}
 }

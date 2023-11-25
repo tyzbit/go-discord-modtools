@@ -147,5 +147,20 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 
 // TODO: fill
 func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.InteractionCreate) {
-	return
+	if i.Interaction.Member.User.ID == "" {
+		log.Warn("user was not provided")
+	}
+
+	user := ModeratedUser{}
+	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
+
+	// TODO: Add more user information
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.GetUserInfoFromUserContext,
+			Flags:    discordgo.MessageFlagsEphemeral,
+			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
+		},
+	})
 }
