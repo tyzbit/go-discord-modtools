@@ -31,6 +31,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 		return
 	}
 
+	user := bot.GetModeratedUser(i.GuildID, message.Author.ID)
 	fields := []*discordgo.MessageEmbedField{
 		{
 			Name:   "Original message timestamp",
@@ -39,7 +40,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 		},
 		{
 			Name:   "Author of message",
-			Value:  fmt.Sprintf("<@%s>", message.Author.ID),
+			Value:  fmt.Sprintf("<@%s> (Reputation: %v)", user.UserID, user.Reputation),
 			Inline: true,
 		},
 		{

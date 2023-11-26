@@ -1,17 +1,31 @@
 package bot
 
-import "fmt"
+import (
+	"fmt"
 
-func (bot *ModeratorBot) GetUserReputation(userID string) (reputation int64, err error) {
-	user := ModeratedUser{}
-	tx := bot.DB.Model(&ModeratedUser{}).
+	"github.com/google/uuid"
+)
+
+func (bot *ModeratorBot) GetModeratedUser(serverID string, userID string) (moderatedUser ModeratedUser) {
+	_ = bot.DB.Model(&ModeratedUser{}).
 		Where(&ModeratedUser{UserID: userID}).
-		First(&user)
+		First(&moderatedUser)
 
-	if tx.RowsAffected > 1 {
-		return 0, fmt.Errorf("unexpected number of rows affected getting user reputation: %v", tx.RowsAffected)
+	guild, _ := bot.DG.Guild(serverID)
+	user, _ := bot.DG.User(userID)
+	// Create the moderated user if they do not exist
+	if moderatedUser.UserID == "" {
+		moderatedUser = ModeratedUser{
+			UUID:       uuid.New().String(),
+			UserName:   user.Username,
+			UserID:     userID,
+			ServerID:   serverID,
+			ServerName: guild.Name,
+			Reputation: 0,
+		}
+		bot.UpdateModeratedUser(moderatedUser)
 	}
-	return user.Reputation, nil
+	return moderatedUser
 }
 
 // UpdateModeratedUser updates moderated user status in the database.
