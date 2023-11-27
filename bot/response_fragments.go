@@ -8,7 +8,8 @@ import (
 	globals "github.com/tyzbit/go-discord-modtools/globals"
 )
 
-// lowReputationValues returns a []discordgo.SelectMenuOption for low rep values
+// lowReputationValues returns a []discordgo.SelectMenuOption for the configurable
+// value to notify when a reputation drops to
 func lowReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption) {
 	for i := -10; i <= 10; i++ {
 
@@ -27,7 +28,8 @@ func lowReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption)
 
 }
 
-// highReputationValues returns a []discordgo.SelectMenuOption for high rep values
+// highReputationValues returns a []discordgo.SelectMenuOption for the configurable
+// value to notify when a reputation rises to
 func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption) {
 	for i := -10; i <= 10; i++ {
 
@@ -83,6 +85,8 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 	}
 }
 
+// User information and stats produced for the /query command and
+// "Get info" when right clicking users
 func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
 	if i.Interaction.Member.User.ID == "" {
 		log.Warn("user was not provided")
@@ -98,6 +102,7 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 	}
 }
 
+// Simple wrapper to display an embed to the user with an error (ephemeral)
 func (bot *ModeratorBot) generalErrorDisplayedToTheUser(reason string) *discordgo.InteractionResponseData {
 	return &discordgo.InteractionResponseData{
 		Embeds: []*discordgo.MessageEmbed{

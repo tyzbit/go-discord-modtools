@@ -161,6 +161,8 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 	}
 
+	// We don't use modals right now, but we might in the future
+	// TODO: cleanup when bot features are more stable
 	// modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 	// 	globals.DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// 		bot.DocumentBehaviorFromModalSubmission(i)

@@ -93,7 +93,10 @@ var (
 		false: discordgo.SecondaryButton,
 	}
 	SettingFailedResponseMessage = "Error changing setting"
-	ChatCommands                 = []*discordgo.ApplicationCommand{
+
+	// These objects are used to register chat commands, so if it's
+	// not in here, it won't get registered properly.
+	ChatCommands = []*discordgo.ApplicationCommand{
 		{
 			Name:        Help,
 			Description: "How to use this bot",
@@ -143,5 +146,8 @@ var (
 
 	RegisteredCommands = make([]*discordgo.ApplicationCommand,
 		len(ChatCommands)+len(UserCommands)+len(MessageCommands))
+
+	// This object is used to register chat commands, so if it's
+	// not in here, it won't get registered properly.
 	Commands = append(append(ChatCommands, UserCommands...), MessageCommands...)
 )

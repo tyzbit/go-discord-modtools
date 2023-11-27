@@ -6,6 +6,10 @@ import (
 )
 
 // TODO: I think all of these need to log events
+
+// Very similar to DocumentBehaviorFromMessageContext, but this is
+// called when the target is a user and not a message, therefore
+// this will be implicitly without any message reference
 func (bot *ModeratorBot) DocumentBehaviorFromUserContext(i *discordgo.InteractionCreate) {
 	// if i.Interaction.Member.User == nil {
 	// 	reason := "No user was provided"
@@ -31,7 +35,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromUserContext(i *discordgo.Interactio
 	// })
 }
 
-// App command (where the target is a message), returns User reputation
+// Produces user info such as reputation and (PLANNED) stats
 func (bot *ModeratorBot) GetUserInfoFromUserContext(i *discordgo.InteractionCreate) {
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

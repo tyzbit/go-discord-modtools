@@ -49,6 +49,8 @@ type ModerationEvent struct {
 	ModeratorName   string
 }
 
+// A ModeratedUser represents a specific user/server combination
+// that serves to track changes
 type ModeratedUser struct {
 	CreatedAt        time.Time
 	UUID             string `gorm:"primaryKey;uniqueIndex"`
@@ -91,6 +93,7 @@ type ServerRegistration struct {
 	Config    ServerConfig `gorm:"foreignKey:DiscordId"`
 }
 
+// Configuration for each server, changed with `/settings`
 type ServerConfig struct {
 	DiscordId                          string        `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
 	Name                               string        `pretty:"Server Name" gorm:"default:default"`

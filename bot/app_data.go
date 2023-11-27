@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// Returns a ModeratedUser record from the DB using server and user ID
+// (a user can be in multiple servers)
 func (bot *ModeratorBot) GetModeratedUser(serverID string, userID string) (moderatedUser ModeratedUser) {
 	_ = bot.DB.Model(&ModeratedUser{}).
 		Where(&ModeratedUser{UserID: userID}).

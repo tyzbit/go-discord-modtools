@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// RespondToSettingsChoice updates a server setting according to the
+// Updates a server setting according to the
 // column name (setting) and the value
 func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	setting string, value interface{}) {
@@ -47,6 +47,8 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	}
 }
 
+// Updates a user reputation, given the source interaction and
+// whether to increase (TRUE) or decrease (FALSE)
 func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, increase bool) {
 	pattern := regexp.MustCompile(`<@(\d+)>`)
 

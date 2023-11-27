@@ -8,6 +8,7 @@ import (
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
+// This produces the help text seen from the chat commant `/help`
 func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionCreate) {
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -27,6 +28,8 @@ func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionC
 	}
 }
 
+// Produces bot stats, server-specific if called in a server and
+// a total summary if DMed by a configured administrator
 func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.InteractionCreate) {
 	directMessage := (i.GuildID == "")
 	var stats botStats
@@ -105,6 +108,7 @@ func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.Interaction
 	}
 }
 
+// Sets setting choices from the `/settings` command
 func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.InteractionCreate) {
 	log.Debug("handling settings request")
 	if i.GuildID == "" {
@@ -146,7 +150,7 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 	}
 }
 
-// TODO: fill
+// Gets user info from the `/query` command
 func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.InteractionCreate) {
 	if i.Interaction.Member.User.ID == "" {
 		log.Warn("user was not provided")
