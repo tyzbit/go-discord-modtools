@@ -129,3 +129,19 @@ func getUserIDFromDiscordReference(content string) string {
 		return ""
 	}
 }
+
+func getAttachmentURLs(content string) (urls []string) {
+	pattern := regexp.MustCompile(`\(([^\)]+)\)`)
+
+	matches := pattern.FindAllStringSubmatch(content, -1)
+	if len(matches) > 1 {
+		for _, match := range matches {
+			if len(match) > 1 {
+				urls = append(urls, match[1])
+			}
+		}
+	} else {
+		log.Warnf("unable to get attachments ID from reference embed")
+	}
+	return urls
+}

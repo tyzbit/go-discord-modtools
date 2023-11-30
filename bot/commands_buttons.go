@@ -3,6 +3,8 @@ package bot
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
+	"path"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -133,6 +135,29 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	ms := discordgo.MessageSend{
 		Embeds: i.Interaction.Message.Embeds,
 	}
+
+	// Save attachments to the message because view links expire after 24h
+	attachmentURLs := getAttachmentURLs(i.Interaction.Message.Embeds[0].Fields[6].Value)
+	files := []*discordgo.File{}
+	for _, attachmentURL := range attachmentURLs {
+		client := http.Client{}
+		resp, err := client.Get(attachmentURL)
+		if err != nil {
+			log.Warn("error getting attachment from message (%s), error: %w", i.Message.ID, err)
+			continue
+		}
+		defer resp.Body.Close()
+
+		filename := path.Base(resp.Request.URL.Path)
+		files = append(files, &discordgo.File{
+			Name:        filename,
+			ContentType: resp.Header.Get("content-type"),
+			Reader:      resp.Body,
+		})
+	}
+
+	// Add files to the attachment
+	ms.Files = files
 
 	// TODO: save event info
 	sc := bot.getServerConfig(i.GuildID)
