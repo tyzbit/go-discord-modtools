@@ -178,18 +178,40 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 	}
 
+	sc := bot.getServerConfig(i.GuildID)
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+			if bot.isAllowed(sc, i.Member) {
+				h(s, i)
+			} else {
+				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: bot.permissionsErrorDisplayedToTheUser(),
+				})
+			}
 		}
 	case discordgo.InteractionMessageComponent:
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
-			h(s, i)
+			if bot.isAllowed(sc, i.Member) {
+				h(s, i)
+			} else {
+				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: bot.permissionsErrorDisplayedToTheUser(),
+				})
+			}
 		}
 	case discordgo.InteractionModalSubmit:
 		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
-			h(s, i)
+			if bot.isAllowed(sc, i.Member) {
+				h(s, i)
+			} else {
+				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: bot.permissionsErrorDisplayedToTheUser(),
+				})
+			}
 		}
 	}
 }

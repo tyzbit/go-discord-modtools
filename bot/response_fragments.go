@@ -50,7 +50,14 @@ func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
 func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
 	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
+	var evidenceChannelName, moderatorRoleName string
+	if channel != nil {
+		evidenceChannelName = channel.Name
+	}
 	moderatorRole, _ := bot.DG.State.Role(sc.DiscordId, sc.ModeratorRoleSettingID)
+	if moderatorRole != nil {
+		moderatorRoleName = moderatorRole.Name
+	}
 	return &discordgo.InteractionResponseData{
 		Flags: discordgo.MessageFlagsEphemeral,
 		Components: []discordgo.MessageComponent{
@@ -75,7 +82,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder:  globals.EvidenceChannelSettingID + ": #" + channel.Name,
+						Placeholder:  globals.EvidenceChannelSettingID + ": #" + evidenceChannelName,
 						MenuType:     discordgo.ChannelSelectMenu,
 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
 						CustomID:     globals.EvidenceChannelSettingID,
@@ -85,7 +92,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: globals.ModeratorRoleSettingID + ": " + moderatorRole.Name,
+						Placeholder: globals.ModeratorRoleSettingID + ": " + moderatorRoleName,
 						MenuType:    discordgo.RoleSelectMenu,
 						CustomID:    globals.ModeratorRoleSettingID,
 					},
@@ -120,6 +127,19 @@ func (bot *ModeratorBot) generalErrorDisplayedToTheUser(reason string) *discordg
 				Title:       "There was an issue",
 				Description: reason,
 				Color:       globals.DarkRed,
+			},
+		},
+		Flags: discordgo.MessageFlagsEphemeral,
+	}
+}
+
+// Simple wrapper to display an embed to the user with an error (ephemeral)
+func (bot *ModeratorBot) permissionsErrorDisplayedToTheUser() *discordgo.InteractionResponseData {
+	return &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title: "You do not have permission to do that",
+				Color: globals.DarkRed,
 			},
 		},
 		Flags: discordgo.MessageFlagsEphemeral,
