@@ -12,17 +12,20 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 	user := bot.GetModeratedUser(i.GuildID, message.Author.ID)
 	var fields []*discordgo.MessageEmbedField
 	var messageType discordgo.InteractionResponseType
+	var authorID string
 	if len(message.Embeds) > 0 {
 		fields = message.Embeds[0].Fields
 		messageType = discordgo.InteractionResponseUpdateMessage
+		authorID = getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
 		for idx, field := range fields {
 			if field.Name == globals.CurrentReputation {
-				user := bot.GetModeratedUser(i.GuildID, getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value))
+				user := bot.GetModeratedUser(i.GuildID, authorID)
 				fields[idx].Value = fmt.Sprintf("%v", user.Reputation.Int64)
 			}
 		}
 	} else {
 		messageType = discordgo.InteractionResponseChannelMessageWithSource
+		authorID = message.Author.ID
 		fields = []*discordgo.MessageEmbedField{
 			{
 				Name:   "Original message timestamp",
@@ -82,7 +85,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Evidence report",
-					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", message.Author.ID),
+					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", authorID),
 					Color:       globals.Purple,
 					Fields:      fields,
 				},
