@@ -11,9 +11,18 @@ import (
 func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCreate, message *discordgo.Message) (resp *discordgo.InteractionResponse) {
 	user := bot.GetModeratedUser(i.GuildID, message.Author.ID)
 	var fields []*discordgo.MessageEmbedField
+	var messageType discordgo.InteractionResponseType
 	if len(message.Embeds) > 0 {
 		fields = message.Embeds[0].Fields
+		messageType = discordgo.InteractionResponseUpdateMessage
+		for idx, field := range fields {
+			if field.Name == globals.CurrentReputation {
+				user := bot.GetModeratedUser(i.GuildID, getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value))
+				fields[idx].Value = fmt.Sprintf("%v", user.Reputation.Int64)
+			}
+		}
 	} else {
+		messageType = discordgo.InteractionResponseChannelMessageWithSource
 		fields = []*discordgo.MessageEmbedField{
 			{
 				Name:   "Original message timestamp",
@@ -22,21 +31,23 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 			},
 			{
 				Name:   "Author of message",
-				Value:  fmt.Sprintf("<@%s> (Reputation: %v)", user.UserID, user.Reputation.Int64),
+				Value:  fmt.Sprintf("<@%s>", user.UserID),
+				Inline: true,
+			},
+			{
+				Name:   "Initial reputation",
+				Value:  fmt.Sprintf("%v", user.Reputation.Int64),
+				Inline: true,
+			},
+			{
+				Name:   globals.CurrentReputation,
+				Value:  fmt.Sprintf("%v", user.Reputation.Int64),
 				Inline: true,
 			},
 			{
 				Name:   "Link to original message",
-				Value:  fmt.Sprintf("https://discord.com/channels/%s/%s/%s", i.Interaction.GuildID, message.ChannelID, message.ID),
+				Value:  fmt.Sprintf(globals.MessageURLTemplate, i.Interaction.GuildID, message.ChannelID, message.ID),
 				Inline: true,
-			},
-			{
-				Name: "Collected by",
-				Value: fmt.Sprintf(`<@%s>
-									%s (<t:%v:R>)`,
-					i.Interaction.Member.User.ID,
-					time.Now().Format(time.RFC1123Z),
-					time.Now().Unix()),
 			},
 			{
 				Name:  globals.OriginalMessageContent,
@@ -45,7 +56,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 		}
 
 		if len(message.Attachments) > 0 {
-			attachmentList := ``
+			attachmentList := ""
 			for _, attachment := range message.Attachments {
 				attachmentList = attachmentList + fmt.Sprintf("%s: %v\n", attachment.Filename, attachment.URL)
 			}
@@ -54,14 +65,23 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 				Value: attachmentList,
 			})
 		}
+
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name: "Collected by",
+			Value: fmt.Sprintf(`<@%s>
+									%s (<t:%v:R>)`,
+				i.Interaction.Member.User.ID,
+				time.Now().Format(time.RFC1123Z),
+				time.Now().Unix()),
+		})
 	}
 
 	return &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Type: messageType,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title:       "Create evidence report",
+					Title:       "Evidence report",
 					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", message.Author.ID),
 					Color:       globals.Purple,
 					Fields:      fields,

@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"time"
 
@@ -115,4 +116,16 @@ func handlePlural(src, suf string, count int) string {
 		return src + suf
 	}
 	return src
+}
+
+func getUserIDFromDiscordReference(content string) string {
+	pattern := regexp.MustCompile(`<@(\d+)>`)
+
+	match := pattern.FindStringSubmatch(content)
+	if len(match) > 1 {
+		return match[1]
+	} else {
+		log.Warnf("unable to get user ID from reference")
+		return ""
+	}
 }

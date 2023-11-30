@@ -55,10 +55,15 @@ const (
 	DarkRed    = 9109504
 
 	// Text fragments
+	CurrentReputation      = "Current reputation"
 	ModerationSuccessful   = "Moderation action saved"
 	ModerationUnSuccessful = "There was a problem saving moderation action"
 	OriginalMessageContent = "Content of original message"
 	Attachments            = "Attachments"
+	Notes                  = "Notes"
+
+	// URLs
+	MessageURLTemplate = "https://discord.com/channels/%s/%s/%s"
 
 	// Shown to the user when `/help` is called
 	BotHelpText = `**Usage**

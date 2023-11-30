@@ -2,7 +2,7 @@ package bot
 
 import (
 	"database/sql"
-	"regexp"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -52,17 +52,7 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 // Updates a user reputation, given the source interaction and
 // whether to increase (TRUE) or decrease (FALSE)
 func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, increase bool) {
-	pattern := regexp.MustCompile(`<@(\d+)>`)
-
-	userID := ""
-	match := pattern.FindStringSubmatch(i.Interaction.Message.Embeds[0].Fields[1].Value)
-	if len(match) > 1 {
-		userID = match[1]
-	} else {
-		log.Warnf("unable to get user ID from message ID %s", i.Interaction.Message.ID)
-		return
-	}
-
+	userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
 	user := ModeratedUser{}
 	tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: userID}).First(&user)
 
@@ -146,8 +136,21 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 
 	// TODO: save event info
 	sc := bot.getServerConfig(i.GuildID)
-	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	message, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
 		log.Warn("Unable to send message %w", err)
 	}
+
+	_ = bot.DG.InteractionRespond(i.Interaction,
+		&discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: &discordgo.InteractionResponseData{
+				Content: "Submitted report: " +
+					fmt.Sprintf(globals.MessageURLTemplate,
+						i.Interaction.GuildID,
+						message.ChannelID,
+						message.ID),
+			},
+		},
+	)
 }
