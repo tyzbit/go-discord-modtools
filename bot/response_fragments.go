@@ -51,11 +51,15 @@ func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption
 func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
 	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
 	var evidenceChannelName, moderatorRoleName string
-	if channel != nil {
-		evidenceChannelName = channel.Name
+	if channel == nil {
+		evidenceChannelName = "not set"
+	} else {
+		evidenceChannelName = "#" + channel.Name
 	}
 	moderatorRole, _ := bot.DG.State.Role(sc.DiscordId, sc.ModeratorRoleSettingID)
-	if moderatorRole != nil {
+	if moderatorRole == nil {
+		moderatorRoleName = "not set"
+	} else {
 		moderatorRoleName = moderatorRole.Name
 	}
 	return &discordgo.InteractionResponseData{
@@ -82,7 +86,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder:  globals.EvidenceChannelSettingID + ": #" + evidenceChannelName,
+						Placeholder:  globals.EvidenceChannelSettingID + ": " + evidenceChannelName,
 						MenuType:     discordgo.ChannelSelectMenu,
 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
 						CustomID:     globals.EvidenceChannelSettingID,

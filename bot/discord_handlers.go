@@ -151,7 +151,24 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		globals.ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
-			bot.RespondToSettingsChoice(i, "moderator_role_setting_id", mcd.Values[0])
+			botGuildMember, err := bot.DG.GuildMember(i.GuildID, i.Interaction.Message.Author.ID)
+			if err != nil {
+				log.Warn("Unable to look up bot in list of guild members, err: %w", err)
+
+			} else {
+				for idx, role := range botGuildMember.Roles {
+					if mcd.Values[0] == role {
+						_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+							Type: discordgo.InteractionResponseChannelMessageWithSource,
+							Data: bot.generalErrorDisplayedToTheUser("Select a different role, this bot role cannot be used"),
+						})
+						break
+					}
+					if idx == len(botGuildMember.Roles)-1 {
+						bot.RespondToSettingsChoice(i, "moderator_role_setting_id", mcd.Values[0])
+					}
+				}
+			}
 		},
 		globals.IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, true)
