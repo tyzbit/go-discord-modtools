@@ -40,10 +40,14 @@ const (
 	// Moderation buttons
 	IncreaseUserReputation = "⬆️ Reputation"
 	DecreaseUserReputation = "⬇️ Reputation"
+	TakeEvidenceNotes      = "Add notes"
+	SubmitReport           = "Submit report"
 
 	// Modals
+	SaveEvidenceNotes = "Save evidence notes"
 
 	// Modal options
+	EvidenceNotes = "Evidence notes"
 
 	// Colors
 	FrenchGray = 13424349
@@ -53,6 +57,8 @@ const (
 	// Text fragments
 	ModerationSuccessful   = "Moderation action saved"
 	ModerationUnSuccessful = "There was a problem saving moderation action"
+	OriginalMessageContent = "Content of original message"
+	Attachments            = "Attachments"
 
 	// Shown to the user when `/help` is called
 	BotHelpText = `**Usage**

@@ -59,7 +59,7 @@ type ModeratedUser struct {
 	UserID           string
 	UserName         string
 	ModerationEvents []ModerationEvent `gorm:"foreignKey:UUID"`
-	Reputation       int64
+	Reputation       sql.NullInt64     `gorm:"default:1"`
 }
 
 // Handlers

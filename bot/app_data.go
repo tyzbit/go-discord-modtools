@@ -1,9 +1,11 @@
 package bot
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 // Returns a ModeratedUser record from the DB using server and user ID
@@ -23,9 +25,12 @@ func (bot *ModeratorBot) GetModeratedUser(serverID string, userID string) (moder
 			UserID:     userID,
 			ServerID:   serverID,
 			ServerName: guild.Name,
-			Reputation: 0,
+			Reputation: sql.NullInt64{Int64: 1, Valid: true},
 		}
-		bot.UpdateModeratedUser(moderatedUser)
+		err := bot.UpdateModeratedUser(moderatedUser)
+		if err != nil {
+			log.Warn("error updating moderated user, err: %w", err)
+		}
 	}
 	return moderatedUser
 }

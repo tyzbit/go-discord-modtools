@@ -1,10 +1,12 @@
 package bot
 
 import (
+	"database/sql"
 	"regexp"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // Updates a server setting according to the
@@ -72,13 +74,80 @@ func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, in
 	}
 
 	if increase {
-		user.Reputation = user.Reputation + 1
+		user.Reputation = sql.NullInt64{
+			Valid: true,
+			Int64: user.Reputation.Int64 + 1,
+		}
 	} else {
-		user.Reputation = user.Reputation - 1
+		user.Reputation = sql.NullInt64{
+			Valid: true,
+			Int64: user.Reputation.Int64 - 1,
+		}
 	}
 
 	err := bot.UpdateModeratedUser(user)
 	if err != nil {
 		log.Warn("unable to update user moderation record, err: %w", err)
+	}
+}
+
+// Called from the App menu, this displays an embed for the moderator to
+// choose to change the reputation of the posting user
+// and (PLANNED) produces output in the evidence channel with information about
+// the message, user and moderation actions taken
+func (bot *ModeratorBot) DocumentBehaviorFromButtonContext(i *discordgo.InteractionCreate) {
+	message := *i.Interaction.Message
+	// This check might be redundant - we may never get here without message
+	// ApplicationCommandData (unless we call this mistakenly from another context)
+	if message.ID == "" {
+		reason := "No message was provided"
+		log.Warn(reason)
+		_ = bot.DG.InteractionRespond(i.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: bot.generalErrorDisplayedToTheUser(reason),
+			},
+		)
+		return
+	}
+
+	_ = bot.DG.InteractionRespond(i.Interaction,
+		bot.DocumentBehaviorFromMessage(i, &message))
+}
+
+func (bot *ModeratorBot) TakeEvidenceNotes(i *discordgo.InteractionCreate) {
+	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.SaveEvidenceNotes,
+			Title:    "Add notes to this report",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:    globals.EvidenceNotes,
+						Label:       "Notes",
+						Style:       discordgo.TextInputParagraph,
+						Placeholder: "Add notes such as reasoning or context",
+						Required:    true,
+						MinLength:   3,
+						MaxLength:   500,
+					},
+				},
+			}},
+		},
+	})
+}
+
+// Submits evidence to the configured channel (including notes)
+func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
+	ms := discordgo.MessageSend{
+		Embeds: i.Interaction.Message.Embeds,
+	}
+
+	// TODO: save event info
+	sc := bot.getServerConfig(i.GuildID)
+	_, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	if err != nil {
+		log.Warn("Unable to send message %w", err)
 	}
 }

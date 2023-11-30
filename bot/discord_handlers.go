@@ -152,22 +152,27 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		globals.IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, true)
 			// TODO: edit the original message we posted instead of posting a new one
-			bot.GetUserInfoFromMessageContext(i)
+			bot.DocumentBehaviorFromButtonContext(i)
 		},
 		globals.DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, false)
 			// TODO: edit the original message we posted instead of posting a new one
-			bot.GetUserInfoFromMessageContext(i)
+			bot.DocumentBehaviorFromButtonContext(i)
+		},
+		globals.TakeEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.TakeEvidenceNotes(i)
+		},
+		globals.SubmitReport: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.SubmitReport(i)
 		},
 	}
 
-	// We don't use modals right now, but we might in the future
 	// TODO: cleanup when bot features are more stable
-	// modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-	// 	globals.DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// 		bot.DocumentBehaviorFromModalSubmission(i)
-	// 	},
-	// }
+	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		globals.SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.SaveEvidenceNotes(i)
+		},
+	}
 
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
@@ -178,9 +183,9 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
 			h(s, i)
 		}
-		// case discordgo.InteractionModalSubmit:
-		// 	if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
-		// 		h(s, i)
-		// 	}
+	case discordgo.InteractionModalSubmit:
+		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
+			h(s, i)
+		}
 	}
 }

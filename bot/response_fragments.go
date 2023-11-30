@@ -98,7 +98,7 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 	return &discordgo.InteractionResponseData{
 		CustomID: globals.GetUserInfoFromUserContext,
 		Flags:    discordgo.MessageFlagsEphemeral,
-		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
+		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation.Int64),
 	}
 }
 
