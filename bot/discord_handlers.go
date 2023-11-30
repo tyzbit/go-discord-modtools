@@ -149,6 +149,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			mcd := i.MessageComponentData()
 			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
 		},
+		globals.ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.RespondToSettingsChoice(i, "moderator_role_setting_id", mcd.Values[0])
+		},
 		globals.IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, true)
 			// TODO: edit the original message we posted instead of posting a new one

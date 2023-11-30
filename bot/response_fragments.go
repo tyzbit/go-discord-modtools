@@ -50,6 +50,7 @@ func highReputationValues(sc ServerConfig) (options []discordgo.SelectMenuOption
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
 func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
 	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
+	moderatorRole, _ := bot.DG.State.Role(sc.DiscordId, sc.ModeratorRoleSettingID)
 	return &discordgo.InteractionResponseData{
 		Flags: discordgo.MessageFlagsEphemeral,
 		Components: []discordgo.MessageComponent{
@@ -78,6 +79,15 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 						MenuType:     discordgo.ChannelSelectMenu,
 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
 						CustomID:     globals.EvidenceChannelSettingID,
+					},
+				},
+			},
+			discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.SelectMenu{
+						Placeholder: globals.ModeratorRoleSettingID + ": " + moderatorRole.Name,
+						MenuType:    discordgo.RoleSelectMenu,
+						CustomID:    globals.ModeratorRoleSettingID,
 					},
 				},
 			},

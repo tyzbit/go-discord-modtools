@@ -36,6 +36,7 @@ const (
 	NotifyWhenReputationIsBelowSetting = "Low rep notification"
 	NotifyWhenReputationIsAboveSetting = "High rep notification"
 	EvidenceChannelSettingID           = "Evidence channel"
+	ModeratorRoleSettingID             = "Moderator role"
 
 	// Moderation buttons
 	IncreaseUserReputation = "⬆️ Reputation"

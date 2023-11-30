@@ -100,6 +100,7 @@ type ServerConfig struct {
 	NotifyWhenReputationIsBelowSetting sql.NullInt32 `pretty:"Low reputation notification threshold" gorm:"default:-5"`
 	NotifyWhenReputationIsAboveSetting sql.NullInt32 `pretty:"High reputation notification threshold" gorm:"default:3"`
 	EvidenceChannelSettingID           string        `pretty:"Channel to document evidence in"`
+	ModeratorRoleSettingID             string        `pretty:"Role for moderators"`
 	UpdatedAt                          time.Time
 }
 
