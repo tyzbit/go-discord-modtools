@@ -61,7 +61,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 		if len(message.Attachments) > 0 {
 			attachmentList := ""
 			for _, attachment := range message.Attachments {
-				attachmentList = attachmentList + fmt.Sprintf("[%s](%v)\n", attachment.Filename, attachment.URL)
+				attachmentList = attachmentList + fmt.Sprintf("%s\n", attachment.Filename)
 			}
 			fields = append(fields, &discordgo.MessageEmbedField{
 				Name:  fmt.Sprintf(globals.Attachments+" (%v)", len(message.Attachments)),
