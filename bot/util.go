@@ -134,9 +134,9 @@ func getAttachmentURLs(content string) (urls []string) {
 	pattern := regexp.MustCompile(`\(([^\)]+)\)`)
 
 	matches := pattern.FindAllStringSubmatch(content, -1)
-	if len(matches) > 1 {
+	if len(matches) > 0 {
 		for _, match := range matches {
-			if len(match) > 1 {
+			if len(match) > 0 {
 				urls = append(urls, match[1])
 			}
 		}

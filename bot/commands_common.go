@@ -38,7 +38,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 				Inline: true,
 			},
 			{
-				Name:   "Initial reputation",
+				Name:   globals.PreviousReputation,
 				Value:  fmt.Sprintf("%v", user.Reputation.Int64),
 				Inline: true,
 			},

@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strconv"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
@@ -143,14 +145,14 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 		client := http.Client{}
 		resp, err := client.Get(attachmentURL)
 		if err != nil {
-			log.Warn("error getting attachment from message (%s), error: %w", i.Message.ID, err)
+			log.Warnf("error getting attachment from message (%s), error: %s", i.Message.ID, err)
 			continue
 		}
 		defer resp.Body.Close()
 
 		filename := path.Base(resp.Request.URL.Path)
 		files = append(files, &discordgo.File{
-			Name:        filename,
+			Name:        globals.Spoiler + filename,
 			ContentType: resp.Header.Get("content-type"),
 			Reader:      resp.Body,
 		})
@@ -163,9 +165,63 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	sc := bot.getServerConfig(i.GuildID)
 	message, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
-		log.Warn("Unable to send message %w", err)
+		log.Warn("unable to send message %w", err)
+	} else {
+		guild, err := bot.DG.Guild(i.GuildID)
+		if err != nil {
+			log.Warnf("unable to look up guild (%s), err: %s", i.GuildID, err)
+			goto respond
+		}
+		// Save attachments to the message because view links expire after 24h
+		userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
+		user, err := bot.DG.User(userID)
+		if err != nil {
+			log.Warnf("unable to look up user (%s, err: %v)", userID, err)
+			goto respond
+		}
+
+		var notes string
+		var previousReputation, currentReputation sql.NullInt64
+		// If notes exist, update. If not, add new
+		for _, field := range i.Interaction.Message.Embeds[0].Fields {
+			if field.Name == globals.Notes {
+				notes = globals.Notes
+			}
+			if field.Name == globals.CurrentReputation {
+				value, _ := strconv.Atoi(field.Value)
+				currentReputation = sql.NullInt64{
+					Valid: true,
+					Int64: int64(value),
+				}
+			}
+			if field.Name == globals.PreviousReputation {
+				value, _ := strconv.Atoi(field.Value)
+				previousReputation = sql.NullInt64{
+					Valid: true,
+					Int64: int64(value),
+				}
+			}
+		}
+
+		bot.createModerationEvent(ModerationEvent{
+			UUID:               uuid.New().String(),
+			ServerID:           i.GuildID,
+			ServerName:         guild.Name,
+			UserID:             userID,
+			UserName:           user.Username,
+			Notes:              notes,
+			PreviousReputation: previousReputation,
+			CurrentReputation:  currentReputation,
+			ModeratorID:        i.Interaction.Member.User.ID,
+			ModeratorName:      i.Interaction.Member.User.Username,
+			ReportURL: fmt.Sprintf(globals.MessageURLTemplate,
+				i.Interaction.GuildID,
+				message.ChannelID,
+				message.ID),
+		})
 	}
 
+respond:
 	_ = bot.DG.InteractionRespond(i.Interaction,
 		&discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,

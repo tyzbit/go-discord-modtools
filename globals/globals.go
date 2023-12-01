@@ -33,10 +33,8 @@ const (
 
 	// Buttons
 	// Settings (the names affect the column names in the DB)
-	NotifyWhenReputationIsBelowSetting = "Low rep notification"
-	NotifyWhenReputationIsAboveSetting = "High rep notification"
-	EvidenceChannelSettingID           = "Evidence channel"
-	ModeratorRoleSettingID             = "Moderator role"
+	EvidenceChannelSettingID = "Evidence channel"
+	ModeratorRoleSettingID   = "Moderator role"
 
 	// Moderation buttons
 	IncreaseUserReputation = "⬆️ Reputation"
@@ -57,11 +55,14 @@ const (
 
 	// Text fragments
 	CurrentReputation      = "Current reputation"
+	PreviousReputation     = "Previous reputation"
 	ModerationSuccessful   = "Moderation action saved"
 	ModerationUnSuccessful = "There was a problem saving moderation action"
 	OriginalMessageContent = "Content of original message"
 	Attachments            = "Attachments"
 	Notes                  = "Notes"
+	// If images have this in front of their name, they're spoilered
+	Spoiler = "SPOILER_"
 
 	// URLs
 	MessageURLTemplate = "https://discord.com/channels/%s/%s/%s"

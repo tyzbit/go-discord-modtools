@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -15,13 +14,11 @@ const moderaterRepoUrl string = "https://github.com/tyzbit/go-discord-modtools"
 func (bot *ModeratorBot) getServerConfig(guildId string) ServerConfig {
 	// Default server config in case guild lookup fails
 	sc := ServerConfig{
-		DiscordId:                          "",
-		Name:                               "",
-		UpdatedAt:                          time.Now(),
-		NotifyWhenReputationIsBelowSetting: sql.NullInt32{Int32: -5, Valid: true},
-		NotifyWhenReputationIsAboveSetting: sql.NullInt32{Int32: 3, Valid: true},
-		EvidenceChannelSettingID:           "",
-		ModeratorRoleSettingID:             "",
+		DiscordId:                "",
+		Name:                     "",
+		UpdatedAt:                time.Now(),
+		EvidenceChannelSettingID: "",
+		ModeratorRoleSettingID:   "",
 	}
 	// If this fails, we'll return a default server
 	// config, which is expected

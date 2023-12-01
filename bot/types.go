@@ -9,17 +9,6 @@ import (
 )
 
 // Events
-// A MessageEvent is created when we receive a message
-type MessageEvent struct {
-	CreatedAt      time.Time
-	UUID           string `gorm:"primaryKey" gorm:"uniqueIndex"`
-	AuthorId       string `gorm:"index"`
-	AuthorUsername string
-	MessageId      string
-	ChannelId      string
-	ServerID       string `gorm:"index"`
-	ServerName     string
-}
 
 // A InteractionEvent when a user interacts with an Embed
 type InteractionEvent struct {
@@ -36,17 +25,18 @@ type InteractionEvent struct {
 
 // This is the representation of a moderation action
 type ModerationEvent struct {
-	CreatedAt       time.Time
-	UUID            string `gorm:"primaryKey;uniqueIndex"`
-	ServerID        string `gorm:"index"`
-	ServerName      string
-	UserID          string
-	UserName        string
-	MessageContents string
-	Action          string
-	Reason          string
-	ModeratorID     string
-	ModeratorName   string
+	CreatedAt          time.Time
+	UUID               string `gorm:"primaryKey;uniqueIndex"`
+	ServerID           string `gorm:"index"`
+	ServerName         string
+	UserID             string
+	UserName           string
+	Notes              string
+	PreviousReputation sql.NullInt64
+	CurrentReputation  sql.NullInt64
+	ModeratorID        string
+	ModeratorName      string
+	ReportURL          string
 }
 
 // A ModeratedUser represents a specific user/server combination
@@ -95,13 +85,11 @@ type ServerRegistration struct {
 
 // Configuration for each server, changed with `/settings`
 type ServerConfig struct {
-	DiscordId                          string        `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
-	Name                               string        `pretty:"Server Name" gorm:"default:default"`
-	NotifyWhenReputationIsBelowSetting sql.NullInt32 `pretty:"Low reputation notification threshold" gorm:"default:-5"`
-	NotifyWhenReputationIsAboveSetting sql.NullInt32 `pretty:"High reputation notification threshold" gorm:"default:3"`
-	EvidenceChannelSettingID           string        `pretty:"Channel to document evidence in"`
-	ModeratorRoleSettingID             string        `pretty:"Role for moderators"`
-	UpdatedAt                          time.Time
+	DiscordId                string `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
+	Name                     string `pretty:"Server Name" gorm:"default:default"`
+	EvidenceChannelSettingID string `pretty:"Channel to document evidence in"`
+	ModeratorRoleSettingID   string `pretty:"Role for moderators"`
+	UpdatedAt                time.Time
 }
 
 // Stats

@@ -137,14 +137,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 
 	buttonHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		// Settings buttons/choices
-		globals.NotifyWhenReputationIsBelowSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			mcd := i.MessageComponentData()
-			bot.RespondToSettingsChoice(i, "notify_when_reputation_is_below_setting", mcd.Values[0])
-		},
-		globals.NotifyWhenReputationIsAboveSetting: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			mcd := i.MessageComponentData()
-			bot.RespondToSettingsChoice(i, "notify_when_reputation_is_above_setting", mcd.Values[0])
-		},
 		globals.EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
 			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
