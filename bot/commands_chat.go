@@ -160,7 +160,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
 	// TODO: Add more user information
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			CustomID: globals.GetUserInfoFromUserContext,
@@ -168,4 +168,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation.Int64),
 		},
 	})
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }

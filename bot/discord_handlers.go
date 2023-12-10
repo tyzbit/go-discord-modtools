@@ -150,10 +150,13 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			} else {
 				for idx, role := range botGuildMember.Roles {
 					if mcd.Values[0] == role {
-						_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: bot.generalErrorDisplayedToTheUser("Select a different role, this bot role cannot be used"),
 						})
+						if err != nil {
+							log.Warn("error responding to interaction: %w", err)
+						}
 						break
 					}
 					if idx == len(botGuildMember.Roles)-1 {
@@ -194,10 +197,13 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if bot.isAllowed(sc, i.Member) {
 				h(s, i)
 			} else {
-				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
+				if err != nil {
+					log.Warn("error responding to interaction: %w", err)
+				}
 			}
 		}
 	case discordgo.InteractionMessageComponent:
@@ -205,10 +211,13 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if bot.isAllowed(sc, i.Member) {
 				h(s, i)
 			} else {
-				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
+				if err != nil {
+					log.Warn("error responding to interaction: %w", err)
+				}
 			}
 		}
 	case discordgo.InteractionModalSubmit:
@@ -216,10 +225,13 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			if bot.isAllowed(sc, i.Member) {
 				h(s, i)
 			} else {
-				_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
+				if err != nil {
+					log.Warn("error responding to interaction: %w", err)
+				}
 			}
 		}
 	}

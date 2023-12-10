@@ -96,21 +96,27 @@ func (bot *ModeratorBot) DocumentBehaviorFromButtonContext(i *discordgo.Interact
 	if message.ID == "" {
 		reason := "No message was provided"
 		log.Warn(reason)
-		_ = bot.DG.InteractionRespond(i.Interaction,
+		err := bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: bot.generalErrorDisplayedToTheUser(reason),
 			},
 		)
+		if err != nil {
+			log.Warn("error responding to interaction: %w", err)
+		}
 		return
 	}
 
-	_ = bot.DG.InteractionRespond(i.Interaction,
+	err := bot.DG.InteractionRespond(i.Interaction,
 		bot.DocumentBehaviorFromMessage(i, &message))
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }
 
 func (bot *ModeratorBot) TakeEvidenceNotes(i *discordgo.InteractionCreate) {
-	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
 			CustomID: globals.SaveEvidenceNotes,
@@ -130,6 +136,9 @@ func (bot *ModeratorBot) TakeEvidenceNotes(i *discordgo.InteractionCreate) {
 			}},
 		},
 	})
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }
 
 // Submits evidence to the configured channel (including notes)
@@ -222,7 +231,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	}
 
 respond:
-	_ = bot.DG.InteractionRespond(i.Interaction,
+	err = bot.DG.InteractionRespond(i.Interaction,
 		&discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
 			Data: &discordgo.InteractionResponseData{
@@ -234,4 +243,7 @@ respond:
 			},
 		},
 	)
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }

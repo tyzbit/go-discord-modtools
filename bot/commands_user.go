@@ -14,14 +14,14 @@ func (bot *ModeratorBot) DocumentBehaviorFromUserContext(i *discordgo.Interactio
 	// if i.Interaction.Member.User == nil {
 	// 	reason := "No user was provided"
 	// 	log.Warn(reason)
-	// 	_ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	// 	err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 	// 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 	// 		Data: bot.generalErrorDisplayedToTheUser(reason)})
 	// 	return
 	// }
 
 	// data := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
-	// _ = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	// err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 	// 	Type: discordgo.InteractionResponseChannelMessageWithSource,
 	// 	Data: &discordgo.InteractionResponseData{
 	// 		Embeds: []*discordgo.MessageEmbed{

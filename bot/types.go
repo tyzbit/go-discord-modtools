@@ -13,7 +13,7 @@ import (
 // A InteractionEvent when a user interacts with an Embed
 type InteractionEvent struct {
 	CreatedAt        time.Time
-	UUID             string `gorm:"primaryKey" gorm:"uniqueIndex"`
+	UUID             string `gorm:"primaryKey;uniqueIndex"`
 	UserID           string `gorm:"index"`
 	Username         string
 	InteractionId    string

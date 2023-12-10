@@ -17,17 +17,23 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 	if message.ID == "" {
 		reason := "No message was provided"
 		log.Warn(reason)
-		_ = bot.DG.InteractionRespond(i.Interaction,
+		err := bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: bot.generalErrorDisplayedToTheUser(reason),
 			},
 		)
+		if err != nil {
+			log.Warn("error responding to interaction: %w", err)
+		}
 		return
 	}
 
-	_ = bot.DG.InteractionRespond(i.Interaction,
+	err := bot.DG.InteractionRespond(i.Interaction,
 		bot.DocumentBehaviorFromMessage(i, &message))
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }
 
 // Produces user info such as reputation and (PLANNED) stats

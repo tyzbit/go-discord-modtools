@@ -2,6 +2,7 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
@@ -27,6 +28,9 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 		}
 	}
 
-	_ = bot.DG.InteractionRespond(i.Interaction,
+	err := bot.DG.InteractionRespond(i.Interaction,
 		bot.DocumentBehaviorFromMessage(i, i.Interaction.Message))
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }
