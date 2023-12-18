@@ -8,7 +8,7 @@ import (
 	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
-func (bot *ModeratorBot) UpdateCommands() {
+func (bot *ModeratorBot) UpdateCommands() (err error) {
 	var commandsToCreate, commandsToEdit, commandsToDelete []*discordgo.ApplicationCommand
 
 	// Get already-registered guild-specific commands from the database
@@ -19,6 +19,7 @@ func (bot *ModeratorBot) UpdateCommands() {
 	for _, id := range guildIds {
 		guildCommands, err := bot.DG.ApplicationCommands(bot.DG.State.User.ID, id)
 		if err != nil {
+			err = fmt.Errorf(", err: %w", err)
 			log.Warnf("unable to look up server-specific commands for server %s", id)
 			break
 		}
@@ -97,6 +98,7 @@ func (bot *ModeratorBot) UpdateCommands() {
 			command.GuildID,
 			command.ID)
 		if err != nil {
+			err = fmt.Errorf(", err: %w", err)
 			log.Errorf("cannot remove command %s: %v", command.Name, err)
 		}
 	}
@@ -113,6 +115,7 @@ func (bot *ModeratorBot) UpdateCommands() {
 			command.ID,
 			command)
 		if err != nil {
+			err = fmt.Errorf(", err: %w", err)
 			log.Errorf("cannot update command '/%s': %v", command.Name, err)
 		} else {
 			globals.RegisteredCommands = append(globals.RegisteredCommands, editedCmd)
@@ -130,9 +133,11 @@ func (bot *ModeratorBot) UpdateCommands() {
 			command.GuildID,
 			command)
 		if err != nil {
-			log.Errorf("cannot create command %s: %v", command.Name, err)
+			err = fmt.Errorf(", err: %w", err)
+			log.Errorf("cannot create command '/%s': %v", command.Name, err)
 		} else {
 			globals.RegisteredCommands = append(globals.RegisteredCommands, newCmd)
 		}
 	}
+	return err
 }

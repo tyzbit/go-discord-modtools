@@ -52,6 +52,7 @@ const (
 	CustomSlashName               = "Name for this custom slash command"
 	CustomSlashCommandDescription = "Description for this custom slash command"
 	CustomSlashCommandContent     = "Message to paste if this command is used"
+	CustomCommandIdentifier       = "Custom command: "
 
 	// Colors
 	FrenchGray = 13424349
@@ -59,7 +60,8 @@ const (
 	DarkRed    = 9109504
 
 	// Constants
-	MaxMessageContentLength = 2000 // https://discord.com/developers/docs/resources/channel#create-message
+	MaxMessageContentLength     = 2000 // https://discord.com/developers/docs/resources/channel#create-message
+	MaxDescriptionContentLength = 100  // https://discord.com/developers/docs/interactions/application-commands#application-command-object
 
 	// Text fragments
 	CurrentReputation      = "Current reputation"

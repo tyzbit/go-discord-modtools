@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -40,6 +41,7 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 // Takes user-submitted command and adds it to the server config and registers
 // it in the guild
 func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) {
+	guild, _ := bot.DG.Guild(i.GuildID)
 	name := i.Interaction.ModalSubmitData().
 		Components[0].(*discordgo.ActionsRow).
 		Components[0].(*discordgo.TextInput).
@@ -56,40 +58,61 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 		Value
 
 	customCommand := CustomCommand{
-		DiscordId:   i.GuildID,
-		Name:        name,
-		Description: description,
+		DiscordId:   guild.ID,
+		Name:        strings.ToLower(name),
+		Description: globals.CustomCommandIdentifier + description,
 		Content:     content,
 	}
 
-	sc := bot.getServerConfig(i.GuildID)
-	sc.CustomCommands = append(sc.CustomCommands, customCommand)
-	tx := bot.DB.Save(&sc)
-	if tx.RowsAffected != 1 {
-		log.Warn("something other than one row affected when updating custom slash command")
+	ird := discordgo.InteractionResponseData{
+		Flags: discordgo.MessageFlagsEphemeral,
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title: fmt.Sprintf("Custom command /%s created", customCommand.Name),
+				Description: fmt.Sprintf(`Description:
+				%s
+				
+				Content:
+					%s`, description, customCommand.Content),
+				Color: globals.Purple,
+			},
+		},
 	}
 
-	bot.RegisterCustomCommandHandler(sc)
+	if len(customCommand.Description) > globals.MaxDescriptionContentLength {
+		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", globals.MaxDescriptionContentLength-len(globals.CustomCommandIdentifier)))
+	} else if len(customCommand.Content) > globals.MaxMessageContentLength {
+		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", globals.MaxMessageContentLength))
+	} else if strings.Contains(customCommand.Name, " ") {
+		ird = *bot.generalErrorDisplayedToTheUser("Command names may not have spaces")
+	} else {
+		sc := bot.getServerConfig(guild.ID)
+		sc.CustomCommands = append(sc.CustomCommands, customCommand)
+		tx := bot.DB.Save(&sc)
+		if tx.RowsAffected != 1 {
+			log.Warn("something other than one row affected when updating custom slash command")
+		}
 
-	// Update registered commands
-	bot.UpdateCommands()
+		sc = bot.getServerConfig(guild.ID)
+
+		bot.RegisterCustomCommandHandler(sc)
+		info := fmt.Sprintf(" from guild %s(%s)", guild.Name, guild.ID)
+		log.Debugf("creating command '/%s'", name+info)
+		_, err := bot.DG.ApplicationCommandCreate(bot.DG.State.User.ID,
+			guild.ID,
+			&discordgo.ApplicationCommand{
+				Name:        name,
+				Description: description,
+				GuildID:     guild.ID,
+			})
+		if err != nil {
+			ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Unable to create command, err: %v", err))
+		}
+	}
 
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: fmt.Sprintf("Custom command /%s created", customCommand.Name),
-					Description: fmt.Sprintf(`Description:
-					%s
-					
-					Content:
-						%s`, customCommand.Description, customCommand.Content),
-					Color: globals.Purple,
-				},
-			},
-		},
+		Data: &ird,
 	})
 	if err != nil {
 		log.Errorf("error responding to custom slash command creation, err: %v", err)
