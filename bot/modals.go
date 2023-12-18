@@ -81,7 +81,7 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 	if len(customCommand.Description) > MaxDescriptionContentLength {
 		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", MaxDescriptionContentLength-len(CustomCommandIdentifier)))
 	} else if len(customCommand.Content) > MaxMessageContentLength {
-		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", MaxMessageContentLength))
+		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the message length to %v", MaxMessageContentLength))
 	} else if strings.Contains(customCommand.Name, " ") {
 		ird = *bot.generalErrorDisplayedToTheUser("Command names may not have spaces")
 	} else {
@@ -100,8 +100,8 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 		_, err := bot.DG.ApplicationCommandCreate(bot.DG.State.User.ID,
 			guild.ID,
 			&discordgo.ApplicationCommand{
-				Name:        name,
-				Description: description,
+				Name:        customCommand.Name,
+				Description: customCommand.Description,
 				GuildID:     guild.ID,
 			})
 		if err != nil {
