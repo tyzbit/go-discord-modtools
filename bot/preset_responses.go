@@ -5,7 +5,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	globals "github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
@@ -29,19 +28,19 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder:  globals.EvidenceChannelSettingID + ": " + evidenceChannelName,
+						Placeholder:  EvidenceChannelSettingID + ": " + evidenceChannelName,
 						MenuType:     discordgo.ChannelSelectMenu,
 						ChannelTypes: []discordgo.ChannelType{discordgo.ChannelTypeGuildText},
-						CustomID:     globals.EvidenceChannelSettingID,
+						CustomID:     EvidenceChannelSettingID,
 					},
 				},
 			},
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.SelectMenu{
-						Placeholder: globals.ModeratorRoleSettingID + ": " + moderatorRoleName,
+						Placeholder: ModeratorRoleSettingID + ": " + moderatorRoleName,
 						MenuType:    discordgo.RoleSelectMenu,
-						CustomID:    globals.ModeratorRoleSettingID,
+						CustomID:    ModeratorRoleSettingID,
 					},
 				},
 			},
@@ -60,7 +59,7 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
 
 	return &discordgo.InteractionResponseData{
-		CustomID: globals.GetUserInfoFromUserContext,
+		CustomID: GetUserInfoFromUserContext,
 		Flags:    discordgo.MessageFlagsEphemeral,
 		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation.Int64),
 	}
@@ -73,7 +72,7 @@ func (bot *ModeratorBot) generalErrorDisplayedToTheUser(reason string) *discordg
 			{
 				Title:       "There was an issue",
 				Description: reason,
-				Color:       globals.DarkRed,
+				Color:       DarkRed,
 			},
 		},
 		Flags: discordgo.MessageFlagsEphemeral,
@@ -86,7 +85,7 @@ func (bot *ModeratorBot) permissionsErrorDisplayedToTheUser() *discordgo.Interac
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title: "You do not have permission to do that",
-				Color: globals.DarkRed,
+				Color: DarkRed,
 			},
 		},
 		Flags: discordgo.MessageFlagsEphemeral,
@@ -99,8 +98,8 @@ func (bot *ModeratorBot) settingsErrorDisplayedToTheUser() *discordgo.Interactio
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Title: "Please configure the bot first",
-				Color: globals.DarkRed,
-				Description: "Please use /" + globals.Settings + " to set " +
+				Color: DarkRed,
+				Description: "Please use /" + Settings + " to set " +
 					"the mod role and evidence channel",
 			},
 		},

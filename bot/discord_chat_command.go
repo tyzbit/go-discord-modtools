@@ -5,7 +5,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // This produces the help text seen from the chat commant `/help`
@@ -17,14 +16,14 @@ func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionC
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Moder8or Bot Help",
-					Description: globals.BotHelpText,
-					Color:       globals.Purple,
+					Description: BotHelpText,
+					Color:       Purple,
 				},
 			},
 		},
 	})
 	if err != nil {
-		log.Errorf("error responding to help command "+globals.Help+", err: %v", err)
+		log.Errorf("error responding to help command "+Help+", err: %v", err)
 	}
 }
 
@@ -74,18 +73,18 @@ func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.Interaction
 					Embeds: []*discordgo.MessageEmbed{
 						{
 							Title: "Stats are not available in DMs",
-							Color: globals.Purple,
+							Color: Purple,
 						},
 					},
 				},
 			})
 			if err != nil {
-				log.Errorf("error responding to slash command "+globals.Stats+", err: %v", err)
+				log.Errorf("error responding to slash command "+Stats+", err: %v", err)
 			}
 			return
 		}
 		stats = bot.getGlobalStats()
-		logMessage = "sending global " + globals.Stats + " response to " + i.User.Username + "(" + i.User.ID + ")"
+		logMessage = "sending global " + Stats + " response to " + i.User.Username + "(" + i.User.ID + ")"
 	}
 
 	log.Info(logMessage)
@@ -98,13 +97,13 @@ func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.Interaction
 				{
 					Title:  "🏛️ Moder8or Bot Stats",
 					Fields: structToPrettyDiscordFields(stats, directMessage),
-					Color:  globals.Purple,
+					Color:  Purple,
 				},
 			},
 		},
 	})
 	if err != nil {
-		log.Errorf("error responding to slash command "+globals.Stats+", err: %v", err)
+		log.Errorf("error responding to slash command "+Stats+", err: %v", err)
 	}
 }
 
@@ -119,7 +118,7 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 			Data: bot.generalErrorDisplayedToTheUser(reason),
 		})
 		if err != nil {
-			log.Errorf("error responding to settings DM"+globals.Settings+", err: %v", err)
+			log.Errorf("error responding to settings DM"+Settings+", err: %v", err)
 		}
 		return
 	} else {
@@ -136,7 +135,7 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 		})
 
 		if err != nil {
-			log.Errorf("error responding to slash command "+globals.Settings+", err: %v", err)
+			log.Errorf("error responding to slash command "+Settings+", err: %v", err)
 		}
 	}
 }
@@ -154,7 +153,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.GetUserInfoFromUserContext,
+			CustomID: GetUserInfoFromUserContext,
 			Flags:    discordgo.MessageFlagsEphemeral,
 			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation.Int64),
 		},
@@ -169,13 +168,13 @@ func (bot *ModeratorBot) ConfigureCustomSlashCommandFromChatCommandContext(i *di
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.SaveCustomSlashCommand,
+			CustomID: SaveCustomSlashCommand,
 			Title:    "Create new simple custom slash command",
 			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.TextInput{
-						CustomID:  globals.CustomSlashName,
-						Label:     globals.CustomSlashName,
+						CustomID:  CustomSlashName,
+						Label:     CustomSlashName,
 						Style:     discordgo.TextInputShort,
 						Required:  true,
 						MinLength: 1,
@@ -186,8 +185,8 @@ func (bot *ModeratorBot) ConfigureCustomSlashCommandFromChatCommandContext(i *di
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						discordgo.TextInput{
-							CustomID:  globals.CustomSlashCommandDescription,
-							Label:     globals.CustomSlashCommandDescription,
+							CustomID:  CustomSlashCommandDescription,
+							Label:     CustomSlashCommandDescription,
 							Style:     discordgo.TextInputShort,
 							Required:  true,
 							MinLength: 1,
@@ -198,13 +197,13 @@ func (bot *ModeratorBot) ConfigureCustomSlashCommandFromChatCommandContext(i *di
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						discordgo.TextInput{
-							CustomID:    globals.CustomSlashCommandContent,
-							Label:       globals.CustomSlashName,
+							CustomID:    CustomSlashCommandContent,
+							Label:       CustomSlashName,
 							Style:       discordgo.TextInputParagraph,
 							Placeholder: "Text this slash command sends to the channel in which it is called",
 							Required:    true,
 							MinLength:   1,
-							MaxLength:   globals.MaxMessageContentLength,
+							MaxLength:   MaxMessageContentLength,
 						},
 					},
 				},

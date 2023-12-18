@@ -10,7 +10,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // Updates a server setting according to the
@@ -94,28 +93,30 @@ func (bot *ModeratorBot) DocumentBehaviorFromButtonContext(i *discordgo.Interact
 	}
 
 	err := bot.DG.InteractionRespond(i.Interaction,
-		bot.DocumentBehaviorFromMessage(i, &message))
+		bot.GenerateEvidenceReportFromMessage(i, &message))
 	if err != nil {
 		log.Warn("error responding to interaction: %w", err)
 	}
 }
 
-func (bot *ModeratorBot) TakeEvidenceNotes(i *discordgo.InteractionCreate) {
+// ShowEvidenceCollectionModal shows the user a modal to fill in information
+// about selected evidence
+func (bot *ModeratorBot) ShowEvidenceCollectionModal(i *discordgo.InteractionCreate) {
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
-			CustomID: globals.SaveEvidenceNotes,
+			CustomID: SaveEvidenceNotes,
 			Title:    "Add notes to this report",
 			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					discordgo.TextInput{
-						CustomID:    globals.EvidenceNotes,
+						CustomID:    EvidenceNotes,
 						Label:       "Notes",
 						Style:       discordgo.TextInputParagraph,
 						Placeholder: "Add notes such as reasoning or context",
 						Required:    true,
 						MinLength:   3,
-						MaxLength:   globals.MaxMessageContentLength,
+						MaxLength:   MaxMessageContentLength,
 					},
 				},
 			}},
@@ -146,7 +147,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 
 		filename := path.Base(resp.Request.URL.Path)
 		files = append(files, &discordgo.File{
-			Name:        globals.Spoiler + filename,
+			Name:        Spoiler + filename,
 			ContentType: resp.Header.Get("content-type"),
 			Reader:      resp.Body,
 		})
@@ -163,7 +164,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 				Type: discordgo.InteractionResponseUpdateMessage,
 				Data: &discordgo.InteractionResponseData{
 					Title:   "Unable to submit report",
-					Content: "Please use /" + globals.Settings + " to set an evidence channel",
+					Content: "Please use /" + Settings + " to set an evidence channel",
 				},
 			},
 		)
@@ -196,17 +197,17 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 		var previousReputation, currentReputation sql.NullInt64
 		// If notes exist, update. If not, add new
 		for _, field := range i.Interaction.Message.Embeds[0].Fields {
-			if field.Name == globals.Notes {
-				notes = globals.Notes
+			if field.Name == Notes {
+				notes = Notes
 			}
-			if field.Name == globals.CurrentReputation {
+			if field.Name == CurrentReputation {
 				value, _ := strconv.Atoi(field.Value)
 				currentReputation = sql.NullInt64{
 					Valid: true,
 					Int64: int64(value),
 				}
 			}
-			if field.Name == globals.PreviousReputation {
+			if field.Name == PreviousReputation {
 				value, _ := strconv.Atoi(field.Value)
 				previousReputation = sql.NullInt64{
 					Valid: true,
@@ -226,7 +227,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 			CurrentReputation:  currentReputation,
 			ModeratorID:        i.Interaction.Member.User.ID,
 			ModeratorName:      i.Interaction.Member.User.Username,
-			ReportURL: fmt.Sprintf(globals.MessageURLTemplate,
+			ReportURL: fmt.Sprintf(MessageURLTemplate,
 				i.Interaction.GuildID,
 				message.ChannelID,
 				message.ID),
@@ -239,7 +240,7 @@ respond:
 			Type: discordgo.InteractionResponseUpdateMessage,
 			Data: &discordgo.InteractionResponseData{
 				Content: "Submitted report: " +
-					fmt.Sprintf(globals.MessageURLTemplate,
+					fmt.Sprintf(MessageURLTemplate,
 						i.Interaction.GuildID,
 						message.ChannelID,
 						message.ID),

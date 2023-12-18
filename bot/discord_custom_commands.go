@@ -5,9 +5,58 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
+// GetCustomCommandHandlers returns a map[string]func of command handlers for every ServerConfig
+// TODO: filter out configured but not registered
+func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
+	registeredServerIDs := []string{}
+	cmds = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
+
+	bot.DB.Model(&ServerRegistration{}).Pluck("discord_id", &registeredServerIDs)
+	for _, regServerId := range registeredServerIDs {
+		sc := bot.getServerConfig(regServerId)
+		for _, customCommand := range sc.CustomCommands {
+			cmds[customCommand.Name] = func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+				bot.UseCustomSlashCommandFromChatCommandContext(i, customCommand.Content)
+			}
+		}
+	}
+	return cmds
+}
+
+// RegisterCustomCommandHandler registers all commands that are configured
+// for a given ServerConfig
+func (bot *ModeratorBot) RegisterCustomCommandHandler(sc ServerConfig) {
+	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
+	commands, _ := bot.DG.ApplicationCommands("", "")
+	for _, customCommand := range sc.CustomCommands {
+		for _, registeredCommand := range commands {
+			if customCommand.Name == registeredCommand.ID {
+				log.Warnf("a saved server chat command conflicts with a global command and will be removed, %s",
+					customCommand.Name)
+
+				bot.DB.Model(&CustomCommand{}).Delete(CustomCommand{
+					Name:        customCommand.Name,
+					DiscordId:   customCommand.DiscordId,
+					Description: customCommand.Description,
+					Content:     customCommand.Content,
+				})
+				// I don't think this is how you do this but I
+				// can't remember the right way right now lol
+				goto skip_custom_command
+			}
+		}
+
+		commandsHandlers[customCommand.Name] = func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.UseCustomSlashCommandFromChatCommandContext(i, customCommand.Content)
+		}
+	skip_custom_command:
+	}
+}
+
+// UpdateCommands iterates through all configured commands and ensures
+// they are registered, updated or removed
 func (bot *ModeratorBot) UpdateCommands() (err error) {
 	var commandsToCreate, commandsToEdit, commandsToDelete []*discordgo.ApplicationCommand
 
@@ -23,14 +72,14 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 			log.Warnf("unable to look up server-specific commands for server %s", id)
 			break
 		}
-		globals.RegisteredCommands = append(globals.RegisteredCommands, guildCommands...)
+		RegisteredCommands = append(RegisteredCommands, guildCommands...)
 
 		sc := bot.getServerConfig(id)
 
-		// If these are guild commands, they won't be in globals.ConfiguredCommands yet
+		// If these are guild commands, they won't be in ConfiguredCommands yet
 		if id != "" {
 			for _, configuredCommand := range sc.CustomCommands {
-				globals.ConfiguredCommands = append(globals.ConfiguredCommands, &discordgo.ApplicationCommand{
+				ConfiguredCommands = append(ConfiguredCommands, &discordgo.ApplicationCommand{
 					Name:        configuredCommand.Name,
 					Description: configuredCommand.Description,
 					GuildID:     id,
@@ -40,10 +89,10 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 	}
 
 	// Ensure configured commands get registered
-	for _, configuredCommand := range globals.ConfiguredCommands {
+	for _, configuredCommand := range ConfiguredCommands {
 		// Compare against registered commands
 		create := true
-		for _, registeredCommand := range globals.RegisteredCommands {
+		for _, registeredCommand := range RegisteredCommands {
 			nameMatch := configuredCommand.Name == registeredCommand.Name
 			guildMatch := configuredCommand.GuildID == registeredCommand.GuildID
 			descriptionMatch := configuredCommand.Description == registeredCommand.Description
@@ -69,9 +118,9 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 	}
 
 	// Ensure extra registered commands get removed
-	for _, registeredCommand := range globals.RegisteredCommands {
+	for _, registeredCommand := range RegisteredCommands {
 		delete := true
-		for _, configuredCommand := range globals.ConfiguredCommands {
+		for _, configuredCommand := range ConfiguredCommands {
 			nameMatch := configuredCommand.Name == registeredCommand.Name
 			guildMatch := configuredCommand.GuildID == registeredCommand.GuildID
 
@@ -118,7 +167,7 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 			err = fmt.Errorf(", err: %w", err)
 			log.Errorf("cannot update command '/%s': %v", command.Name, err)
 		} else {
-			globals.RegisteredCommands = append(globals.RegisteredCommands, editedCmd)
+			RegisteredCommands = append(RegisteredCommands, editedCmd)
 		}
 	}
 
@@ -136,7 +185,7 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 			err = fmt.Errorf(", err: %w", err)
 			log.Errorf("cannot create command '/%s': %v", command.Name, err)
 		} else {
-			globals.RegisteredCommands = append(globals.RegisteredCommands, newCmd)
+			RegisteredCommands = append(RegisteredCommands, newCmd)
 		}
 	}
 	return err

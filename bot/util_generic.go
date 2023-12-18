@@ -5,10 +5,22 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	// Enabled takes a boolean and returns "enabled" or "disabled" as a string
+	Enabled = map[bool]string{
+		true:  "enabled",
+		false: "disabled",
+	}
+	// Takes a boolean and returns a colorized button if true
+	ActiveButton = map[bool]discordgo.ButtonStyle{
+		true:  discordgo.PrimaryButton,
+		false: discordgo.SecondaryButton,
+	}
 )
 
 // getFieldNamesByType takes an interface as an argument
@@ -78,22 +90,6 @@ func structToPrettyDiscordFields(i any, globalMessage bool) []*discordgo.Message
 	}
 
 	return fields
-}
-
-// typeInChannel sets the typing indicator for a channel. The indicator is cleared
-// when a message is sent or after some number of seconds.
-func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
-	for {
-		select {
-		case <-channel:
-			return
-		default:
-			if err := bot.DG.ChannelTyping(channelID); err != nil {
-				log.Error("unable to set typing indicator: ", err)
-			}
-			time.Sleep(time.Second * 5)
-		}
-	}
 }
 
 // handlePlural returns the provided `src` and add `suf` if `count` is more than 1

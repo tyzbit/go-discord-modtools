@@ -7,7 +7,7 @@ import (
 
 // TODO: I think all of these need to log events
 
-// Very similar to DocumentBehaviorFromMessageContext, but this is
+// Very similar to GenerateEvidenceReportFromMessageContext, but this is
 // called when the target is a user and not a message, therefore
 // this will be implicitly without any message reference
 func (bot *ModeratorBot) DocumentBehaviorFromUserContext(i *discordgo.InteractionCreate) {

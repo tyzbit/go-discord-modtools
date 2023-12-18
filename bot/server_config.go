@@ -6,8 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const moderaterRepoUrl string = "https://github.com/tyzbit/go-discord-modtools"
-
 // getServerConfig takes a guild ID and returns a ServerConfig object for that server
 // If the config isn't found, it returns a default config
 func (bot *ModeratorBot) getServerConfig(guildId string) ServerConfig {

@@ -81,7 +81,7 @@ type ServerConfig struct {
 	CustomCommands           []CustomCommand `pretty:"Custom commands"`
 }
 
-// Configuration for each server, changed with `/settings`
+// Custom commands registered with a specific server
 type CustomCommand struct {
 	gorm.Model
 	ServerConfigID uint

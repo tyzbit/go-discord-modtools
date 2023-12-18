@@ -1,13 +1,13 @@
-package globals
-
-import (
-	"github.com/bwmarrin/discordgo"
-)
+package bot
 
 const (
 	// Commands (max 32 in length)
 	// These all function as IDs, they are sometimes shown to the user
 	// They must be unique among similar types (ex: all command IDs must be unique)
+
+	// TODO: make this i8n compatible (one task of which is to ensure changing the
+	// translated English words does not break the command IDs that are registered
+	// from them
 
 	// Chat commands
 	Help                              = "help"
@@ -38,10 +38,10 @@ const (
 	ModeratorRoleSettingID   = "Moderator role"
 
 	// Moderation buttons
-	IncreaseUserReputation = "⬆️ Reputation"
-	DecreaseUserReputation = "⬇️ Reputation"
-	TakeEvidenceNotes      = "Add notes"
-	SubmitReport           = "Submit report"
+	IncreaseUserReputation      = "⬆️ Reputation"
+	DecreaseUserReputation      = "⬇️ Reputation"
+	ShowEvidenceCollectionModal = "Add notes"
+	SubmitReport                = "Submit report"
 
 	// Modals
 	SaveEvidenceNotes      = "Save evidence notes"
@@ -74,6 +74,10 @@ const (
 	// If images have this in front of their name, they're spoilered
 	Spoiler = "SPOILER_"
 
+	// Errors
+	SettingFailedResponseMessage = "Error changing setting"
+	UnexpectedRowsAffected       = "unexpected number of rows affected getting user reputation: %v"
+
 	// URLs
 	MessageURLTemplate = "https://discord.com/channels/%s/%s/%s"
 
@@ -102,78 +106,4 @@ Get stats for the bot:
 Get this help message:
 
 ` + "`/help`"
-)
-
-var (
-	// Enabled takes a boolean and returns "enabled" or "disabled"
-	Enabled = map[bool]string{
-		true:  "enabled",
-		false: "disabled",
-	}
-	// Button style takes a boolean and returns a colorized button if true
-	ButtonStyle = map[bool]discordgo.ButtonStyle{
-		true:  discordgo.PrimaryButton,
-		false: discordgo.SecondaryButton,
-	}
-	SettingFailedResponseMessage = "Error changing setting"
-
-	// These objects are used to register chat commands, so if it's
-	// not in here, it won't get registered properly.
-	ChatCommands = []*discordgo.ApplicationCommand{
-		{
-			Name:        Help,
-			Description: "How to use this bot",
-		},
-		{
-			Name:        GetUserInfoFromChatCommandContext,
-			Description: "Check a user's reputation information",
-			Type:        discordgo.ChatApplicationCommand,
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Name:        UserOption,
-					Description: "User to look up",
-					Type:        discordgo.ApplicationCommandOptionString,
-					Required:    true,
-				},
-			},
-		},
-		{
-			Name:        Stats,
-			Description: "Show bot stats",
-		},
-		{
-			Name:        Settings,
-			Description: "Change settings",
-		},
-		{
-			Name:        AddCustomSlashCommand,
-			Description: "Create custom slash command",
-		},
-	}
-	UserCommands = []*discordgo.ApplicationCommand{
-		{
-			Name: GetUserInfoFromUserContext,
-			Type: discordgo.UserApplicationCommand,
-		},
-		{
-			Name: DocumentBehaviorFromUserContext,
-			Type: discordgo.UserApplicationCommand,
-		},
-	}
-	MessageCommands = []*discordgo.ApplicationCommand{
-		{
-			Name: GetUserInfoFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
-		{
-			Name: DocumentBehaviorFromMessageContext,
-			Type: discordgo.MessageApplicationCommand,
-		},
-	}
-
-	RegisteredCommands = []*discordgo.ApplicationCommand{}
-
-	// This object is used to register chat commands, so if it's
-	// not in here, it won't get registered properly.
-	ConfiguredCommands = append(append(ChatCommands, UserCommands...), MessageCommands...)
 )

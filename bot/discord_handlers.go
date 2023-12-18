@@ -3,7 +3,6 @@ package bot
 import (
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // BotReadyHandler is called when the bot is considered ready to use the Discord session
@@ -50,51 +49,51 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	// We don't pass the session to these because you can get that from bot.DG
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		// Chat commands (slash commands)
-		globals.Help: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		Help: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetHelpFromChatCommandContext(i)
 		},
 		// Stats does not create an InteractionEvent
-		globals.Stats: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		Stats: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetStatsFromChatCommandContext(i)
 		},
-		globals.Settings: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		Settings: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SetSettingsFromChatCommandContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.GetUserInfoFromChatCommandContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		GetUserInfoFromChatCommandContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromChatCommandContext(i)
 		},
 		// Message actions (right click or long-press message)
-		globals.DocumentBehaviorFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		DocumentBehaviorFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.DocumentBehaviorFromUserContext(i)
 		},
 
 		// User actions (right click or long-press user)
 		// TODO: error will be handled once the functions are ready
-		globals.GetUserInfoFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		GetUserInfoFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromUserContext(i)
 		},
 
 		// Message actions (right click or long-press message)
-		globals.DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.DocumentBehaviorFromMessageContext(i)
 		},
 		// TODO: error will be handled once the functions are ready
-		globals.GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromMessageContext(i)
 		},
-		globals.AddCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		AddCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ConfigureCustomSlashCommandFromChatCommandContext(i)
 		},
 	}
 
 	buttonHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		// Settings buttons/choices
-		globals.EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
 			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
 		},
-		globals.ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
 			botGuildMember, err := bot.DG.GuildMember(i.GuildID, i.Interaction.Message.Author.ID)
 			if err != nil {
@@ -118,30 +117,30 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 				}
 			}
 		},
-		globals.IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, true)
 			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
-		globals.DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, false)
 			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
-		globals.TakeEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.TakeEvidenceNotes(i)
+		ShowEvidenceCollectionModal: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ShowEvidenceCollectionModal(i)
 		},
-		globals.SubmitReport: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		SubmitReport: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SubmitReport(i)
 		},
 	}
 
 	// TODO: cleanup when bot features are more stable
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		globals.SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SaveEvidenceNotes(i)
 		},
-		globals.SaveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		SaveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SaveCustomSlashCommand(i)
 		},
 	}

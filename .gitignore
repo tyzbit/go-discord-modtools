@@ -4,3 +4,4 @@
 __debug_bin*
 go-discord-modtools*
 local.db
+test.sqlite

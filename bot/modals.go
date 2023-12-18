@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyzbit/go-discord-modtools/globals"
 )
 
 // Takes user-submitted notes and adds it to an in-progress report
@@ -18,21 +17,21 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 
 	// If notes exist, update. If not, add new
 	for idx, field := range i.Interaction.Message.Embeds[0].Fields {
-		if field.Name == globals.Notes {
+		if field.Name == Notes {
 			i.Interaction.Message.Embeds[0].Fields[idx].Value = notes
 			break
 		}
 
 		if idx == len(i.Interaction.Message.Embeds[0].Fields)-1 {
 			i.Interaction.Message.Embeds[0].Fields = append(i.Interaction.Message.Embeds[0].Fields, &discordgo.MessageEmbedField{
-				Name:  globals.Notes,
+				Name:  Notes,
 				Value: notes,
 			})
 		}
 	}
 
 	err := bot.DG.InteractionRespond(i.Interaction,
-		bot.DocumentBehaviorFromMessage(i, i.Interaction.Message))
+		bot.GenerateEvidenceReportFromMessage(i, i.Interaction.Message))
 	if err != nil {
 		log.Warn("error responding to interaction: %w", err)
 	}
@@ -60,7 +59,7 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 	customCommand := CustomCommand{
 		DiscordId:   guild.ID,
 		Name:        strings.ToLower(name),
-		Description: globals.CustomCommandIdentifier + description,
+		Description: CustomCommandIdentifier + description,
 		Content:     content,
 	}
 
@@ -74,15 +73,15 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 				
 				Content:
 					%s`, description, customCommand.Content),
-				Color: globals.Purple,
+				Color: Purple,
 			},
 		},
 	}
 
-	if len(customCommand.Description) > globals.MaxDescriptionContentLength {
-		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", globals.MaxDescriptionContentLength-len(globals.CustomCommandIdentifier)))
-	} else if len(customCommand.Content) > globals.MaxMessageContentLength {
-		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", globals.MaxMessageContentLength))
+	if len(customCommand.Description) > MaxDescriptionContentLength {
+		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", MaxDescriptionContentLength-len(CustomCommandIdentifier)))
+	} else if len(customCommand.Content) > MaxMessageContentLength {
+		ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Please limit the description to %v", MaxMessageContentLength))
 	} else if strings.Contains(customCommand.Name, " ") {
 		ird = *bot.generalErrorDisplayedToTheUser("Command names may not have spaces")
 	} else {
@@ -90,7 +89,7 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 		sc.CustomCommands = append(sc.CustomCommands, customCommand)
 		tx := bot.DB.Save(&sc)
 		if tx.RowsAffected != 1 {
-			log.Warn("something other than one row affected when updating custom slash command")
+			log.Warnf(UnexpectedRowsAffected, tx.RowsAffected)
 		}
 
 		sc = bot.getServerConfig(guild.ID)

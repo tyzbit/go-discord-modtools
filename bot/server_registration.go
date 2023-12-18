@@ -96,28 +96,3 @@ func (bot *ModeratorBot) UpdateInactiveRegistrations(activeGuilds []*discordgo.G
 		}
 	}
 }
-
-// updateServersWatched updates the servers watched value
-// in both the local bot stats and in the database. It is allowed to fail
-func (bot *ModeratorBot) updateServersWatched() error {
-	var serversConfigured, serversActive int64
-	bot.DB.Model(&ServerRegistration{}).Where(&ServerRegistration{}).Count(&serversConfigured)
-	serversActive = int64(len(bot.DG.State.Ready.Guilds))
-	log.Debugf("total number of servers configured: %v, connected servers: %v", serversConfigured, serversActive)
-
-	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}
-	updateStatusData.Activities = make([]*discordgo.Activity, 1)
-	updateStatusData.Activities[0] = &discordgo.Activity{
-		Name: fmt.Sprintf("%v %v", serversActive, handlePlural("server", "s", int(serversActive))),
-		Type: discordgo.ActivityTypeWatching,
-		URL:  moderaterRepoUrl,
-	}
-
-	log.Debug("updating discord bot status")
-	err := bot.DG.UpdateStatusComplex(*updateStatusData)
-	if err != nil {
-		return fmt.Errorf("unable to update discord bot status: %w", err)
-	}
-
-	return nil
-}
