@@ -60,6 +60,7 @@ const (
 	DarkRed    = 9109504
 
 	// Constants
+	MaxCommandContentLength     = 32   // https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 	MaxMessageContentLength     = 2000 // https://discord.com/developers/docs/resources/channel#create-message
 	MaxDescriptionContentLength = 100  // https://discord.com/developers/docs/interactions/application-commands#application-command-object
 
