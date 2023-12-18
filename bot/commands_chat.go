@@ -24,7 +24,7 @@ func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionC
 		},
 	})
 	if err != nil {
-		log.Errorf("error responding to hexlp command "+globals.Help+", err: %v", err)
+		log.Errorf("error responding to help command "+globals.Help+", err: %v", err)
 	}
 }
 
@@ -128,15 +128,6 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 			guild.Name = "GuildLookupError"
 		}
 
-		bot.createInteractionEvent(InteractionEvent{
-			UserID:        i.Interaction.Member.User.ID,
-			Username:      i.Interaction.Member.User.Username,
-			InteractionId: i.ID,
-			ChannelId:     i.Interaction.ChannelID,
-			ServerID:      i.Interaction.GuildID,
-			ServerName:    guild.Name,
-		})
-
 		sc := bot.getServerConfig(i.GuildID)
 		resp := bot.SettingsIntegrationResponse(sc)
 		err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -170,5 +161,68 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 	})
 	if err != nil {
 		log.Warn("error responding to interaction: %w", err)
+	}
+}
+
+// Creates a new slash command
+func (bot *ModeratorBot) ConfigureCustomSlashCommandFromChatCommandContext(i *discordgo.InteractionCreate) {
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID: globals.SaveCustomSlashCommand,
+			Title:    "Create new simple custom slash command",
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.TextInput{
+						CustomID:  globals.CustomSlashName,
+						Label:     globals.CustomSlashName,
+						Style:     discordgo.TextInputShort,
+						Required:  true,
+						MinLength: 1,
+						MaxLength: 32,
+					},
+				},
+			},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:  globals.CustomSlashCommandDescription,
+							Label:     globals.CustomSlashCommandDescription,
+							Style:     discordgo.TextInputShort,
+							Required:  true,
+							MinLength: 1,
+							MaxLength: 32,
+						},
+					},
+				},
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.TextInput{
+							CustomID:    globals.CustomSlashCommandContent,
+							Label:       globals.CustomSlashName,
+							Style:       discordgo.TextInputParagraph,
+							Placeholder: "Text this slash command sends to the channel in which it is called",
+							Required:    true,
+							MinLength:   1,
+							MaxLength:   globals.MaxMessageContentLength,
+						},
+					},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		log.Errorf("error showing custom slash command creation modal, err: %v", err)
+	}
+}
+
+// Creates a new slash command
+func (bot *ModeratorBot) UseCustomSlashCommandFromChatCommandContext(i *discordgo.InteractionCreate, content string) {
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{Content: content}})
+	if err != nil {
+		log.Errorf("error responding to use of custom command, err: %v", err)
 	}
 }

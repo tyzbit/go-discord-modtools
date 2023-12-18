@@ -28,9 +28,9 @@ var (
 	allSchemaTypes = []interface{}{
 		&bot.ServerRegistration{},
 		&bot.ServerConfig{},
+		&bot.CustomCommand{},
 		&bot.ModerationEvent{},
 		&bot.ModeratedUser{},
-		&bot.InteractionEvent{},
 	}
 
 	sqlitePath      string        = "/var/go-discord-modtools/local.sqlite"

@@ -10,19 +10,6 @@ import (
 
 // Events
 
-// A InteractionEvent when a user interacts with an Embed
-type InteractionEvent struct {
-	CreatedAt        time.Time
-	UUID             string `gorm:"primaryKey;uniqueIndex"`
-	UserID           string `gorm:"index"`
-	Username         string
-	InteractionId    string
-	ChannelId        string
-	ServerID         string `gorm:"index"`
-	ServerName       string
-	ModerationEvents []ModerationEvent `gorm:"foreignKey:UUID"`
-}
-
 // This is the representation of a moderation action
 type ModerationEvent struct {
 	CreatedAt          time.Time
@@ -75,21 +62,33 @@ type ModeratorBotConfig struct {
 
 // Servers
 type ServerRegistration struct {
-	DiscordId string `gorm:"primaryKey;uniqueIndex"`
+	gorm.Model
+	DiscordId string
 	Name      string
-	UpdatedAt time.Time
 	JoinedAt  time.Time
 	Active    sql.NullBool `pretty:"Bot is active in the server" gorm:"default:true"`
-	Config    ServerConfig `gorm:"foreignKey:DiscordId"`
+	Config    ServerConfig
 }
 
 // Configuration for each server, changed with `/settings`
 type ServerConfig struct {
-	DiscordId                string `gorm:"primaryKey;uniqueIndex" pretty:"Server ID"`
-	Name                     string `pretty:"Server Name" gorm:"default:default"`
-	EvidenceChannelSettingID string `pretty:"Channel to document evidence in"`
-	ModeratorRoleSettingID   string `pretty:"Role for moderators"`
-	UpdatedAt                time.Time
+	gorm.Model
+	ServerRegistrationID     uint
+	DiscordId                string          `pretty:"ServerID"`
+	Name                     string          `pretty:"Server Name" gorm:"default:default"`
+	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
+	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
+	CustomCommands           []CustomCommand `pretty:"Custom commands"`
+}
+
+// Configuration for each server, changed with `/settings`
+type CustomCommand struct {
+	gorm.Model
+	ServerConfigID uint
+	DiscordId      string
+	Name           string
+	Description    string
+	Content        string
 }
 
 // Stats

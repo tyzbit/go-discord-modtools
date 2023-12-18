@@ -81,7 +81,7 @@ func structToPrettyDiscordFields(i any, globalMessage bool) []*discordgo.Message
 }
 
 // typeInChannel sets the typing indicator for a channel. The indicator is cleared
-// when a message is sent
+// when a message is sent or after some number of seconds.
 func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
 	for {
 		select {
@@ -92,20 +92,6 @@ func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
 				log.Error("unable to set typing indicator: ", err)
 			}
 			time.Sleep(time.Second * 5)
-		}
-	}
-}
-
-// deleteAllCommands is referenced in bot.go (but is probably commented out)
-func (bot *ModeratorBot) DeleteAllCommands() {
-	globalCommands, err := bot.DG.ApplicationCommands(bot.DG.State.User.ID, "")
-	if err != nil {
-		log.Fatalf("could not fetch registered global commands: %v", err)
-	}
-	for _, command := range globalCommands {
-		err = bot.DG.ApplicationCommandDelete(bot.DG.State.User.ID, "", command.ID)
-		if err != nil {
-			log.Panicf("cannot delete '%v' command: %v", command.Name, err)
 		}
 	}
 }

@@ -29,8 +29,18 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 		return
 	}
 
-	err := bot.DG.InteractionRespond(i.Interaction,
-		bot.DocumentBehaviorFromMessage(i, &message))
+	var err error
+	sc := bot.getServerConfig(i.GuildID)
+	if sc.EvidenceChannelSettingID == "" {
+		err = bot.DG.InteractionRespond(i.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: bot.settingsErrorDisplayedToTheUser(),
+			})
+	} else {
+		err = bot.DG.InteractionRespond(i.Interaction,
+			bot.DocumentBehaviorFromMessage(i, &message))
+	}
 	if err != nil {
 		log.Warn("error responding to interaction: %w", err)
 	}

@@ -3,7 +3,6 @@ package bot
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -26,13 +25,13 @@ func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool)
 			DiscordId: g.ID,
 			Name:      g.Name,
 			Active:    sql.NullBool{Valid: true, Bool: true},
-			UpdatedAt: time.Now(),
 			JoinedAt:  g.JoinedAt,
 			Config: ServerConfig{
-				Name: g.Name,
+				Name:      g.Name,
+				DiscordId: g.ID,
 			},
 		}
-		tx := bot.DB.Create(&registration)
+		tx := bot.DB.Model(&ServerRegistration{}).Where(&ServerRegistration{DiscordId: g.ID}).Save(&registration)
 
 		// We only expect one server to be updated at a time. Otherwise, return an error
 		if tx.RowsAffected != 1 {
@@ -52,12 +51,16 @@ func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool)
 		_ = bot.updateServersWatched()
 	}
 
+	// Called with no arguments, this only updates registration
+	// for global commands.
+	bot.UpdateCommands()
+
 	return nil
 }
 
-// updateInactiveRegistrations goes through every server registration and
+// UpdateInactiveRegistrations goes through every server registration and
 // updates the DB as to whether or not it's active
-func (bot *ModeratorBot) updateInactiveRegistrations(activeGuilds []*discordgo.Guild) {
+func (bot *ModeratorBot) UpdateInactiveRegistrations(activeGuilds []*discordgo.Guild) {
 	var sr []ServerRegistration
 	var inactiveRegistrations []string
 	bot.DB.Find(&sr)

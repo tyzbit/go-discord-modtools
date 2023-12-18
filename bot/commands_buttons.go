@@ -17,23 +17,8 @@ import (
 // column name (setting) and the value
 func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	setting string, value interface{}) {
-	guild, err := bot.DG.Guild(i.Interaction.GuildID)
-	if err != nil {
-		log.Errorf("unable to look up guild ID %s", i.Interaction.GuildID)
-		return
-	}
-
 	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
 	var interactionErr error
-
-	bot.createInteractionEvent(InteractionEvent{
-		UserID:        i.Member.User.ID,
-		Username:      i.Member.User.Username,
-		InteractionId: i.Message.ID,
-		ChannelId:     i.Message.ChannelID,
-		ServerID:      i.Interaction.GuildID,
-		ServerName:    guild.Name,
-	})
 
 	if !ok {
 		reason := "Unable to save settings"
@@ -130,7 +115,7 @@ func (bot *ModeratorBot) TakeEvidenceNotes(i *discordgo.InteractionCreate) {
 						Placeholder: "Add notes such as reasoning or context",
 						Required:    true,
 						MinLength:   3,
-						MaxLength:   500,
+						MaxLength:   globals.MaxMessageContentLength,
 					},
 				},
 			}},
@@ -172,6 +157,24 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 
 	// TODO: save event info
 	sc := bot.getServerConfig(i.GuildID)
+	if sc.EvidenceChannelSettingID == "" {
+		err := bot.DG.InteractionRespond(i.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseUpdateMessage,
+				Data: &discordgo.InteractionResponseData{
+					Title:   "Unable to submit report",
+					Content: "Please use /" + globals.Settings + " to set an evidence channel",
+				},
+			},
+		)
+
+		if err != nil {
+			log.Errorf("error responding to settings interaction, err: %v", err)
+		}
+		return
+	}
+
+	ms.Embeds[0].Description = ""
 	message, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
 	if err != nil {
 		log.Warn("unable to send message %w", err)

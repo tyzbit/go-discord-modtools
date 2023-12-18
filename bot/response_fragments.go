@@ -92,3 +92,18 @@ func (bot *ModeratorBot) permissionsErrorDisplayedToTheUser() *discordgo.Interac
 		Flags: discordgo.MessageFlagsEphemeral,
 	}
 }
+
+// Simple wrapper to display an embed to the user with an error (ephemeral)
+func (bot *ModeratorBot) settingsErrorDisplayedToTheUser() *discordgo.InteractionResponseData {
+	return &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title: "Please configure the bot first",
+				Color: globals.DarkRed,
+				Description: "Please use /" + globals.Settings + " to set " +
+					"the mod role and evidence channel",
+			},
+		},
+		Flags: discordgo.MessageFlagsEphemeral,
+	}
+}

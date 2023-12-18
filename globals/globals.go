@@ -14,6 +14,7 @@ const (
 	Stats                             = "stats"
 	Settings                          = "settings"
 	GetUserInfoFromChatCommandContext = "query"
+	AddCustomSlashCommand             = "addcommand"
 
 	// User commands
 	GetUserInfoFromUserContext      = "Check info"
@@ -43,15 +44,22 @@ const (
 	SubmitReport           = "Submit report"
 
 	// Modals
-	SaveEvidenceNotes = "Save evidence notes"
+	SaveEvidenceNotes      = "Save evidence notes"
+	SaveCustomSlashCommand = "Save custom slash command"
 
 	// Modal options
-	EvidenceNotes = "Evidence notes"
+	EvidenceNotes                 = "Evidence notes"
+	CustomSlashName               = "Name for this custom slash command"
+	CustomSlashCommandDescription = "Description for this custom slash command"
+	CustomSlashCommandContent     = "Message to paste if this command is used"
 
 	// Colors
 	FrenchGray = 13424349
 	Purple     = 7283691
 	DarkRed    = 9109504
+
+	// Constants
+	MaxMessageContentLength = 2000 // https://discord.com/developers/docs/resources/channel#create-message
 
 	// Text fragments
 	CurrentReputation      = "Current reputation"
@@ -135,6 +143,10 @@ var (
 			Name:        Settings,
 			Description: "Change settings",
 		},
+		{
+			Name:        AddCustomSlashCommand,
+			Description: "Create custom slash command",
+		},
 	}
 	UserCommands = []*discordgo.ApplicationCommand{
 		{
@@ -157,10 +169,9 @@ var (
 		},
 	}
 
-	RegisteredCommands = make([]*discordgo.ApplicationCommand,
-		len(ChatCommands)+len(UserCommands)+len(MessageCommands))
+	RegisteredCommands = []*discordgo.ApplicationCommand{}
 
 	// This object is used to register chat commands, so if it's
 	// not in here, it won't get registered properly.
-	Commands = append(append(ChatCommands, UserCommands...), MessageCommands...)
+	ConfiguredCommands = append(append(ChatCommands, UserCommands...), MessageCommands...)
 )

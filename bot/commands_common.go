@@ -28,11 +28,6 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 		authorID = message.Author.ID
 		fields = []*discordgo.MessageEmbedField{
 			{
-				Name:   "Original message timestamp",
-				Value:  fmt.Sprintf("%s (<t:%v:R>)", message.Timestamp.Format(time.RFC1123Z), message.Timestamp.Unix()),
-				Inline: false,
-			},
-			{
 				Name:   "Author of message",
 				Value:  fmt.Sprintf("<@%s>", user.UserID),
 				Inline: true,
@@ -56,6 +51,11 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 				Name:  globals.OriginalMessageContent,
 				Value: message.Content,
 			},
+			{
+				Name:   "Original message timestamp",
+				Value:  fmt.Sprintf("%s (<t:%v:R>)", message.Timestamp.Format(time.RFC1123Z), message.Timestamp.Unix()),
+				Inline: false,
+			},
 		}
 
 		if len(message.Attachments) > 0 {
@@ -74,7 +74,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 			Value: fmt.Sprintf(`<@%s>
 									%s (<t:%v:R>)`,
 				i.Interaction.Member.User.ID,
-				time.Now().Format(time.RFC1123Z),
+				time.Now().UTC().Format(time.RFC1123Z),
 				time.Now().Unix()),
 		})
 	}
@@ -84,7 +84,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessage(i *discordgo.InteractionCre
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
-					Title:       "Evidence report",
+					Title:       "Evidence Report",
 					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", authorID),
 					Color:       globals.Purple,
 					Fields:      fields,

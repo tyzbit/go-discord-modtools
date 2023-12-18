@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -16,13 +15,18 @@ func (bot *ModeratorBot) getServerConfig(guildId string) ServerConfig {
 	sc := ServerConfig{
 		DiscordId:                "",
 		Name:                     "",
-		UpdatedAt:                time.Now(),
 		EvidenceChannelSettingID: "",
 		ModeratorRoleSettingID:   "",
+		CustomCommands:           []CustomCommand{},
 	}
+
 	// If this fails, we'll return a default server
 	// config, which is expected
-	bot.DB.Where(&ServerConfig{DiscordId: guildId}).Find(&sc)
+	bot.DB.Model(&ServerConfig{}).
+		Where(&ServerConfig{DiscordId: guildId}).
+		Preload("CustomCommands").
+		First(&sc)
+	// bot.DB.Where(&ServerConfig{DiscordId: guildId}).Find(&sc)
 	return sc
 }
 

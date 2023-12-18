@@ -11,59 +11,9 @@ func (bot *ModeratorBot) BotReadyHandler(s *discordgo.Session, r *discordgo.Read
 	// r.Guilds has all of our connected servers, so we should
 	// update server registrations and set any registered servers
 	// not in r.Guilds as inactive
-	bot.updateInactiveRegistrations(r.Guilds)
+	bot.UpdateInactiveRegistrations(r.Guilds)
 
-	// Use this to clean up commands if IDs have changed
-	// TODO remove later if unnecessary
-	// log.Debug("removing all commands")
-	// bot.DeleteAllCommands()
-	// var err error
-	// globals.RegisteredCommands, err = bot.DG.ApplicationCommandBulkOverwrite(bot.DG.State.User.ID, "", globals.Commands)
-	log.Debug("registering slash commands")
-	registeredCommands, err := bot.DG.ApplicationCommands(bot.DG.State.User.ID, "")
-	if err != nil {
-		log.Errorf("unable to look up registered application commands, err: %s", err)
-	} else {
-		for _, botCommand := range globals.Commands {
-			for i, registeredCommand := range registeredCommands {
-				// Check if this registered command matches a configured bot command
-				if botCommand.Name == registeredCommand.Name {
-					// Only update if it differs from what's already registered
-					if botCommand != registeredCommand {
-						editedCmd, err := bot.DG.ApplicationCommandEdit(bot.DG.State.User.ID, "", registeredCommand.ID, botCommand)
-						if err != nil {
-							log.Errorf("cannot update command %s: %v", botCommand.Name, err)
-						}
-						globals.RegisteredCommands = append(globals.RegisteredCommands, editedCmd)
-
-						// Bot command was updated, so skip to the next bot command
-						break
-					}
-				}
-
-				// Check on the last item of registeredCommands
-				if i == len(registeredCommands) {
-					// This is a stale registeredCommand, so we should delete it
-					err := bot.DG.ApplicationCommandDelete(bot.DG.State.User.ID, "", registeredCommand.ID)
-					if err != nil {
-						log.Errorf("cannot remove command %s: %v", registeredCommand.Name, err)
-					}
-				}
-			}
-
-			// If we're here, then we have a command that needs to be registered
-			createdCmd, err := bot.DG.ApplicationCommandCreate(bot.DG.State.User.ID, "", botCommand)
-			if err != nil {
-				log.Errorf("cannot update command %s: %v", botCommand.Name, err)
-			}
-			globals.RegisteredCommands = append(globals.RegisteredCommands, createdCmd)
-			if err != nil {
-				log.Errorf("cannot update commands: %v", err)
-			}
-		}
-	}
-
-	err = bot.updateServersWatched()
+	err := bot.updateServersWatched()
 	if err != nil {
 		log.Error("unable to update servers watched")
 	}
@@ -133,6 +83,9 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		globals.GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromMessageContext(i)
 		},
+		globals.AddCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ConfigureCustomSlashCommandFromChatCommandContext(i)
+		},
 	}
 
 	buttonHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
@@ -188,12 +141,30 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		globals.SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SaveEvidenceNotes(i)
 		},
+		globals.SaveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.SaveCustomSlashCommand(i)
+		},
 	}
 
+	customCommandHandlers := bot.GetCustomCommandHandlers()
+	log.Debugf("found %v custom commands", len(customCommandHandlers))
 	sc := bot.getServerConfig(i.GuildID)
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
+			if bot.isAllowed(sc, i.Member) {
+				h(s, i)
+			} else {
+				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: bot.permissionsErrorDisplayedToTheUser(),
+				})
+				if err != nil {
+					log.Warn("error responding to interaction: %w", err)
+				}
+			}
+		}
+		if h, ok := customCommandHandlers[i.ApplicationCommandData().Name]; ok {
 			if bot.isAllowed(sc, i.Member) {
 				h(s, i)
 			} else {

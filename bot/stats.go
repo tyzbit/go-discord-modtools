@@ -10,7 +10,6 @@ import (
 func (bot *ModeratorBot) getGlobalStats() botStats {
 	var ModerateRequests, MessagesSent, Interactions, URLsModerated, ServersConfigured, ServersActive int64
 
-	bot.DB.Model(&InteractionEvent{}).Where(&InteractionEvent{}).Count(&Interactions)
 	bot.DB.Model(&ModerationEvent{}).Count(&URLsModerated)
 	bot.DB.Model(&ServerRegistration{}).Count(&ServersConfigured)
 	bot.DB.Find(&ServerRegistration{}).Where(&ServerRegistration{
@@ -30,7 +29,6 @@ func (bot *ModeratorBot) getGlobalStats() botStats {
 func (bot *ModeratorBot) getServerStats(serverId string) botStats {
 	var ModerateRequests, MessagesSent, Interactions, ServersActive int64
 
-	bot.DB.Model(&InteractionEvent{}).Where(&InteractionEvent{ServerID: serverId}).Count(&Interactions)
 	bot.DB.Model(&ModerationEvent{}).Where(&ModerationEvent{ServerID: serverId}).Count(&ModerateRequests)
 	bot.DB.Model(&ServerRegistration{}).Where(&ServerRegistration{}).Count(&ServersActive)
 
