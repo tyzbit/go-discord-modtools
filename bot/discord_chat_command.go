@@ -27,86 +27,6 @@ func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionC
 	}
 }
 
-// Produces bot stats, server-specific if called in a server and
-// a total summary if DMed by a configured administrator
-func (bot *ModeratorBot) GetStatsFromChatCommandContext(i *discordgo.InteractionCreate) {
-	directMessage := (i.GuildID == "")
-	var stats botStats
-	logMessage := ""
-	if !directMessage {
-		log.Debug("handling stats request")
-		stats = bot.getServerStats(i.GuildID)
-		guild, err := bot.DG.Guild(i.GuildID)
-		if err != nil {
-			log.Errorf("unable to look up server by id: %v", i.GuildID+", "+fmt.Sprintf("%v", err))
-			return
-		}
-		logMessage = "sending stats response to " + i.Member.User.Username + "(" + i.Member.User.ID + ") in " +
-			guild.Name + "(" + guild.ID + ")"
-	} else {
-		log.Debug("handling stats DM request")
-		// We can be sure now the request was a direct message
-		// Deny by default
-		administrator := false
-
-	out:
-		// TODO: allow adding, removing and looking up admins in the DB
-		for _, id := range bot.Config.AdminIds {
-			if i.User.ID == id {
-				administrator = true
-
-				// This prevents us from checking all IDs now that
-				// we found a match but is a fairly ineffectual
-				// optimization since config.AdminIds will probably
-				// only have dozens of IDs at most
-				break out
-			}
-		}
-
-		if !administrator {
-			log.Errorf("did not respond to global stats command from %v(%v), because user is not an administrator",
-				i.User.Username, i.User.ID)
-
-			err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Embeds: []*discordgo.MessageEmbed{
-						{
-							Title: "Stats are not available in DMs",
-							Color: Purple,
-						},
-					},
-				},
-			})
-			if err != nil {
-				log.Errorf("error responding to slash command "+Stats+", err: %v", err)
-			}
-			return
-		}
-		stats = bot.getGlobalStats()
-		logMessage = "sending global " + Stats + " response to " + i.User.Username + "(" + i.User.ID + ")"
-	}
-
-	log.Info(logMessage)
-
-	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:  "🏛️ Moder8or Bot Stats",
-					Fields: structToPrettyDiscordFields(stats, directMessage),
-					Color:  Purple,
-				},
-			},
-		},
-	})
-	if err != nil {
-		log.Errorf("error responding to slash command "+Stats+", err: %v", err)
-	}
-}
-
 // Sets setting choices from the `/settings` command
 func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.InteractionCreate) {
 	log.Debug("handling settings request")
@@ -127,8 +47,9 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 			guild.Name = "GuildLookupError"
 		}
 
-		sc := bot.getServerConfig(i.GuildID)
-		resp := bot.SettingsIntegrationResponse(sc)
+		var cfg GuildConfig
+		bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
+		resp := bot.SettingsIntegrationResponse(cfg)
 		err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: resp,
@@ -147,7 +68,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
+	bot.DB.Where(&ModeratedUser{ID: i.GuildID + i.Interaction.Member.User.ID}).First(&user)
 
 	// TODO: Add more user information
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

@@ -26,7 +26,6 @@ services:
       DB_USER: gomoderate
       DB_PASSWORD: gomoderate
       DB_NAME: go_moderator
-      ADMINISTRATOR_IDS: ${ADMINISTRATOR_IDS}
       COOKIE: ${COOKIE}
       LOG_LEVEL: ${LOG_LEVEL}
       TOKEN: ${TOKEN}

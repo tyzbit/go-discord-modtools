@@ -26,8 +26,8 @@ import (
 var (
 	config         bot.ModeratorBotConfig
 	allSchemaTypes = []interface{}{
-		&bot.ServerRegistration{},
-		&bot.ServerConfig{},
+		&bot.GuildConfig{},
+		&bot.GuildConfig{},
 		&bot.CustomCommand{},
 		&bot.ModerationEvent{},
 		&bot.ModeratedUser{},

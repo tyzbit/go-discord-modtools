@@ -8,15 +8,15 @@ import (
 )
 
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
-func (bot *ModeratorBot) SettingsIntegrationResponse(sc ServerConfig) *discordgo.InteractionResponseData {
-	channel, _ := bot.DG.Channel(sc.EvidenceChannelSettingID)
+func (bot *ModeratorBot) SettingsIntegrationResponse(cfg GuildConfig) *discordgo.InteractionResponseData {
+	channel, _ := bot.DG.Channel(cfg.EvidenceChannelSettingID)
 	var evidenceChannelName, moderatorRoleName string
 	if channel == nil {
 		evidenceChannelName = "not set"
 	} else {
 		evidenceChannelName = "#" + channel.Name
 	}
-	moderatorRole, _ := bot.DG.State.Role(sc.DiscordId, sc.ModeratorRoleSettingID)
+	moderatorRole, _ := bot.DG.State.Role(cfg.GuildID, cfg.ModeratorRoleSettingID)
 	if moderatorRole == nil {
 		moderatorRoleName = "not set"
 	} else {
@@ -56,7 +56,7 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 	}
 
 	user := ModeratedUser{}
-	bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: i.Interaction.Member.User.ID}).First(&user)
+	bot.DB.Where(&ModeratedUser{ID: i.GuildID + i.Interaction.Member.User.ID}).First(&user)
 
 	return &discordgo.InteractionResponseData{
 		CustomID: GetUserInfoFromUserContext,

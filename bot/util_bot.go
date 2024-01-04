@@ -29,20 +29,20 @@ func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
 // isAllowed returns a boolean if the user is in the preselected group
 // that should have access to the bot
 // PLANNED: or if the user is a server owner.
-func (bot *ModeratorBot) isAllowed(sc ServerConfig, member *discordgo.Member) bool {
+func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bool {
 	// Allow if no role has been set
-	if sc.ModeratorRoleSettingID == "" {
+	if cfg.ModeratorRoleSettingID == "" {
 		log.Infof("Allowing %s(%s) to use function because moderator role is not defined in server %s(%s)",
 			member.User.Username,
 			member.User.ID,
-			sc.Name,
-			sc.DiscordId,
+			cfg.Name,
+			cfg.GuildID,
 		)
 		return true
 	}
 
 	for _, roleID := range member.Roles {
-		if roleID == sc.ModeratorRoleSettingID {
+		if roleID == cfg.ModeratorRoleSettingID {
 			return true
 		}
 	}
@@ -52,15 +52,15 @@ func (bot *ModeratorBot) isAllowed(sc ServerConfig, member *discordgo.Member) bo
 // updateServersWatched updates the servers watched value
 // in both the local bot stats and in the database. It is allowed to fail
 func (bot *ModeratorBot) updateServersWatched() error {
-	var serversConfigured, serversActive int64
-	bot.DB.Model(&ServerRegistration{}).Where(&ServerRegistration{}).Count(&serversConfigured)
-	serversActive = int64(len(bot.DG.State.Ready.Guilds))
-	log.Debugf("total number of servers configured: %v, connected servers: %v", serversConfigured, serversActive)
+	var GuildsConfigured, GuildsActive int64
+	bot.DB.Where(&GuildConfig{}).Count(&GuildsConfigured)
+	GuildsActive = int64(len(bot.DG.State.Ready.Guilds))
+	log.Debugf("total number of servers configured: %v, connected servers: %v", GuildsConfigured, GuildsActive)
 
 	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}
 	updateStatusData.Activities = make([]*discordgo.Activity, 1)
 	updateStatusData.Activities[0] = &discordgo.Activity{
-		Name: fmt.Sprintf("%v %v", serversActive, handlePlural("server", "s", int(serversActive))),
+		Name: fmt.Sprintf("%v %v", GuildsActive, handlePlural("server", "s", int(GuildsActive))),
 		Type: discordgo.ActivityTypeWatching,
 		URL:  moderatorRepoUrl,
 	}

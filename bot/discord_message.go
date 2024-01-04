@@ -33,8 +33,9 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 	}
 
 	var err error
-	sc := bot.getServerConfig(i.GuildID)
-	if sc.EvidenceChannelSettingID == "" {
+	var cfg GuildConfig
+	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
+	if cfg.EvidenceChannelSettingID == "" {
 		err = bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -68,13 +69,15 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 	var messageType discordgo.InteractionResponseType
 	var authorID string
 	if len(message.Embeds) > 0 {
-		fields = message.Embeds[0].Fields
-		messageType = discordgo.InteractionResponseUpdateMessage
-		authorID = getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
-		for idx, field := range fields {
-			if field.Name == CurrentReputation {
-				user := bot.GetModeratedUser(i.GuildID, authorID)
-				fields[idx].Value = fmt.Sprintf("%v", user.Reputation.Int64)
+		if len(message.Embeds[0].Fields) > 0 {
+			fields = message.Embeds[0].Fields
+			messageType = discordgo.InteractionResponseUpdateMessage
+			authorID = getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
+			for idx, field := range fields {
+				if field.Name == CurrentReputation {
+					user := bot.GetModeratedUser(i.GuildID, authorID)
+					fields[idx].Value = fmt.Sprintf("%v", user.Reputation.Int64)
+				}
 			}
 		}
 	} else {

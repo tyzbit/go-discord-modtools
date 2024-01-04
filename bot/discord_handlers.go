@@ -52,10 +52,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		Help: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetHelpFromChatCommandContext(i)
 		},
-		// Stats does not create an InteractionEvent
-		Stats: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.GetStatsFromChatCommandContext(i)
-		},
 		Settings: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SetSettingsFromChatCommandContext(i)
 		},
@@ -118,12 +114,12 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			}
 		},
 		IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ChangeUserReputation(i, true)
+			bot.ChangeUserReputation(i, 1)
 			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
 		DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ChangeUserReputation(i, false)
+			bot.ChangeUserReputation(i, -1)
 			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
@@ -147,11 +143,12 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 
 	customCommandHandlers := bot.GetCustomCommandHandlers()
 	log.Debugf("found %v custom commands", len(customCommandHandlers))
-	sc := bot.getServerConfig(i.GuildID)
+	var cfg GuildConfig
+	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
-			if bot.isAllowed(sc, i.Member) {
+			if bot.isAllowed(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -164,7 +161,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			}
 		}
 		if h, ok := customCommandHandlers[i.ApplicationCommandData().Name]; ok {
-			if bot.isAllowed(sc, i.Member) {
+			if bot.isAllowed(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -178,7 +175,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		}
 	case discordgo.InteractionMessageComponent:
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
-			if bot.isAllowed(sc, i.Member) {
+			if bot.isAllowed(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -192,7 +189,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		}
 	case discordgo.InteractionModalSubmit:
 		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
-			if bot.isAllowed(sc, i.Member) {
+			if bot.isAllowed(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

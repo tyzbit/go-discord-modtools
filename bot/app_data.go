@@ -2,92 +2,21 @@ package bot
 
 import (
 	"database/sql"
-	"fmt"
-
-	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 // Returns a ModeratedUser record from the DB using server and user ID
 // (a user can be in multiple servers)
-func (bot *ModeratorBot) GetModeratedUser(serverID string, userID string) (moderatedUser ModeratedUser) {
-	_ = bot.DB.Model(&ModeratedUser{}).
-		Where(&ModeratedUser{UserID: userID}).
-		First(&moderatedUser)
-
-	guild, _ := bot.DG.Guild(serverID)
+func (bot *ModeratorBot) GetModeratedUser(GuildId string, userID string) (moderatedUser ModeratedUser) {
+	guild, _ := bot.DG.Guild(GuildId)
 	user, _ := bot.DG.User(userID)
-	// Create the moderated user if they do not exist
-	if moderatedUser.UserID == "" {
-		moderatedUser = ModeratedUser{
-			UUID:       uuid.New().String(),
-			UserName:   user.Username,
-			UserID:     userID,
-			ServerID:   serverID,
-			ServerName: guild.Name,
-			Reputation: sql.NullInt64{Int64: 1, Valid: true},
-		}
-		err := bot.UpdateModeratedUser(moderatedUser)
-		if err != nil {
-			log.Warn("error updating moderated user, err: %w", err)
-		}
+	moderatedUser = ModeratedUser{
+		UserName:   user.Username,
+		UserID:     userID,
+		GuildId:    GuildId,
+		ID:         GuildId + userID,
+		GuildName:  guild.Name,
+		Reputation: sql.NullInt64{Int64: 1, Valid: true},
 	}
+	bot.DB.Where(&ModeratedUser{ID: GuildId + userID}).FirstOrCreate(&moderatedUser)
 	return moderatedUser
-}
-
-// UpdateModeratedUser updates moderated user status in the database.
-// It is allowed to fail
-func (bot *ModeratorBot) UpdateModeratedUser(u ModeratedUser) error {
-	tx := bot.DB.Save(&u)
-
-	if tx.RowsAffected > 1 {
-		return fmt.Errorf("did not update one user row as expected, "+
-			"updated %v rows for user %s(%s)",
-			tx.RowsAffected, u.UserName, u.UserID)
-	} else if tx.RowsAffected == 0 {
-		// This user doesn't exist, so create them
-		tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: u.UserID}).Create(&u)
-		if tx.RowsAffected != 1 {
-			return fmt.Errorf("did not create one user row as expected, "+
-				"updated %v rows for user %s(%s)",
-				tx.RowsAffected, u.UserName, u.UserID)
-		}
-	}
-	return nil
-}
-
-// getGlobalStats calls the database to get global stats for the bot
-// The output here is not appropriate to send to individual servers, except
-// for ServersActive
-func (bot *ModeratorBot) getGlobalStats() botStats {
-	var ModerateRequests, MessagesSent, Interactions, URLsModerated, ServersConfigured, ServersActive int64
-
-	bot.DB.Model(&ModerationEvent{}).Count(&URLsModerated)
-	bot.DB.Model(&ServerRegistration{}).Count(&ServersConfigured)
-	bot.DB.Find(&ServerRegistration{}).Where(&ServerRegistration{
-		Active: sql.NullBool{Valid: true, Bool: true}}).Count(&ServersActive)
-
-	return botStats{
-		ModerateRequests:  ModerateRequests,
-		MessagesSent:      MessagesSent,
-		Interactions:      Interactions,
-		ServersConfigured: ServersConfigured,
-		ServersActive:     ServersActive,
-	}
-}
-
-// getServerStats gets the stats for a particular server with ID serverId
-// If you want global stats, use getGlobalStats()
-func (bot *ModeratorBot) getServerStats(serverId string) botStats {
-	var ModerateRequests, MessagesSent, Interactions, ServersActive int64
-
-	bot.DB.Model(&ModerationEvent{}).Where(&ModerationEvent{ServerID: serverId}).Count(&ModerateRequests)
-	bot.DB.Model(&ServerRegistration{}).Where(&ServerRegistration{}).Count(&ServersActive)
-
-	return botStats{
-		ModerateRequests: ModerateRequests,
-		MessagesSent:     MessagesSent,
-		Interactions:     Interactions,
-		ServersActive:    ServersActive,
-	}
 }

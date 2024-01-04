@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,19 +15,22 @@ import (
 // column name (setting) and the value
 func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	setting string, value interface{}) {
-	sc, ok := bot.updateServerSetting(i.Interaction.GuildID, setting, value)
+
+	tx := bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).Update(setting, value)
 	var interactionErr error
 
-	if !ok {
-		reason := "Unable to save settings"
+	if tx.RowsAffected != 1 {
+		log.Debugf("unexpected number of rows affected updating guild settings: %v", tx.RowsAffected)
 		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.generalErrorDisplayedToTheUser(reason),
+			Data: bot.generalErrorDisplayedToTheUser("Unable to save settings"),
 		})
 	} else {
+		var cfg GuildConfig
+		bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).First(&cfg)
 		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: bot.SettingsIntegrationResponse(sc),
+			Data: bot.SettingsIntegrationResponse(cfg),
 		})
 	}
 
@@ -37,36 +39,36 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	}
 }
 
-// Updates a user reputation, given the source interaction and
-// whether to increase (TRUE) or decrease (FALSE)
-func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, increase bool) {
-	userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
-	user := ModeratedUser{}
-	tx := bot.DB.Model(&ModeratedUser{}).Where(&ModeratedUser{UserID: userID}).First(&user)
-
-	if tx.RowsAffected > 1 {
-		log.Errorf("unexpected number of rows affected getting user reputation: %v", tx.RowsAffected)
-		return
-	} else if tx.RowsAffected == 0 {
-		user.UserID = userID
+// Updates a user reputation, given the source interaction and value to add
+func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, difference int) (err error) {
+	userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
+	if userID == "" {
+		return fmt.Errorf("unable to determine user ID from reference")
 	}
 
-	if increase {
-		user.Reputation = sql.NullInt64{
-			Valid: true,
-			Int64: user.Reputation.Int64 + 1,
-		}
-	} else {
-		user.Reputation = sql.NullInt64{
-			Valid: true,
-			Int64: user.Reputation.Int64 - 1,
-		}
-	}
-
-	err := bot.UpdateModeratedUser(user)
+	user, err := bot.DG.User(userID)
 	if err != nil {
-		log.Warn("unable to update user moderation record, err: %w", err)
+		return err
 	}
+	guild, err := bot.DG.Guild(i.GuildID)
+	if err != nil {
+		return err
+	}
+
+	userUpdate := ModeratedUser{
+		UserID:    userID,
+		UserName:  user.Username,
+		GuildId:   i.GuildID,
+		ID:        i.GuildID + userID,
+		GuildName: guild.Name,
+	}
+	tx := bot.DB.Where(&ModeratedUser{ID: i.GuildID + userID}).FirstOrCreate(&userUpdate)
+	if err != nil {
+		return err
+	}
+
+	tx.Update("Reputation", userUpdate.Reputation.Int64+int64(difference))
+	return nil
 }
 
 // Called from the App menu, this displays an embed for the moderator to
@@ -157,8 +159,9 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	ms.Files = files
 
 	// TODO: save event info
-	sc := bot.getServerConfig(i.GuildID)
-	if sc.EvidenceChannelSettingID == "" {
+	var cfg GuildConfig
+	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).FirstOrCreate(&cfg)
+	if cfg.EvidenceChannelSettingID == "" {
 		err := bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseUpdateMessage,
@@ -176,7 +179,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	}
 
 	ms.Embeds[0].Description = ""
-	message, err := bot.DG.ChannelMessageSendComplex(sc.EvidenceChannelSettingID, &ms)
+	message, err := bot.DG.ChannelMessageSendComplex(cfg.EvidenceChannelSettingID, &ms)
 	if err != nil {
 		log.Warn("unable to send message %w", err)
 	} else {
@@ -186,7 +189,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 			goto respond
 		}
 		// Save attachments to the message because view links expire after 24h
-		userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[1].Value)
+		userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
 		user, err := bot.DG.User(userID)
 		if err != nil {
 			log.Warnf("unable to look up user (%s, err: %v)", userID, err)
@@ -216,12 +219,12 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 			}
 		}
 
-		bot.createModerationEvent(ModerationEvent{
-			UUID:               uuid.New().String(),
-			ServerID:           i.GuildID,
-			ServerName:         guild.Name,
+		event := ModerationEvent{
+			GuildId:            i.GuildID,
+			GuildName:          guild.Name,
 			UserID:             userID,
 			UserName:           user.Username,
+			ModeratedUserID:    i.GuildID + userID,
 			Notes:              notes,
 			PreviousReputation: previousReputation,
 			CurrentReputation:  currentReputation,
@@ -231,7 +234,9 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 				i.Interaction.GuildID,
 				message.ChannelID,
 				message.ID),
-		})
+		}
+		tx := bot.DB.Where(&ModeratedUser{ID: i.GuildID + userID}).Create(&event)
+		tx.Commit()
 	}
 
 respond:

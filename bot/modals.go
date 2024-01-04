@@ -57,10 +57,10 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 		Value
 
 	customCommand := CustomCommand{
-		DiscordId:   guild.ID,
-		Name:        strings.ToLower(name),
-		Description: CustomCommandIdentifier + description,
-		Content:     content,
+		GuildConfigID: guild.ID,
+		Name:          strings.ToLower(name),
+		Description:   CustomCommandIdentifier + description,
+		Content:       content,
 	}
 
 	ird := discordgo.InteractionResponseData{
@@ -85,16 +85,12 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 	} else if strings.Contains(customCommand.Name, " ") {
 		ird = *bot.generalErrorDisplayedToTheUser("Command names may not have spaces")
 	} else {
-		sc := bot.getServerConfig(guild.ID)
-		sc.CustomCommands = append(sc.CustomCommands, customCommand)
-		tx := bot.DB.Save(&sc)
-		if tx.RowsAffected != 1 {
-			log.Warnf(UnexpectedRowsAffected, tx.RowsAffected)
-		}
+		var cmds []CustomCommand
+		bot.DB.Model(&CustomCommand{}).Where(&CustomCommand{GuildConfigID: guild.ID}).Create(&customCommand)
 
-		sc = bot.getServerConfig(guild.ID)
+		// Register commands with Discord API
+		bot.RegisterCustomCommandHandler(cmds)
 
-		bot.RegisterCustomCommandHandler(sc)
 		info := fmt.Sprintf(" from guild %s(%s)", guild.Name, guild.ID)
 		log.Debugf("creating command '/%s'", name+info)
 		_, err := bot.DG.ApplicationCommandCreate(bot.DG.State.User.ID,

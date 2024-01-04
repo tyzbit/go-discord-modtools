@@ -10,13 +10,14 @@ import (
 // GetCustomCommandHandlers returns a map[string]func of command handlers for every ServerConfig
 // TODO: filter out configured but not registered
 func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
-	registeredServerIDs := []string{}
+	registeredGuildIds := []string{}
 	cmds = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
-	bot.DB.Model(&ServerRegistration{}).Pluck("discord_id", &registeredServerIDs)
-	for _, regServerId := range registeredServerIDs {
-		sc := bot.getServerConfig(regServerId)
-		for _, customCommand := range sc.CustomCommands {
+	bot.DB.Model(&GuildConfig{}).Pluck("guild_id", &registeredGuildIds)
+	for _, regGuildId := range registeredGuildIds {
+		var customCommands []CustomCommand
+		bot.DB.Where(&CustomCommand{GuildConfigID: regGuildId}).Find(&customCommands)
+		for _, customCommand := range customCommands {
 			cmds[customCommand.Name] = func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				bot.UseCustomSlashCommandFromChatCommandContext(i, customCommand.Content)
 			}
@@ -27,20 +28,20 @@ func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *dis
 
 // RegisterCustomCommandHandler registers all commands that are configured
 // for a given ServerConfig
-func (bot *ModeratorBot) RegisterCustomCommandHandler(sc ServerConfig) {
+func (bot *ModeratorBot) RegisterCustomCommandHandler(cmds []CustomCommand) {
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 	commands, _ := bot.DG.ApplicationCommands("", "")
-	for _, customCommand := range sc.CustomCommands {
+	for _, customCommand := range cmds {
 		for _, registeredCommand := range commands {
 			if customCommand.Name == registeredCommand.ID {
 				log.Warnf("a saved server chat command conflicts with a global command and will be removed, %s",
 					customCommand.Name)
 
 				bot.DB.Model(&CustomCommand{}).Delete(CustomCommand{
-					Name:        customCommand.Name,
-					DiscordId:   customCommand.DiscordId,
-					Description: customCommand.Description,
-					Content:     customCommand.Content,
+					Name:          customCommand.Name,
+					GuildConfigID: customCommand.GuildConfigID,
+					Description:   customCommand.Description,
+					Content:       customCommand.Content,
 				})
 				// I don't think this is how you do this but I
 				// can't remember the right way right now lol
@@ -62,7 +63,7 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 
 	// Get already-registered guild-specific commands from the database
 	guildIds := []string{}
-	bot.DB.Model(&ServerRegistration{}).Pluck("discord_id", &guildIds)
+	bot.DB.Model(&GuildConfig{}).Pluck("guild_id", &guildIds)
 	// Add an element for global commands (they do not have a Guild ID)
 	guildIds = append(guildIds, "")
 	for _, id := range guildIds {
@@ -74,11 +75,12 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 		}
 		RegisteredCommands = append(RegisteredCommands, guildCommands...)
 
-		sc := bot.getServerConfig(id)
+		var cfg GuildConfig
+		bot.DB.Where(&GuildConfig{GuildID: id}).First(&cfg)
 
 		// If these are guild commands, they won't be in ConfiguredCommands yet
 		if id != "" {
-			for _, configuredCommand := range sc.CustomCommands {
+			for _, configuredCommand := range cfg.CustomCommands {
 				ConfiguredCommands = append(ConfiguredCommands, &discordgo.ApplicationCommand{
 					Name:        configuredCommand.Name,
 					Description: configuredCommand.Description,

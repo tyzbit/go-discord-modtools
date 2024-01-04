@@ -9,15 +9,14 @@ Set some environment variables before launching, or add a `.env` file.
 If database environment variables are provided, the bot will save stats to an external database.
 Otherwise, it will save stats to a local sqlite database at `/var/go-discord-modtools/local.db`
 
-| Variable          | Value(s)                                                           |
-| :---------------- | :----------------------------------------------------------------- |
-| ADMINISTRATOR_IDS | Comma separated IDs of users allowed to use administrator commands |
-| DB_NAME           | Database name for database                                         |
-| DB_HOST           | Hostname for database                                              |
-| DB_PASSWORD       | Password for database user                                         |
-| DB_USER           | Username for database user                                         |
-| LOG_LEVEL         | `trace`, `debug`, `info`, `warn`, `error`                          |
-| TOKEN             | The Discord token the bot should use                               |
+| Variable    | Value(s)                                  |
+| :---------- | :---------------------------------------- |
+| DB_NAME     | Database name for database                |
+| DB_HOST     | Hostname for database                     |
+| DB_PASSWORD | Password for database user                |
+| DB_USER     | Username for database user                |
+| LOG_LEVEL   | `trace`, `debug`, `info`, `warn`, `error` |
+| TOKEN       | The Discord token the bot should use      |
 
 ## Usage
 

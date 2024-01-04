@@ -3,10 +3,9 @@ module github.com/tyzbit/go-discord-modtools
 go 1.19
 
 require (
-	github.com/bwmarrin/discordgo v0.27.1
+	github.com/bwmarrin/discordgo v0.27.2-0.20240104041734-f70a01544f56
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golobby/config/v3 v3.4.2
-	github.com/google/uuid v1.5.0
 	github.com/sirupsen/logrus v1.9.3
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/sqlite v1.5.4
