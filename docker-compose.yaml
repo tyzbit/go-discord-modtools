@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: mariadb:11.1
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: moderatoroot
+      MARIADB_DATABASE: go_moderator
+      MARIADB_USER: gomoderate
+      MARIADB_PASSWORD: gomoderate
+
+  go-discord-modtools:
+    build: .
+    depends_on:
+      - db
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      DB_HOST: db
+      DB_USER: gomoderate
+      DB_PASSWORD: gomoderate
+      DB_NAME: go_moderator
+      COOKIE: ${COOKIE}
+      LOG_LEVEL: ${LOG_LEVEL}
+      TOKEN: ${TOKEN}
+volumes:
+  db_data: {}

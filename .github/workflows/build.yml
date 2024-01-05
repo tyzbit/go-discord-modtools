@@ -1,0 +1,38 @@
+name: Build and Push Docker Images with Version Tag
+
+on:
+  push:
+    branches:
+      - main
+      - initial-development # will change to develop when the app is more stable
+    tags:
+      - "*"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Extract tag name
+        id: extract-tag
+        run: echo "TAG_NAME=$(echo $GITHUB_REF | sed 's/refs\/tags\///')" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Build and push appropriate tag
+        run: |
+          date=$(date +%s)
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            docker build -t ghcr.io/${{ github.repository }}:latest .
+            docker push ghcr.io/${{ github.repository }}:latest
+          elif [[ "$GITHUB_REF" == "refs/heads/initial-development" ]]; then
+            docker build -t ghcr.io/${{ github.repository }}:develop-$date .
+            docker push ghcr.io/${{ github.repository }}:develop-$date
+          else
+            docker build -t ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }} .
+            docker push ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }}
+          fi
