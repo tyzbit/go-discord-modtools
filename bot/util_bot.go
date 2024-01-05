@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -54,7 +55,7 @@ func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bo
 func (bot *ModeratorBot) updateServersWatched() error {
 	var GuildsConfigured, GuildsActive int64
 	bot.DB.Where(&GuildConfig{}).Count(&GuildsConfigured)
-	GuildsActive = int64(len(bot.DG.State.Ready.Guilds))
+	bot.DB.Where(&GuildConfig{Active: sql.NullBool{Bool: true, Valid: true}}).Count(&GuildsActive)
 	log.Debugf("total number of servers configured: %v, connected servers: %v", GuildsConfigured, GuildsActive)
 
 	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}
