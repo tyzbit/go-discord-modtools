@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
@@ -85,7 +86,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 }
 
 // Creates a new slash command
-func (bot *ModeratorBot) ConfigureCustomSlashCommandFromChatCommandContext(i *discordgo.InteractionCreate) {
+func (bot *ModeratorBot) CreateCustomSlashCommandFromChatCommandContext(i *discordgo.InteractionCreate) {
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseModal,
 		Data: &discordgo.InteractionResponseData{
@@ -144,5 +145,41 @@ func (bot *ModeratorBot) UseCustomSlashCommandFromChatCommandContext(i *discordg
 		Data: &discordgo.InteractionResponseData{Content: content}})
 	if err != nil {
 		log.Errorf("error responding to use of custom command, err: %v", err)
+	}
+}
+
+func (bot *ModeratorBot) DeleteCustomSlashCommandFromChatCommandContext(i *discordgo.InteractionCreate) {
+	var cmds []CustomCommand
+	bot.DB.Where(&CustomCommand{GuildConfigID: i.GuildID}).Find(&cmds)
+
+	var options []discordgo.SelectMenuOption
+	for _, cmd := range cmds {
+		options = append(options, discordgo.SelectMenuOption{
+			Label:       fmt.Sprintf("/%s", cmd.Name),
+			Description: strings.ReplaceAll(cmd.Description, CustomCommandIdentifier, ""),
+			Value:       cmd.DiscordId,
+		})
+	}
+
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Flags: discordgo.MessageFlagsEphemeral,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.SelectMenu{
+							Placeholder: "Command to delete",
+							CustomID:    DeleteCustomSlashCommand,
+							Options:     options,
+						},
+					},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		log.Errorf("error showing custom slash command creation modal, err: %v", err)
 	}
 }

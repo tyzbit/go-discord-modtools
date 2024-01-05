@@ -14,9 +14,11 @@ import (
 // Updates a server setting according to the
 // column name (setting) and the value
 func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
-	setting string, value interface{}) {
+	setting string, value string) {
 
-	tx := bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).Update(setting, value)
+	tx := bot.DB.Model(&GuildConfig{}).
+		Where(&GuildConfig{GuildID: i.Interaction.GuildID}).
+		Update(setting, value)
 	var interactionErr error
 
 	if tx.RowsAffected != 1 {
@@ -67,7 +69,7 @@ func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, di
 		return err
 	}
 
-	tx.Update("Reputation", userUpdate.Reputation.Int64+int64(difference))
+	tx.Model(&ModeratedUser{}).Update("Reputation", userUpdate.Reputation.Int64+int64(difference))
 	return nil
 }
 
@@ -254,5 +256,52 @@ respond:
 	)
 	if err != nil {
 		log.Warn("error responding to interaction: %w", err)
+	}
+}
+
+// Deletes a custom command
+func (bot *ModeratorBot) DeleteCustomSlashCommandFromButtonContext(i *discordgo.InteractionCreate, commandID string) {
+	var cmds []CustomCommand
+	bot.DB.Where(&CustomCommand{GuildConfigID: i.Interaction.GuildID}).Find(&cmds)
+
+	var interactionErr error
+	guild, _ := bot.DG.Guild(i.GuildID)
+	if len(cmds) == 0 {
+		log.Debugf("no registered commands returned for %s(%s)", guild.Name, guild.Name)
+	}
+	for _, cmd := range cmds {
+		if cmd.DiscordId == commandID {
+			log.Infof("deleting custom command %s from server %s(%s)", commandID, guild.Name, guild.ID)
+			tx := bot.DB.Where(&CustomCommand{GuildConfigID: guild.ID, DiscordId: commandID}).Delete(&cmd)
+			if tx.RowsAffected != 1 {
+				log.Debugf("unexpected number of rows affected updating guild settings: %v", tx.RowsAffected)
+				interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseUpdateMessage,
+					Data: bot.generalErrorDisplayedToTheUser("Unable to save settings"),
+				})
+			} else {
+				defer bot.UpdateCommands()
+				var cfg GuildConfig
+				bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).First(&cfg)
+				interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseUpdateMessage,
+					Data: &discordgo.InteractionResponseData{
+						Title: "Command deleted",
+						Flags: discordgo.MessageFlagsEphemeral,
+						Embeds: []*discordgo.MessageEmbed{
+							{
+								Title:       "Command deleted",
+								Description: fmt.Sprintf("/%s command deleted", cmd.Name),
+								Color:       Green,
+							},
+						},
+					},
+				})
+			}
+		}
+	}
+
+	if interactionErr != nil {
+		log.Errorf("error responding to settings interaction, err: %v", interactionErr)
 	}
 }

@@ -26,8 +26,7 @@ func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *dis
 	return cmds
 }
 
-// RegisterCustomCommandHandler registers all commands that are configured
-// for a given ServerConfig
+// RegisterCustomCommandHandler registers the provided commands
 func (bot *ModeratorBot) RegisterCustomCommandHandler(cmds []CustomCommand) {
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 	commands, _ := bot.DG.ApplicationCommands("", "")

@@ -35,6 +35,10 @@ var (
 			Name:        AddCustomSlashCommand,
 			Description: "Create custom slash command",
 		},
+		{
+			Name:        RemoveCustomSlashCommand,
+			Description: "Remove custom slash command",
+		},
 	}
 	UserCommands = []*discordgo.ApplicationCommand{
 		{

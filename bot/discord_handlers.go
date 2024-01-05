@@ -79,7 +79,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			bot.GetUserInfoFromMessageContext(i)
 		},
 		AddCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ConfigureCustomSlashCommandFromChatCommandContext(i)
+			bot.CreateCustomSlashCommandFromChatCommandContext(i)
+		},
+		RemoveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DeleteCustomSlashCommandFromChatCommandContext(i)
 		},
 	}
 
@@ -87,7 +90,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		// Settings buttons/choices
 		EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
-			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", mcd.Values[0])
+			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", string(mcd.Values[0]))
 		},
 		ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			mcd := i.MessageComponentData()
@@ -108,7 +111,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 						break
 					}
 					if idx == len(botGuildMember.Roles)-1 {
-						bot.RespondToSettingsChoice(i, "moderator_role_setting_id", mcd.Values[0])
+						bot.RespondToSettingsChoice(i, "moderator_role_setting_id", string(mcd.Values[0]))
 					}
 				}
 			}
@@ -128,6 +131,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		SubmitReport: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SubmitReport(i)
+		},
+		DeleteCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			mcd := i.MessageComponentData()
+			bot.DeleteCustomSlashCommandFromButtonContext(i, mcd.Values[0])
 		},
 	}
 

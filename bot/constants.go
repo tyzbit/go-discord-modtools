@@ -15,6 +15,7 @@ const (
 	Settings                          = "settings"
 	GetUserInfoFromChatCommandContext = "query"
 	AddCustomSlashCommand             = "addcommand"
+	RemoveCustomSlashCommand          = "deletecommand"
 
 	// User commands
 	GetUserInfoFromUserContext      = "Check info"
@@ -44,8 +45,9 @@ const (
 	SubmitReport                = "Submit report"
 
 	// Modals
-	SaveEvidenceNotes      = "Save evidence notes"
-	SaveCustomSlashCommand = "Save custom slash command"
+	SaveEvidenceNotes        = "Save evidence notes"
+	SaveCustomSlashCommand   = "Save custom slash command"
+	DeleteCustomSlashCommand = "Remove custom slash command"
 
 	// Modal options
 	EvidenceNotes                 = "Evidence notes"
@@ -58,6 +60,7 @@ const (
 	FrenchGray = 13424349
 	Purple     = 7283691
 	DarkRed    = 9109504
+	Green      = 4306266
 
 	// Constants
 	MaxCommandContentLength     = 32   // https://discord.com/developers/docs/interactions/application-commands#create-global-application-command

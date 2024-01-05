@@ -49,6 +49,7 @@ type GuildConfig struct {
 type CustomCommand struct {
 	gorm.Model
 	GuildConfigID string
+	DiscordId     string
 	Name          string
 	Description   string
 	Content       string
