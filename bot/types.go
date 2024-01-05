@@ -38,7 +38,7 @@ type GuildConfig struct {
 	Active                   sql.NullBool    `pretty:"Bot is active in the server" gorm:"default:true"`
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
 	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
-	CustomCommands           []CustomCommand `pretty:"Custom commands"`
+	CustomCommands           []CustomCommand `pretty:"Custom commands" gorm:"foreignKey:ID"`
 }
 
 // Custom commands registered with a specific server
