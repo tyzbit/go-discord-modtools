@@ -25,6 +25,9 @@ jobs:
       - name: Build and push appropriate tag
         run: |
           date=$(date +%s)
+          sha=$(echo ${GITHUB_SHA::7})
+          docker build -t ghcr.io/${{ github.repository }}:$sha-$date .
+          docker push ghcr.io/${{ github.repository }}:$sha-$date
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
             docker build -t ghcr.io/${{ github.repository }}:latest .
             docker push ghcr.io/${{ github.repository }}:latest
