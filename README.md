@@ -1,6 +1,6 @@
 # go-discord-modtools
 
-Discord bot for Moder8or, written in Go
+Discord moderation bot written in Go
 
 ## Configuration
 
@@ -20,7 +20,8 @@ Otherwise, it will save stats to a local sqlite database at `/var/go-discord-mod
 
 ## Usage
 
-Right click (Desktop) or long press (mobile) a message and select Apps, then select a moderation action for the message.
+In the Discord app, right click (Desktop) or long press (mobile) a message or
+user to see the available options.
 
 ### Commands
 
