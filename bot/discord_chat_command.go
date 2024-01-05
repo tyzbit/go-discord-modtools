@@ -49,7 +49,7 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 		}
 
 		var cfg GuildConfig
-		bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
+		bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 		resp := bot.SettingsIntegrationResponse(cfg)
 		err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -157,7 +157,7 @@ func (bot *ModeratorBot) DeleteCustomSlashCommandFromChatCommandContext(i *disco
 		options = append(options, discordgo.SelectMenuOption{
 			Label:       fmt.Sprintf("/%s", cmd.Name),
 			Description: strings.ReplaceAll(cmd.Description, CustomCommandIdentifier, ""),
-			Value:       cmd.DiscordId,
+			Value:       cmd.ID,
 		})
 	}
 

@@ -34,7 +34,7 @@ func (bot *ModeratorBot) DocumentBehaviorFromMessageContext(i *discordgo.Interac
 
 	var err error
 	var cfg GuildConfig
-	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
+	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 	if cfg.EvidenceChannelSettingID == "" {
 		err = bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{

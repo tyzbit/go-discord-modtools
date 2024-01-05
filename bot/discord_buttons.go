@@ -17,7 +17,7 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 	setting string, value string) {
 
 	tx := bot.DB.Model(&GuildConfig{}).
-		Where(&GuildConfig{GuildID: i.Interaction.GuildID}).
+		Where(&GuildConfig{ID: i.Interaction.GuildID}).
 		Update(setting, value)
 	var interactionErr error
 
@@ -29,7 +29,7 @@ func (bot *ModeratorBot) RespondToSettingsChoice(i *discordgo.InteractionCreate,
 		})
 	} else {
 		var cfg GuildConfig
-		bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).First(&cfg)
+		bot.DB.Where(&GuildConfig{ID: i.Interaction.GuildID}).First(&cfg)
 		interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
 			Data: bot.SettingsIntegrationResponse(cfg),
@@ -162,7 +162,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 
 	// TODO: save event info
 	var cfg GuildConfig
-	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).FirstOrCreate(&cfg)
+	bot.DB.Where(&GuildConfig{ID: i.GuildID}).FirstOrCreate(&cfg)
 	if cfg.EvidenceChannelSettingID == "" {
 		err := bot.DG.InteractionRespond(i.Interaction,
 			&discordgo.InteractionResponse{
@@ -270,9 +270,9 @@ func (bot *ModeratorBot) DeleteCustomSlashCommandFromButtonContext(i *discordgo.
 		log.Debugf("no registered commands returned for %s(%s)", guild.Name, guild.Name)
 	}
 	for _, cmd := range cmds {
-		if cmd.DiscordId == commandID {
+		if cmd.ID == commandID {
 			log.Infof("deleting custom command %s from server %s(%s)", commandID, guild.Name, guild.ID)
-			tx := bot.DB.Where(&CustomCommand{GuildConfigID: guild.ID, DiscordId: commandID}).Delete(&cmd)
+			tx := bot.DB.Where(&CustomCommand{GuildConfigID: guild.ID, ID: commandID}).Delete(&cmd)
 			if tx.RowsAffected != 1 {
 				log.Debugf("unexpected number of rows affected updating guild settings: %v", tx.RowsAffected)
 				interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -282,7 +282,7 @@ func (bot *ModeratorBot) DeleteCustomSlashCommandFromButtonContext(i *discordgo.
 			} else {
 				defer bot.UpdateCommands()
 				var cfg GuildConfig
-				bot.DB.Where(&GuildConfig{GuildID: i.Interaction.GuildID}).First(&cfg)
+				bot.DB.Where(&GuildConfig{ID: i.Interaction.GuildID}).First(&cfg)
 				interactionErr = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseUpdateMessage,
 					Data: &discordgo.InteractionResponseData{

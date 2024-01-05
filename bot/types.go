@@ -2,7 +2,6 @@ package bot
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"gorm.io/gorm"
@@ -32,12 +31,9 @@ type ModeratorBotConfig struct {
 	Token      string `env:"TOKEN"`
 }
 
-// Servers
-// TODO: Combine registration and config
+// Servers are called Guilds in the Discord API
 type GuildConfig struct {
-	CreatedAt                time.Time
-	UpdatedAt                time.Time
-	GuildID                  string          `pretty:"Server ID" gorm:"primarykey"`
+	ID                       string          `pretty:"Server ID"`
 	Name                     string          `pretty:"Server Name" gorm:"default:default"`
 	Active                   sql.NullBool    `pretty:"Bot is active in the server" gorm:"default:true"`
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
@@ -46,19 +42,21 @@ type GuildConfig struct {
 }
 
 // Custom commands registered with a specific server
+// ID is registered with the Discord API
+// GuildConfigID is the server ID where the command is registered
 type CustomCommand struct {
-	gorm.Model
+	ID            string
 	GuildConfigID string
-	DiscordId     string
 	Name          string
 	Description   string
 	Content       string
 }
 
 // A ModeratedUser represents a specific user/server combination
-// that serves to track changes
+// that serves to record events and a "Reputation" which is only
+// visible to people who are in the moderator's configurable role.
 type ModeratedUser struct {
-	ID               string `gorm:"unique"`
+	ID               string
 	GuildId          string
 	GuildName        string
 	UserID           string
@@ -69,6 +67,7 @@ type ModeratedUser struct {
 
 // This is the representation of a moderation action
 type ModerationEvent struct {
+	ID                 uint `gorm:"primaryKey"`
 	ModeratedUserID    string
 	GuildId            string
 	GuildName          string

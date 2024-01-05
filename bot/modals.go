@@ -98,7 +98,7 @@ func (bot *ModeratorBot) SaveCustomSlashCommand(i *discordgo.InteractionCreate) 
 			ird = *bot.generalErrorDisplayedToTheUser(fmt.Sprintf("Unable to create command, err: %v", err))
 		}
 
-		customCommand.DiscordId = cmd.ID
+		customCommand.ID = cmd.ID
 		bot.DB.Model(&CustomCommand{}).Where(&CustomCommand{GuildConfigID: guild.ID}).Create(&customCommand)
 
 		// Register commands with Discord API

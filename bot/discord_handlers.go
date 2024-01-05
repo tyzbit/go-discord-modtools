@@ -151,7 +151,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	customCommandHandlers := bot.GetCustomCommandHandlers()
 	log.Debugf("found %v custom commands", len(customCommandHandlers))
 	var cfg GuildConfig
-	bot.DB.Where(&GuildConfig{GuildID: i.GuildID}).First(&cfg)
+	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {

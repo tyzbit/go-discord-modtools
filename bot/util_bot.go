@@ -36,7 +36,7 @@ func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bo
 			member.User.Username,
 			member.User.ID,
 			cfg.Name,
-			cfg.GuildID,
+			cfg.ID,
 		)
 		return true
 	}

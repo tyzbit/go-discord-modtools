@@ -16,7 +16,7 @@ func (bot *ModeratorBot) SettingsIntegrationResponse(cfg GuildConfig) *discordgo
 	} else {
 		evidenceChannelName = "#" + channel.Name
 	}
-	moderatorRole, _ := bot.DG.State.Role(cfg.GuildID, cfg.ModeratorRoleSettingID)
+	moderatorRole, _ := bot.DG.State.Role(cfg.ID, cfg.ModeratorRoleSettingID)
 	if moderatorRole == nil {
 		moderatorRoleName = "not set"
 	} else {

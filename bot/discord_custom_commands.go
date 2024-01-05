@@ -13,7 +13,7 @@ func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *dis
 	registeredGuildIds := []string{}
 	cmds = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
-	bot.DB.Model(&GuildConfig{}).Pluck("guild_id", &registeredGuildIds)
+	bot.DB.Model(&GuildConfig{}).Pluck("id", &registeredGuildIds)
 	for _, regGuildId := range registeredGuildIds {
 		var customCommands []CustomCommand
 		bot.DB.Where(&CustomCommand{GuildConfigID: regGuildId}).Find(&customCommands)
@@ -62,7 +62,7 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 
 	// Get already-registered guild-specific commands from the database
 	guildIds := []string{}
-	bot.DB.Model(&GuildConfig{}).Pluck("guild_id", &guildIds)
+	bot.DB.Model(&GuildConfig{}).Pluck("id", &guildIds)
 	// Add an element for global commands (they do not have a Guild ID)
 	guildIds = append(guildIds, "")
 	for _, id := range guildIds {
@@ -75,7 +75,7 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 		RegisteredCommands = append(RegisteredCommands, guildCommands...)
 
 		var cfg GuildConfig
-		bot.DB.Where(&GuildConfig{GuildID: id}).First(&cfg)
+		bot.DB.Where(&GuildConfig{ID: id}).First(&cfg)
 
 		// If these are guild commands, they won't be in ConfiguredCommands yet
 		if id != "" {

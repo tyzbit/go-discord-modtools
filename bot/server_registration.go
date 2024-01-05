@@ -11,11 +11,11 @@ import (
 // it creates it with sensibile defaults
 func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool) error {
 	reg := GuildConfig{
-		GuildID: g.ID,
-		Name:    g.Name,
-		Active:  sql.NullBool{Valid: true, Bool: true},
+		ID:     g.ID,
+		Name:   g.Name,
+		Active: sql.NullBool{Valid: true, Bool: true},
 	}
-	tx := bot.DB.Where(&GuildConfig{GuildID: g.ID}).FirstOrCreate(&reg)
+	tx := bot.DB.Where(&GuildConfig{ID: g.ID}).FirstOrCreate(&reg)
 	tx.Commit()
 
 	// Called with no arguments, this only updates registration
@@ -39,7 +39,7 @@ func (bot *ModeratorBot) UpdateInactiveRegistrations(activeGuilds []*discordgo.G
 	for _, reg := range sr {
 		active := false
 		for _, g := range activeGuilds {
-			if g.ID == reg.GuildID {
+			if g.ID == reg.ID {
 				active = true
 				break
 			}
@@ -48,7 +48,7 @@ func (bot *ModeratorBot) UpdateInactiveRegistrations(activeGuilds []*discordgo.G
 		// If the server isn't found in activeGuilds, then we have a config
 		// for a server we're not in anymore
 		if !active {
-			inactiveRegistrations = append(inactiveRegistrations, reg.GuildID)
+			inactiveRegistrations = append(inactiveRegistrations, reg.ID)
 		}
 	}
 
