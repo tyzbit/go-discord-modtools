@@ -32,10 +32,6 @@ Get reputation for a user:
 
 `/reputation`
 
-Get stats for the bot:
-
-`/stats`
-
 Get this help message:
 
 `/help`

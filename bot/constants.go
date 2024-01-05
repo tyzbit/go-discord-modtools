@@ -103,10 +103,6 @@ Directly moderate up a user (more coming soon):
 
 ` + "`/moderate`" + `
 
-Get stats for the bot:
-
-` + "`/stats`" + `
-
 Get this help message:
 
 ` + "`/help`"
