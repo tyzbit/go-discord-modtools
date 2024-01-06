@@ -54,15 +54,14 @@ func (bot *ModeratorBot) UpdateInactiveRegistrations(activeGuilds []*discordgo.G
 
 	// Since active servers will set Active to true, we will
 	// set the rest of the servers as inactive.
-	registrations := int64(len(inactiveRegistrations))
-	if registrations > 0 && len(inactiveRegistrations) > 0 {
-		tx := bot.DB.Model(&GuildConfig{}).Where(inactiveRegistrations)
-		tx.Updates(&GuildConfig{Active: sql.NullBool{Valid: true, Bool: false}})
+	if len(inactiveRegistrations) > 0 {
+		tx := bot.DB.Model(&GuildConfig{}).Where("id IN ?", inactiveRegistrations).
+			Updates(map[string]interface{}{"active": sql.NullBool{Valid: true, Bool: false}})
 
-		if tx.RowsAffected != registrations {
+		if tx.RowsAffected != int64(len(inactiveRegistrations)) {
 			log.Errorf("unexpected number of rows affected updating %v inactive "+
 				"server registrations, rows updated: %v",
-				registrations, tx.RowsAffected)
+				inactiveRegistrations, tx.RowsAffected)
 		}
 	}
 }

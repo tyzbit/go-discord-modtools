@@ -54,8 +54,9 @@ func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bo
 // in both the local bot stats and in the database. It is allowed to fail
 func (bot *ModeratorBot) updateServersWatched() error {
 	var GuildsConfigured, GuildsActive int64
-	bot.DB.Where(&GuildConfig{}).Count(&GuildsConfigured)
-	bot.DB.Where(&GuildConfig{Active: sql.NullBool{Bool: true, Valid: true}}).Count(&GuildsActive)
+	tx := bot.DB.Model(&GuildConfig{})
+	tx.Count(&GuildsConfigured)
+	tx.Where(&GuildConfig{Active: sql.NullBool{Bool: true, Valid: true}}).Count(&GuildsActive)
 	log.Debugf("total number of servers configured: %v, connected servers: %v", GuildsConfigured, GuildsActive)
 
 	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}
