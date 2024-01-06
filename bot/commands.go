@@ -24,10 +24,6 @@ var (
 			},
 		},
 		{
-			Name:        Stats,
-			Description: "Show bot stats",
-		},
-		{
 			Name:        Settings,
 			Description: "Change settings",
 		},
