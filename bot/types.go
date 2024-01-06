@@ -8,6 +8,7 @@ import (
 )
 
 // TODO: Change everything to Guild[...] to match DiscordGo
+// TODO: Use pointers for nullable fields
 
 // Events
 

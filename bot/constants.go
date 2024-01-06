@@ -87,11 +87,9 @@ const (
 
 	// Shown to the user when `/help` is called
 	BotHelpText = `**Usage**
-	Right click (Desktop) or long press (mobile) a message and select Apps, then select a moderation action for the message.
+	In the Discord app, right click (Desktop) or long press (mobile) a message or user to see the available options.
 
-You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see- You can also right-click (or long press) a message and use "Get snapshot" to get a message with snapshots that only you can see or select "Take snapshot" to take a snapshot of the live page.
-
-Configure the bot:
+Configure the bot (Highly recommended to do so only people in a specific role can use the moderation commands):
 
 ` + "`/settings`" + `
 
@@ -99,9 +97,13 @@ Look up a user (more coming soon):
 
 ` + "`/query`" + `
 
-Directly moderate up a user (more coming soon):
+Add a custom command (simply posts your desired block of text, Markdown formatting enabled)
 
-` + "`/moderate`" + `
+` + "`/addcommand`" + `
+
+Remove a custom command
+
+` + "`/deletecommand`" + `
 
 Get this help message:
 

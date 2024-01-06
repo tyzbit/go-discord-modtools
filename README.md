@@ -20,18 +20,26 @@ Otherwise, it will save stats to a local sqlite database at `/var/go-discord-mod
 
 ## Usage
 
-In the Discord app, right click (Desktop) or long press (mobile) a message or
-user to see the available options.
+In the Discord app, right click (Desktop) or long press (mobile)
+a message or user to see the available options.
 
 ### Commands
 
-Configure the bot:
+Configure the bot (Highly recommended to do so only people in a specific role can use the moderation commands):
 
 `/settings`
 
 Get reputation for a user:
 
-`/reputation`
+`/query`
+
+Add a custom command (simply posts your desired block of text, Markdown formatting enabled)
+
+`/addcommand`
+
+Remove a custom command
+
+`/deletecommand`
 
 Get this help message:
 
