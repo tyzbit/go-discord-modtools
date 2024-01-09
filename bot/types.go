@@ -24,7 +24,9 @@ type ModeratorBot struct {
 // ModeratorBotConfig is attached to ModeratorBot so config settings can be
 // accessed easily
 type ModeratorBotConfig struct {
+	DBType     string `env:"DB_TYPE"`
 	DBHost     string `env:"DB_HOST"`
+	DBPort     string `env:"DB_PORT"`
 	DBName     string `env:"DB_NAME"`
 	DBPassword string `env:"DB_PASSWORD"`
 	DBUser     string `env:"DB_USER"`
@@ -34,12 +36,12 @@ type ModeratorBotConfig struct {
 
 // Servers are called Guilds in the Discord API
 type GuildConfig struct {
-	ID                       string          `pretty:"Server ID"`
+	ID                       string          `pretty:"Server ID" gorm:"type:varchar(191)"`
 	Name                     string          `pretty:"Server Name" gorm:"default:default"`
 	Active                   sql.NullBool    `pretty:"Bot is active in the server" gorm:"default:true"`
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
 	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
-	CustomCommands           []CustomCommand `pretty:"Custom commands" gorm:"foreignKey:ID"`
+	CustomCommands           []CustomCommand `pretty:"Custom commands"`
 }
 
 // Custom commands registered with a specific server
@@ -47,7 +49,7 @@ type GuildConfig struct {
 // GuildConfigID is the server ID where the command is registered
 type CustomCommand struct {
 	ID            string
-	GuildConfigID string
+	GuildConfigID string `gorm:"type:varchar(191)"`
 	Name          string
 	Description   string
 	Content       string

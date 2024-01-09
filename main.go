@@ -18,6 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	bot "github.com/tyzbit/go-discord-modtools/bot"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -76,10 +77,26 @@ func main() {
 		logConfig = logger.Default.LogMode(logger.Info)
 	}
 
-	if config.DBHost != "" && config.DBName != "" && config.DBPassword != "" && config.DBUser != "" {
-		dbType = "mysql"
-		dsn := fmt.Sprintf("%v:%v@tcp(%v)/%v?parseTime=True", config.DBUser, config.DBPassword, config.DBHost, config.DBName)
+	if config.DBType != "" {
+		dbType = config.DBType
+	}
+	if config.DBHost != "" && config.DBName != "" && config.DBPassword != "" && config.DBUser != "" && dbType == "mysql" {
+		dbPort := "3306"
+		if config.DBPort != "" {
+			dbPort = config.DBPort
+		}
+		dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=True", config.DBUser, config.DBPassword, config.DBHost, dbPort, config.DBName)
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logConfig})
+	} else if config.DBHost != "" && config.DBName != "" && config.DBPassword != "" && config.DBUser != "" && dbType == "postgresql" {
+		dbPort := "5432"
+		if config.DBPort != "" {
+			dbPort = config.DBPort
+		}
+		currentTime := time.Now()
+		timezone, _ := currentTime.Zone()
+		dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=%v",
+			config.DBHost, config.DBUser, config.DBPassword, config.DBName, dbPort, timezone)
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logConfig})
 	} else {
 		dbType = "sqlite"
 		// Create the folder path if it doesn't exist
