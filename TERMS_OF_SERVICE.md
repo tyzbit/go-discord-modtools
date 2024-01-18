@@ -8,9 +8,7 @@ This Privacy Policy only applies to the officially hosted instance of the go-dis
 
 By using the go-discord-modtools Bot, you agree to be bound by these Terms. If you do not agree to these Terms, please refrain from using the Bot.
 
-**2. Use of the Bot**
-
-a. **Authorized Use:** You may use the Bot only for its intended purpose, which is to provide links to mirrors of content hosted on Moder8or.
+a. **Authorized Use:** You may use the Bot only for its intended purpose, which is to aid as a moderation tool for Discord to foster healthy communities.
 
 b. **Compliance:** You agree to comply with all applicable laws and regulations while using the Bot.
 
