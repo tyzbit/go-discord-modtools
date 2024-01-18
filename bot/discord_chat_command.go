@@ -77,7 +77,7 @@ func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.Interact
 		Data: &discordgo.InteractionResponseData{
 			CustomID: GetUserInfoFromUserContext,
 			Flags:    discordgo.MessageFlagsEphemeral,
-			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, user.Reputation),
+			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, &user.Reputation),
 		},
 	})
 	if err != nil {
