@@ -13,7 +13,7 @@ func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool)
 	reg := GuildConfig{
 		ID:     g.ID,
 		Name:   g.Name,
-		Active: sql.NullBool{Valid: true, Bool: true},
+		Active: nullBool(true),
 	}
 	tx := bot.DB.Where(&GuildConfig{ID: g.ID}).FirstOrCreate(&reg)
 	tx.Commit()

@@ -76,7 +76,7 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 			for idx, field := range fields {
 				if field.Name == CurrentReputation {
 					user := bot.GetModeratedUser(i.GuildID, authorID)
-					fields[idx].Value = fmt.Sprintf("%v", user.Reputation.Int64)
+					fields[idx].Value = fmt.Sprintf("%v", user.Reputation)
 				}
 			}
 		}
@@ -91,12 +91,12 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 			},
 			{
 				Name:   PreviousReputation,
-				Value:  fmt.Sprintf("%v", user.Reputation.Int64),
+				Value:  fmt.Sprintf("%v", user.Reputation),
 				Inline: true,
 			},
 			{
 				Name:   CurrentReputation,
-				Value:  fmt.Sprintf("%v", user.Reputation.Int64),
+				Value:  fmt.Sprintf("%v", user.Reputation),
 				Inline: true,
 			},
 			{

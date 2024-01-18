@@ -55,7 +55,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		Settings: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SetSettingsFromChatCommandContext(i)
 		},
-		// TODO: error will be handled once the functions are ready
 		GetUserInfoFromChatCommandContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromChatCommandContext(i)
 		},
@@ -65,7 +64,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 
 		// User actions (right click or long-press user)
-		// TODO: error will be handled once the functions are ready
 		GetUserInfoFromUserContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromUserContext(i)
 		},
@@ -74,7 +72,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		DocumentBehaviorFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.DocumentBehaviorFromMessageContext(i)
 		},
-		// TODO: error will be handled once the functions are ready
 		GetUserInfoFromMessageContext: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.GetUserInfoFromMessageContext(i)
 		},
@@ -118,12 +115,10 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, 1)
-			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
 		DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.ChangeUserReputation(i, -1)
-			// TODO: edit the original message we posted instead of posting a new one
 			bot.DocumentBehaviorFromButtonContext(i)
 		},
 		ShowEvidenceCollectionModal: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -138,7 +133,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 	}
 
-	// TODO: cleanup when bot features are more stable
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SaveEvidenceNotes(i)

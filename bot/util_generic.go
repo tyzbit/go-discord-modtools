@@ -127,3 +127,12 @@ func getAttachmentURLs(content string) (urls []string) {
 	}
 	return urls
 }
+
+func nullInt64(i int) *int64 {
+	v := int64(i)
+	return &v
+}
+
+func nullBool(b bool) *bool {
+	return &b
+}

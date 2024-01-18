@@ -8,13 +8,12 @@ import (
 )
 
 // GetCustomCommandHandlers returns a map[string]func of command handlers for every ServerConfig
-// TODO: filter out configured but not registered
 func (bot *ModeratorBot) GetCustomCommandHandlers() (cmds map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
-	registeredGuildIds := []string{}
+	activeGuildIds := []string{}
 	cmds = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
-	bot.DB.Model(&GuildConfig{}).Pluck("id", &registeredGuildIds)
-	for _, regGuildId := range registeredGuildIds {
+	bot.DB.Model(&GuildConfig{}).Where(&GuildConfig{Active: nullBool(true)}).Pluck("id", &activeGuildIds)
+	for _, regGuildId := range activeGuildIds {
 		var customCommands []CustomCommand
 		bot.DB.Where(&CustomCommand{GuildConfigID: regGuildId}).Find(&customCommands)
 		for _, customCommand := range customCommands {

@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"database/sql"
-
 	"github.com/bwmarrin/discordgo"
 	"gorm.io/gorm"
 )
@@ -38,7 +36,7 @@ type ModeratorBotConfig struct {
 type GuildConfig struct {
 	ID                       string          `pretty:"Server ID" gorm:"type:varchar(191)"`
 	Name                     string          `pretty:"Server Name" gorm:"default:default"`
-	Active                   sql.NullBool    `pretty:"Bot is active in the server" gorm:"default:true"`
+	Active                   *bool           `pretty:"Bot is active in the server" gorm:"default:true"`
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
 	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
 	CustomCommands           []CustomCommand `pretty:"Custom commands"`
@@ -65,7 +63,7 @@ type ModeratedUser struct {
 	UserID           string
 	UserName         string
 	ModerationEvents []ModerationEvent
-	Reputation       sql.NullInt64 `gorm:"default:1"`
+	Reputation       *int64 `gorm:"default:1"`
 }
 
 // This is the representation of a moderation action
@@ -77,8 +75,8 @@ type ModerationEvent struct {
 	UserID             string
 	UserName           string
 	Notes              string
-	PreviousReputation sql.NullInt64
-	CurrentReputation  sql.NullInt64
+	PreviousReputation *int64
+	CurrentReputation  *int64
 	ModeratorID        string
 	ModeratorName      string
 	ReportURL          string

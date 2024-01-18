@@ -1,31 +1,13 @@
 package bot
 
 import (
-	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
 
 const moderatorRepoUrl string = "https://github.com/tyzbit/go-discord-modtools"
-
-// typeInChannel sets the typing indicator for a channel. The indicator is cleared
-// when a message is sent or after some number of seconds.
-func (bot *ModeratorBot) typeInChannel(channel chan bool, channelID string) {
-	for {
-		select {
-		case <-channel:
-			return
-		default:
-			if err := bot.DG.ChannelTyping(channelID); err != nil {
-				log.Error("unable to set typing indicator: ", err)
-			}
-			time.Sleep(time.Second * 5)
-		}
-	}
-}
 
 // isAllowed returns a boolean if the user is in the preselected group
 // that should have access to the bot
@@ -56,7 +38,7 @@ func (bot *ModeratorBot) updateServersWatched() error {
 	var GuildsConfigured, GuildsActive int64
 	tx := bot.DB.Model(&GuildConfig{})
 	tx.Count(&GuildsConfigured)
-	tx.Where(&GuildConfig{Active: sql.NullBool{Bool: true, Valid: true}}).Count(&GuildsActive)
+	tx.Where(&GuildConfig{Active: nullBool(true)}).Count(&GuildsActive)
 	log.Debugf("total number of servers configured: %v, connected servers: %v", GuildsConfigured, GuildsActive)
 
 	updateStatusData := &discordgo.UpdateStatusData{Status: "online"}

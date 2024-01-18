@@ -27,7 +27,6 @@ const (
 
 	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
-	// TODO: (extra credit) make a command that manages custom commands that drop a premade message
 	UserOption    = "user"
 	ChannelOption = "channel"
 	MessageOption = "message"

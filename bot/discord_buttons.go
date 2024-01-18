@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"path"
@@ -69,7 +68,7 @@ func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, di
 		return err
 	}
 
-	tx.Model(&ModeratedUser{}).Update("Reputation", userUpdate.Reputation.Int64+int64(difference))
+	tx.Model(&ModeratedUser{}).Update("Reputation", *userUpdate.Reputation+int64(difference))
 	return nil
 }
 
@@ -160,7 +159,6 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 	// Add files to the attachment
 	ms.Files = files
 
-	// TODO: save event info
 	var cfg GuildConfig
 	bot.DB.Where(&GuildConfig{ID: i.GuildID}).FirstOrCreate(&cfg)
 	if cfg.EvidenceChannelSettingID == "" {
@@ -199,7 +197,7 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 		}
 
 		var notes string
-		var previousReputation, currentReputation sql.NullInt64
+		var previousReputation, currentReputation *int64
 		// If notes exist, update. If not, add new
 		for _, field := range i.Interaction.Message.Embeds[0].Fields {
 			if field.Name == Notes {
@@ -207,17 +205,11 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 			}
 			if field.Name == CurrentReputation {
 				value, _ := strconv.Atoi(field.Value)
-				currentReputation = sql.NullInt64{
-					Valid: true,
-					Int64: int64(value),
-				}
+				currentReputation = nullInt64(value)
 			}
 			if field.Name == PreviousReputation {
 				value, _ := strconv.Atoi(field.Value)
-				previousReputation = sql.NullInt64{
-					Valid: true,
-					Int64: int64(value),
-				}
+				previousReputation = nullInt64(value)
 			}
 		}
 
