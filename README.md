@@ -54,3 +54,14 @@ Create a `.env` file with your configuration, at the bare minimum you need
 a Discord token for `TOKEN`.
 
 You can either `docker compose up --build` to run with a mysql database, or just `go run main.go` to run with a sqlite database.
+
+## Self-hosting
+
+- Create a bot here: https://discord.com/developers/applications
+
+- Go to "Bot" -> Copy token, it should be set as the `TOKEN` environment variable
+
+- Go to Oauth2 -> save your Client ID to your notes
+
+- Add it to your server by visiting https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=277025507392&scope=bot,
+  replacing CLIENT_ID with your client ID.
