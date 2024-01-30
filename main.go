@@ -94,7 +94,7 @@ func main() {
 		}
 		currentTime := time.Now()
 		timezone, _ := currentTime.Zone()
-		dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=%v",
+		dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=enable TimeZone=%v",
 			config.DBHost, config.DBUser, config.DBPassword, config.DBName, dbPort, timezone)
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logConfig})
 	} else {

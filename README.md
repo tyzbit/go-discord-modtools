@@ -11,12 +11,15 @@ Otherwise, it will save stats to a local sqlite database at `/var/go-discord-mod
 
 | Variable    | Value(s)                                  |
 | :---------- | :---------------------------------------- |
+| DB_TYPE     | `mysql`, `postgres` or unset for sqlite   |
 | DB_NAME     | Database name for database                |
 | DB_HOST     | Hostname for database                     |
 | DB_PASSWORD | Password for database user                |
 | DB_USER     | Username for database user                |
 | LOG_LEVEL   | `trace`, `debug`, `info`, `warn`, `error` |
 | TOKEN       | The Discord token the bot should use      |
+
+PostgreSQL requires SSL to be enabled for your database.
 
 ## Usage
 
