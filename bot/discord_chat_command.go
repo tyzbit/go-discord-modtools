@@ -64,23 +64,25 @@ func (bot *ModeratorBot) SetSettingsFromChatCommandContext(i *discordgo.Interact
 
 // Gets user info from the `/query` command
 func (bot *ModeratorBot) GetUserInfoFromChatCommandContext(i *discordgo.InteractionCreate) {
-	if i.Interaction.Member.User.ID == "" {
+	userMentions := i.Interaction.ApplicationCommandData().Resolved.Users
+	if len(userMentions) == 0 {
 		log.Warn("user was not provided")
 	}
+	for userID := range userMentions {
+		user := bot.GetModeratedUser(i.GuildID, userID)
 
-	user := bot.GetModeratedUser(i.GuildID, i.Interaction.Member.User.ID)
-
-	// TODO: Add more user information
-	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			CustomID: GetUserInfoFromUserContext,
-			Flags:    discordgo.MessageFlagsEphemeral,
-			Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, *user.Reputation),
-		},
-	})
-	if err != nil {
-		log.Warn("error responding to interaction: %w", err)
+		// TODO: Add more user information
+		err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				CustomID: GetUserInfoFromUserContext,
+				Flags:    discordgo.MessageFlagsEphemeral,
+				Content:  fmt.Sprintf("<@%s> has a reputation of %v", userID, *user.Reputation),
+			},
+		})
+		if err != nil {
+			log.Warn("error responding to interaction: %w", err)
+		}
 	}
 }
 
