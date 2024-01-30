@@ -55,8 +55,7 @@ func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCre
 		log.Warn("user was not provided")
 	}
 
-	user := ModeratedUser{}
-	bot.DB.Where(&ModeratedUser{ID: i.GuildID + i.Interaction.Member.User.ID}).First(&user)
+	user := bot.GetModeratedUser(i.GuildID, i.Interaction.Member.User.ID)
 
 	return &discordgo.InteractionResponseData{
 		CustomID: GetUserInfoFromUserContext,
