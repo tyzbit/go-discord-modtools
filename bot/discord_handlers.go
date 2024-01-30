@@ -143,7 +143,6 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	customCommandHandlers := bot.GetCustomCommandHandlers()
-	log.Debugf("found %v custom commands", len(customCommandHandlers))
 	var cfg GuildConfig
 	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 	switch i.Type {
@@ -157,7 +156,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
 				if err != nil {
-					log.Warn("error responding to interaction: %w", err)
+					log.Warn("error responding to application command interaction: %w", err)
 				}
 			}
 		}
@@ -170,7 +169,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
 				if err != nil {
-					log.Warn("error responding to interaction: %w", err)
+					log.Warn("error responding to custom command interaction: %w", err)
 				}
 			}
 		}
@@ -184,7 +183,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
 				if err != nil {
-					log.Warn("error responding to interaction: %w", err)
+					log.Warn("error responding to interaction message interaction: %w", err)
 				}
 			}
 		}
@@ -198,7 +197,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 					Data: bot.permissionsErrorDisplayedToTheUser(),
 				})
 				if err != nil {
-					log.Warn("error responding to interaction: %w", err)
+					log.Warn("error responding to modal submit interaction: %w", err)
 				}
 			}
 		}
