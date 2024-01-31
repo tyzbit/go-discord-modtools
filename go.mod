@@ -8,6 +8,7 @@ require (
 	github.com/golobby/config/v3 v3.4.2
 	github.com/sirupsen/logrus v1.9.3
 	gorm.io/driver/mysql v1.5.2
+	gorm.io/driver/postgres v1.5.4
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.5
 )
@@ -50,5 +51,4 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.5.4 // indirect
 )
