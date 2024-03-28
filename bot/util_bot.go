@@ -9,10 +9,10 @@ import (
 
 const moderatorRepoUrl string = "https://github.com/tyzbit/go-discord-modtools"
 
-// isAllowed returns a boolean if the user is in the preselected group
+// allowedDueToAdminRole returns a boolean if the user is in the preselected group
 // that should have access to the bot
 // PLANNED: or if the user is a server owner.
-func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bool {
+func (bot *ModeratorBot) allowedDueToAdminRole(cfg GuildConfig, member *discordgo.Member) bool {
 	// Allow if no role has been set
 	if cfg.ModeratorRoleSettingID == "" {
 		log.Infof("Allowing %s(%s) to use function because moderator role is not defined in server %s(%s)",
@@ -30,6 +30,12 @@ func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bo
 		}
 	}
 	return false
+}
+
+func (bot *ModeratorBot) allowedDueToCreatingThePoll(i *discordgo.InteractionCreate) bool {
+	// TODO: check if user created poll and permit/deny
+	log.Debug("not implemented, allowing anyway!!!!!!!!")
+	return true
 }
 
 // updateServersWatched updates the servers watched value

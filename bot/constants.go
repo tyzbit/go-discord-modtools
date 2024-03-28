@@ -16,6 +16,7 @@ const (
 	GetUserInfoFromChatCommandContext = "query"
 	AddCustomSlashCommand             = "addcommand"
 	RemoveCustomSlashCommand          = "deletecommand"
+	CreatePoll                        = "poll"
 
 	// User commands
 	GetUserInfoFromUserContext      = "Check info"
@@ -27,15 +28,19 @@ const (
 
 	// Premade Option IDs (semi-reusable)
 	// TODO: actions that delete messages, ban users etc
-	UserOption    = "user"
-	ChannelOption = "channel"
-	MessageOption = "message"
-	ReasonOption  = "reason"
+	UserOption          = "user"
+	ChannelOption       = "channel"
+	MessageOption       = "message"
+	ReasonOption        = "reason"
+	NumberOfPollChoices = "choices"
 
 	// Buttons
 	// Settings (the names affect the column names in the DB)
 	EvidenceChannelSettingID = "Evidence channel"
 	ModeratorRoleSettingID   = "Moderator role"
+	// Poll buttons
+	EndPoll          = "End poll"
+	PollOptionPrefix = "Poll option "
 
 	// Moderation buttons
 	IncreaseUserReputation      = "⬆️ Reputation"
@@ -47,6 +52,7 @@ const (
 	SaveEvidenceNotes        = "Save evidence notes"
 	SaveCustomSlashCommand   = "Save custom slash command"
 	DeleteCustomSlashCommand = "Remove custom slash command"
+	StartPoll                = "Start poll"
 
 	// Modal options
 	EvidenceNotes                 = "Evidence notes"
@@ -54,6 +60,9 @@ const (
 	CustomSlashCommandDescription = "Description for this custom slash command"
 	CustomSlashCommandContent     = "Message to paste if this command is used"
 	CustomCommandIdentifier       = "Custom command: "
+	VoteEndTime                   = "Time when the vote should end"
+	VoteOptions                   = "List of options for voting"
+	PollName                      = "Name for the poll"
 
 	// Colors
 	FrenchGray = 13424349
@@ -61,10 +70,14 @@ const (
 	DarkRed    = 9109504
 	Green      = 4306266
 
+	// Emoji
+	StopEmoji = "🛑"
+
 	// Constants
 	MaxCommandContentLength     = 32   // https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 	MaxMessageContentLength     = 2000 // https://discord.com/developers/docs/resources/channel#create-message
 	MaxDescriptionContentLength = 100  // https://discord.com/developers/docs/interactions/application-commands#application-command-object
+	DefaultNumberOfPollOptions  = "3"
 
 	// Text fragments
 	CurrentReputation      = "Current reputation"

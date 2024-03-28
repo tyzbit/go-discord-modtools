@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	log "github.com/sirupsen/logrus"
 )
@@ -45,6 +47,9 @@ func (bot *ModeratorBot) GuildDeleteHandler(s *discordgo.Session, gd *discordgo.
 
 // InteractionInit configures all interactive commands
 func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	var cfg GuildConfig
+	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
+
 	// Technically app actions are commands too, but those are in commands_message.go and commands_user.go
 	// We don't pass the session to these because you can get that from bot.DG
 	commandsHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
@@ -81,74 +86,126 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		RemoveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.DeleteCustomSlashCommandFromChatCommandContext(i)
 		},
+		CreatePoll: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.CreatePollFromChatCommandContext(i)
+		},
 	}
 
 	buttonHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		// Settings buttons/choices
 		EvidenceChannelSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			mcd := i.MessageComponentData()
-			bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", string(mcd.Values[0]))
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				mcd := i.MessageComponentData()
+				bot.RespondToSettingsChoice(i, "evidence_channel_setting_id", string(mcd.Values[0]))
+			}
 		},
 		ModeratorRoleSettingID: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			mcd := i.MessageComponentData()
-			botGuildMember, err := bot.DG.GuildMember(i.GuildID, i.Interaction.Message.Author.ID)
-			if err != nil {
-				log.Warn("Unable to look up bot in list of guild members, err: %w", err)
-
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
 			} else {
-				for idx, role := range botGuildMember.Roles {
-					if mcd.Values[0] == role {
-						err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-							Type: discordgo.InteractionResponseChannelMessageWithSource,
-							Data: bot.generalErrorDisplayedToTheUser("Select a different role, this bot role cannot be used"),
-						})
-						if err != nil {
-							log.Warn("error responding to interaction: %w", err)
+				mcd := i.MessageComponentData()
+				botGuildMember, err := bot.DG.GuildMember(i.GuildID, i.Interaction.Message.Author.ID)
+				if err != nil {
+					log.Warn("Unable to look up bot in list of guild members, err: %w", err)
+
+				} else {
+					for idx, role := range botGuildMember.Roles {
+						if mcd.Values[0] == role {
+							err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+								Type: discordgo.InteractionResponseChannelMessageWithSource,
+								Data: bot.generalErrorDisplayedToTheUser("Select a different role, this bot role cannot be used"),
+							})
+							if err != nil {
+								log.Warn("error responding to interaction: %w", err)
+							}
+							break
 						}
-						break
-					}
-					if idx == len(botGuildMember.Roles)-1 {
-						bot.RespondToSettingsChoice(i, "moderator_role_setting_id", string(mcd.Values[0]))
+						if idx == len(botGuildMember.Roles)-1 {
+							bot.RespondToSettingsChoice(i, "moderator_role_setting_id", string(mcd.Values[0]))
+						}
 					}
 				}
 			}
 		},
 		IncreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ChangeUserReputation(i, 1)
-			bot.DocumentBehaviorFromButtonContext(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.ChangeUserReputation(i, 1)
+				bot.DocumentBehaviorFromButtonContext(i)
+			}
 		},
 		DecreaseUserReputation: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ChangeUserReputation(i, -1)
-			bot.DocumentBehaviorFromButtonContext(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.ChangeUserReputation(i, -1)
+				bot.DocumentBehaviorFromButtonContext(i)
+			}
 		},
 		ShowEvidenceCollectionModal: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.ShowEvidenceCollectionModal(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.ShowEvidenceCollectionModal(i)
+			}
 		},
 		SubmitReport: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SubmitReport(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.SubmitReport(i)
+			}
 		},
 		DeleteCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			mcd := i.MessageComponentData()
-			bot.DeleteCustomSlashCommandFromButtonContext(i, mcd.Values[0])
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				mcd := i.MessageComponentData()
+				bot.DeleteCustomSlashCommandFromButtonContext(i, mcd.Values[0])
+			}
+		},
+		EndPoll: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if bot.allowedDueToAdminRole(cfg, i.Member) || bot.allowedDueToCreatingThePoll(i) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.EndPollFromButtonContext(i)
+			}
 		},
 	}
 
 	modalHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		SaveEvidenceNotes: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SaveEvidenceNotes(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.SaveEvidenceNotes(i)
+			}
 		},
 		SaveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			bot.SaveCustomSlashCommand(i)
+			if !bot.allowedDueToAdminRole(cfg, i.Member) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				bot.SaveCustomSlashCommand(i)
+			}
+		},
+		StartPoll: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if bot.allowedDueToAdminRole(cfg, i.Member) || bot.allowedDueToCreatingThePoll(i) {
+				bot.RespondWithPermissionDenied(i)
+			} else {
+				mcd := i.ModalSubmitData()
+				bot.StartPoll(i, mcd)
+			}
 		},
 	}
 
 	customCommandHandlers := bot.GetCustomCommandHandlers()
-	var cfg GuildConfig
-	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
 		if h, ok := commandsHandlers[i.ApplicationCommandData().Name]; ok {
-			if bot.isAllowed(cfg, i.Member) {
+			if bot.allowedDueToAdminRole(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -161,7 +218,7 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			}
 		}
 		if h, ok := customCommandHandlers[i.ApplicationCommandData().Name]; ok {
-			if bot.isAllowed(cfg, i.Member) {
+			if bot.allowedDueToAdminRole(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -174,22 +231,18 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 			}
 		}
 	case discordgo.InteractionMessageComponent:
+		if strings.HasPrefix(i.MessageComponentData().CustomID, PollOptionPrefix) {
+			// A poll option was selected, everyone is allowed
+			bot.PollUpdateHandler(i)
+			break
+		}
+
 		if h, ok := buttonHandlers[i.MessageComponentData().CustomID]; ok {
-			if bot.isAllowed(cfg, i.Member) {
-				h(s, i)
-			} else {
-				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: bot.permissionsErrorDisplayedToTheUser(),
-				})
-				if err != nil {
-					log.Warn("error responding to interaction message interaction: %w", err)
-				}
-			}
+			h(s, i)
 		}
 	case discordgo.InteractionModalSubmit:
 		if h, ok := modalHandlers[i.ModalSubmitData().CustomID]; ok {
-			if bot.isAllowed(cfg, i.Member) {
+			if bot.allowedDueToAdminRole(cfg, i.Member) {
 				h(s, i)
 			} else {
 				err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -203,3 +256,25 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		}
 	}
 }
+
+// func (bot *ModeratorBot) MessageReactionAddHandler(s *discordgo.Session, i *discordgo.MessageReactionAdd) {
+// 	reactionsHandlers := map[string]func(s *discordgo.Session, i *discordgo.MessageReactionAdd){
+// 		// Chat commands (slash commands)
+// 		StopEmoji: func(s *discordgo.Session, i *discordgo.MessageReactionAdd) {
+// 			var cfg GuildConfig
+// 			bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
+// 			if bot.allowedDueToAdminRole(cfg, i.Member) {
+// 				bot.StopVoteFromReactionContext(i)
+// 			} else {
+// 				bot.RemoveMessageReaction(i)
+// 			}
+// 		},
+// 	}
+
+// 	if h, ok := reactionsHandlers[i.Emoji.Name]; ok {
+// 		h(s, i)
+// 		return
+// 	}
+
+// 	bot.HandleCatchallMessageReaction(i)
+// }

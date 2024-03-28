@@ -64,9 +64,6 @@ func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, di
 		GuildName: guild.Name,
 	}
 	tx := bot.DB.Where(&ModeratedUser{ID: i.GuildID + userID}).FirstOrCreate(&userUpdate)
-	if err != nil {
-		return err
-	}
 
 	tx.Model(&ModeratedUser{}).Update("Reputation", *userUpdate.Reputation+int64(difference))
 	return nil
@@ -296,4 +293,52 @@ func (bot *ModeratorBot) DeleteCustomSlashCommandFromButtonContext(i *discordgo.
 	if interactionErr != nil {
 		log.Errorf("error responding to settings interaction, err: %v", interactionErr)
 	}
+}
+
+func (bot *ModeratorBot) PollUpdateHandler(i *discordgo.InteractionCreate) {
+	mcd := i.Interaction.MessageComponentData()
+	customID := mcd.CustomID
+	guild, err := bot.DG.Guild(i.GuildID)
+	if err != nil {
+		log.Warnf("unable to look up guild (%s), err: %s", i.GuildID, err)
+		return
+	}
+
+	var poll Poll
+	var votes []Vote
+	// Create if necessary
+	bot.DB.Where(&Poll{GuildConfigID: guild.ID, ID: i.Message.ID}).Preload("Votes").FirstOrCreate(&poll)
+	voteTx := bot.DB.Where(&Vote{GuildConfigID: guild.ID, PollID: i.Message.ID, CustomID: customID}).FirstOrCreate(&votes)
+
+	for _, vote := range votes {
+		if i.Member.User.ID == vote.UserID {
+			err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: bot.generalInfoDisplayedToTheUser("You have already voted for that option"),
+			})
+			if err != nil {
+				log.Warn("error responding to poll choice interaction: %w", err)
+			}
+			return
+		}
+	}
+
+	log.Debugf("counting a vote for poll %s by %s in %s(%s)", poll.ID, i.Member.User.ID, guild.Name, guild.ID)
+	poll.Votes = append(poll.Votes, Vote{
+		PollID:        i.Message.ID,
+		GuildConfigID: guild.ID,
+		CustomID:      customID,
+		UserID:        i.Member.User.ID,
+	})
+	voteTx.Updates(&votes)
+
+	// TODO: update message with new tallies
+	// TODO: show who voted for each option
+}
+
+// Starts a poll the user has customized
+func (bot *ModeratorBot) EndPollFromButtonContext(i *discordgo.InteractionCreate) {
+	// TODO: Update DB
+	// TODO: Update message with results
+	// TODO: Optionally notify user that created poll?
 }

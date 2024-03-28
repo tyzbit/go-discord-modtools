@@ -40,6 +40,7 @@ type GuildConfig struct {
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
 	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
 	CustomCommands           []CustomCommand `pretty:"Custom commands"`
+	Polls                    []Poll          `pretty:"Active polls"`
 }
 
 // Custom commands registered with a specific server
@@ -51,6 +52,25 @@ type CustomCommand struct {
 	Name          string
 	Description   string
 	Content       string
+}
+
+// This is everything needed to track polls
+type Poll struct {
+	// This matches the message ID from discord when the poll was first posted
+	ID            string `gorm:"type:varchar(191)"`
+	GuildConfigID string
+	Votes         []Vote
+}
+
+// Vote is one of 0 or more votes on a Poll
+type Vote struct {
+	ID            uint
+	PollID        string
+	GuildConfigID string
+	// This is the ID of the button for the choice, used in a few places
+	// It is only unique per PollID, essentially just the number of the poll choice
+	CustomID string
+	UserID   string
 }
 
 // A ModeratedUser represents a specific user/server combination

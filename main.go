@@ -32,6 +32,8 @@ var (
 		&bot.CustomCommand{},
 		&bot.ModerationEvent{},
 		&bot.ModeratedUser{},
+		&bot.Poll{},
+		&bot.Vote{},
 	}
 
 	sqlitePath      string        = "/var/go-discord-modtools/local.sqlite"

@@ -24,6 +24,21 @@ var (
 			},
 		},
 		{
+			Name:        CreatePoll,
+			Description: "Create a poll",
+			Type:        discordgo.ChatApplicationCommand,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        NumberOfPollChoices,
+					Description: "Number of choices",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Required:    true,
+					MinValue:    func() *float64 { v := 1.0; return &v }(),
+					MaxValue:    10.0,
+				},
+			},
+		},
+		{
 			Name:        Settings,
 			Description: "Change settings",
 		},

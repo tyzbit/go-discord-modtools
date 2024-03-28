@@ -184,3 +184,51 @@ func (bot *ModeratorBot) DeleteCustomSlashCommandFromChatCommandContext(i *disco
 		log.Errorf("error showing custom slash command creation modal, err: %v", err)
 	}
 }
+
+// Shows a modal for choosing poll options
+func (bot *ModeratorBot) CreatePollFromChatCommandContext(i *discordgo.InteractionCreate) {
+	numberOfChoices := i.ApplicationCommandData().Options[0].IntValue()
+	components := []discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{discordgo.TextInput{
+				Required:  true,
+				CustomID:  PollName,
+				Label:     PollName,
+				Style:     discordgo.TextInputParagraph,
+				MinLength: 1,
+				MaxLength: 200,
+			}},
+		},
+	}
+	// TODO(stretch goal): ask user for end time for the poll
+	for i := 1; i <= int(numberOfChoices); i++ {
+		component := discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.TextInput{
+					Required:  true,
+					CustomID:  fmt.Sprintf("poll_option_%v", i),
+					Label:     fmt.Sprintf("Option %v", i),
+					Style:     discordgo.TextInputShort,
+					MinLength: 1,
+					MaxLength: 20,
+				},
+			},
+		}
+		components = append(components, component)
+	}
+
+	// TODO(stretch goal): launch goroutine to end poll after a time
+
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseModal,
+		Data: &discordgo.InteractionResponseData{
+			CustomID:   StartPoll,
+			Title:      "Create a poll",
+			Components: components,
+		},
+	})
+
+	if err != nil {
+		log.Errorf("error responding to /%s, err: %v", CreatePoll, err)
+	}
+}

@@ -7,6 +7,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Responds to an InteractionCreate with a permission denied message
+func (bot *ModeratorBot) RespondWithPermissionDenied(i *discordgo.InteractionCreate) {
+	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: bot.permissionsErrorDisplayedToTheUser(),
+	})
+	if err != nil {
+		log.Warn("error responding to interaction message interaction: %w", err)
+	}
+}
+
 // SettingsIntegrationResponse returns server settings in a *discordgo.InteractionResponseData
 func (bot *ModeratorBot) SettingsIntegrationResponse(cfg GuildConfig) *discordgo.InteractionResponseData {
 	channel, _ := bot.DG.Channel(cfg.EvidenceChannelSettingID)
@@ -72,6 +83,20 @@ func (bot *ModeratorBot) generalErrorDisplayedToTheUser(reason string) *discordg
 				Title:       "There was an issue",
 				Description: reason,
 				Color:       DarkRed,
+			},
+		},
+		Flags: discordgo.MessageFlagsEphemeral,
+	}
+}
+
+// Simple wrapper to display an embed to the user with an error (ephemeral)
+func (bot *ModeratorBot) generalInfoDisplayedToTheUser(reason string) *discordgo.InteractionResponseData {
+	return &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title:       "Notice",
+				Description: reason,
+				Color:       FrenchGray,
 			},
 		},
 		Flags: discordgo.MessageFlagsEphemeral,
