@@ -3,7 +3,7 @@ module github.com/tyzbit/go-discord-modtools
 go 1.19
 
 require (
-	github.com/bwmarrin/discordgo v0.27.2-0.20240202235938-7f80bc797881
+	github.com/bwmarrin/discordgo v0.27.2-0.20240315152229-33ee38cbf271
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golobby/config/v3 v3.4.2
 	github.com/sirupsen/logrus v1.9.3
