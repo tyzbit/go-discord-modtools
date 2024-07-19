@@ -16,7 +16,10 @@ const (
 	MessageOption = "message"
 	ReasonOption  = "reason"
 
-	// Buttons
+	// Constants
+	MaxCommandContentLength     = 32   // https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
+	MaxMessageContentLength     = 2000 // https://discord.com/developers/docs/resources/channel#create-message
+	MaxDescriptionContentLength = 100  // https://discord.com/developers/docs/interactions/application-commands#application-command-object
 
 	// Colors
 	FrenchGray = 13424349
@@ -26,9 +29,6 @@ const (
 
 	// If images have this in front of their name, they're spoilered
 	Spoiler = "SPOILER_"
-
-	// Errors
-	UnexpectedRowsAffected = "unexpected number of rows affected getting user reputation: %v"
 
 	// URLs
 	MessageURLTemplate = "https://discord.com/channels/%s/%s/%s"

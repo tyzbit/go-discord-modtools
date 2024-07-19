@@ -24,10 +24,13 @@ func (bot *ModeratorBot) GuildCreateHandler(s *discordgo.Session, gc *discordgo.
 		return
 	}
 
-	err := bot.registerOrUpdateServer(gc.Guild, false)
+	err := bot.registerOrUpdateServer(gc.Guild)
 	if err != nil {
 		log.Errorf("unable to register or update server: %v", err)
 	}
+
+	// Start watching RSS feeds
+	go bot.StartWatchingRegisteredFeeds(gc.Guild.ID)
 }
 
 // GuildDeleteHandler is called whenever the bot leaves a guild.
@@ -37,7 +40,7 @@ func (bot *ModeratorBot) GuildDeleteHandler(s *discordgo.Session, gd *discordgo.
 	}
 
 	log.Infof("guild %s(%s) deleted (bot was probably kicked)", gd.Guild.Name, gd.Guild.ID)
-	err := bot.registerOrUpdateServer(gd.BeforeDelete, true)
+	err := bot.registerOrUpdateServer(gd.BeforeDelete)
 	if err != nil {
 		log.Errorf("unable to register or update server: %v", err)
 	}
@@ -80,6 +83,15 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		RemoveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.DeleteCustomSlashCommandFromChatCommandContext(i)
+		},
+		ConfigureRSSFeed: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ConfigureRSSFeedFromChatCommandContext(i)
+		},
+		ListRSSFeeds: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ListRSSFeedsFromChatCommandContext(i)
+		},
+		SelectRSSFeedForDeletion: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.DeleteRSSFeedFromChatCommandContext(i)
 		},
 	}
 
@@ -139,6 +151,9 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 		},
 		SaveCustomSlashCommand: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			bot.SaveCustomSlashCommand(i)
+		},
+		ConfigureRSSFeed: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			bot.ConfigureRSSFeed(i)
 		},
 	}
 

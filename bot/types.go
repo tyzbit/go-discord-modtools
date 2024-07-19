@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"gorm.io/gorm"
 )
@@ -40,6 +42,7 @@ type GuildConfig struct {
 	EvidenceChannelSettingID string          `pretty:"Channel to document evidence in"`
 	ModeratorRoleSettingID   string          `pretty:"Role for moderators"`
 	CustomCommands           []CustomCommand `pretty:"Custom commands"`
+	RSSFeeds                 []RSSFeed       `pretty:"RSS Feeds"`
 }
 
 // Custom commands registered with a specific server
@@ -51,6 +54,20 @@ type CustomCommand struct {
 	Name          string
 	Description   string
 	Content       string
+}
+
+// RSS Feed config, per-server
+type RSSFeed struct {
+	ID              string
+	GuildConfigID   string `gorm:"type:varchar(191)"`
+	URL             string
+	Name            string
+	UpdateFrequency time.Duration
+	TargetChannelID string
+	ShowAuthor      bool
+	ShowThumbnail   bool
+	ShowImage       bool
+	ShowVideo       bool
 }
 
 // A ModeratedUser represents a specific user/server combination
@@ -80,15 +97,4 @@ type ModerationEvent struct {
 	ModeratorID        string
 	ModeratorName      string
 	ReportURL          string
-}
-
-// Stats
-// botStats is read by structToPrettyDiscordFields and converted
-// into a slice of *discordgo.MessageEmbedField
-type botStats struct {
-	ModerateRequests int64 `pretty:"Times the bot has been called"`
-	MessagesSent     int64 `pretty:"Messages Sent"`
-	Interactions     int64 `pretty:"Interactions with the bot"`
-	GuildsActive     int64 `pretty:"Active servers"`
-	GuildsConfigured int64 `pretty:"Configured servers" global:"true"`
 }

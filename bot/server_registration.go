@@ -9,7 +9,7 @@ import (
 
 // registerOrUpdateServer checks if a guild is already registered in the database. If not,
 // it creates it with sensibile defaults
-func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool) error {
+func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild) error {
 	reg := GuildConfig{
 		ID:     g.ID,
 		Name:   g.Name,
@@ -20,10 +20,7 @@ func (bot *ModeratorBot) registerOrUpdateServer(g *discordgo.Guild, delete bool)
 
 	// Called with no arguments, this only updates registration
 	// for global commands.
-	err := bot.UpdateCommands()
-	if err != nil {
-		return err
-	}
+	bot.UpdateCommands()
 
 	return nil
 }

@@ -32,6 +32,7 @@ var (
 		&bot.CustomCommand{},
 		&bot.ModerationEvent{},
 		&bot.ModeratedUser{},
+		&bot.RSSFeed{},
 	}
 
 	sqlitePath      string        = "/var/go-discord-modtools/local.sqlite"

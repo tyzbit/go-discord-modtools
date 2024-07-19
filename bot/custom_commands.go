@@ -17,17 +17,13 @@ const (
 	// Modals
 	SaveCustomSlashCommand   = "Save custom slash command"
 	DeleteCustomSlashCommand = "Remove custom slash command"
+	SaveRSSFeed              = "Save RSS Feed"
 
 	// Modal options
 	CustomSlashName               = "Name for this custom slash command"
 	CustomSlashCommandDescription = "Description for this custom slash command"
 	CustomSlashCommandContent     = "Message to paste if this command is used"
 	CustomCommandIdentifier       = "Custom command: "
-
-	// Constants
-	MaxCommandContentLength     = 32   // https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
-	MaxMessageContentLength     = 2000 // https://discord.com/developers/docs/resources/channel#create-message
-	MaxDescriptionContentLength = 100  // https://discord.com/developers/docs/interactions/application-commands#application-command-object
 )
 
 // GetCustomCommandHandlers returns a map[string]func of command handlers for every ServerConfig
@@ -79,7 +75,7 @@ func (bot *ModeratorBot) RegisterCustomCommandHandler(cmds []CustomCommand) {
 
 // UpdateCommands iterates through all configured commands and ensures
 // they are registered, updated or removed
-func (bot *ModeratorBot) UpdateCommands() (err error) {
+func (bot *ModeratorBot) UpdateCommands() {
 	var commandsToCreate, commandsToEdit, commandsToDelete []*discordgo.ApplicationCommand
 
 	// Get already-registered guild-specific commands from the database
@@ -90,7 +86,6 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 	for _, id := range guildIds {
 		guildCommands, err := bot.DG.ApplicationCommands(bot.DG.State.User.ID, id)
 		if err != nil {
-			err = fmt.Errorf(", err: %w", err)
 			log.Warnf("unable to look up server-specific commands for server %s", id)
 			break
 		}
@@ -211,7 +206,6 @@ func (bot *ModeratorBot) UpdateCommands() (err error) {
 			RegisteredCommands = append(RegisteredCommands, newCmd)
 		}
 	}
-	return err
 }
 
 // Deletes a custom command

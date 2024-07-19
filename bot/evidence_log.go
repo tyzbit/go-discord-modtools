@@ -479,19 +479,19 @@ func (bot *ModeratorBot) GetModeratedUser(GuildId string, userID string) (modera
 }
 
 // Updates a user reputation, given the source interaction and value to add
-func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, difference int) (err error) {
+func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, difference int) {
 	userID := getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
 	if userID == "" {
-		return fmt.Errorf("unable to determine user ID from reference")
+		log.Errorf("unable to determine user ID from reference")
 	}
 
 	user, err := bot.DG.User(userID)
 	if err != nil {
-		return err
+		log.Errorf("unable to look up user %s", userID)
 	}
 	guild, err := bot.DG.Guild(i.GuildID)
 	if err != nil {
-		return err
+		log.Errorf("unable to look up guild %s", i.GuildID)
 	}
 
 	userUpdate := ModeratedUser{
@@ -502,10 +502,9 @@ func (bot *ModeratorBot) ChangeUserReputation(i *discordgo.InteractionCreate, di
 		GuildName: guild.Name,
 	}
 	tx := bot.DB.Where(&ModeratedUser{ID: i.GuildID + userID}).FirstOrCreate(&userUpdate)
-	if err != nil {
-		return err
+	if tx.Error != nil {
+		log.Errorf("unable to look up or create user %s(%s)", user.Username, userID)
 	}
 
 	tx.Model(&ModeratedUser{}).Update("Reputation", *userUpdate.Reputation+int64(difference))
-	return nil
 }

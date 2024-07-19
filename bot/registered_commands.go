@@ -35,6 +35,44 @@ var (
 			Name:        RemoveCustomSlashCommand,
 			Description: "Remove custom slash command",
 		},
+		{
+			Name:        ConfigureRSSFeed,
+			Description: "Add RSS feed to watch",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        FeedName,
+					Description: "RSS feed name",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Required:    true,
+				},
+				{
+					Name:        FeedURL,
+					Description: "RSS feed URL",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Required:    true,
+				},
+				{
+					Name:        TargetChannel,
+					Description: "Channel to post updates in",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Required:    true,
+				},
+				{
+					Name:        UpdateInterval,
+					Description: "How often to check for new items",
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name:        ListRSSFeeds,
+			Description: "List configured RSS feeds",
+		},
+		{
+			Name:        SelectRSSFeedForDeletion,
+			Description: "Remove RSS feed",
+		},
 	}
 	UserCommands = []*discordgo.ApplicationCommand{
 		{

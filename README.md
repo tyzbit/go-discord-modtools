@@ -44,6 +44,18 @@ Remove a custom command
 
 `/deletecommand`
 
+Add a custom command (simply posts your desired block of text, Markdown formatting enabled)
+
+`/addrss`
+
+List all configured RSS feeds
+
+`/listrss`
+
+Remove a custom command
+
+`/deleterss`
+
 Get this help message:
 
 `/help`
