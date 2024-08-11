@@ -2,6 +2,10 @@
 
 Discord moderation bot written in Go
 
+![Using the bot to check reputation and save evidence](features_1.png)
+
+![The resulting report](features_2.png)
+
 ## Configuration
 
 Set some environment variables before launching, or add a `.env` file.
