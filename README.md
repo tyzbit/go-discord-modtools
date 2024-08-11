@@ -2,9 +2,8 @@
 
 Discord moderation bot written in Go
 
-![Using the bot to check reputation and save evidence](features_1.png)
-
-![The resulting report](features_2.png)
+<img src="features_1.png" width="400">
+<img src="features_2.png" width="400">
 
 ## Configuration
 
