@@ -449,15 +449,17 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 // User information and stats produced for the /query command and
 // "Get info" when right clicking users
 func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
+	user := i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID].Author
+
 	if i.Interaction.Member.User.ID == "" {
 		log.Warn("user was not provided")
 	}
 
-	user := bot.GetModeratedUser(i.GuildID, i.Interaction.Member.User.ID)
+	moderatedUser := bot.GetModeratedUser(i.GuildID, user.ID)
 	return &discordgo.InteractionResponseData{
 		CustomID: GetUserInfoFromUserContext,
 		Flags:    discordgo.MessageFlagsEphemeral,
-		Content:  fmt.Sprintf("<@%s> has a reputation of %v", i.Interaction.Member.User.ID, *user.Reputation),
+		Content:  fmt.Sprintf("<@%s> has a reputation of %v", user.ID, *moderatedUser.Reputation),
 	}
 }
 
