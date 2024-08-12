@@ -11,8 +11,11 @@ const moderatorRepoUrl string = "https://github.com/tyzbit/go-discord-modtools"
 
 // isAllowed returns a boolean if the user is in the preselected group
 // that should have access to the bot
-// PLANNED: or if the user is a server owner.
 func (bot *ModeratorBot) isAllowed(cfg GuildConfig, member *discordgo.Member) bool {
+	// Guild owners always have full permissions
+	if guild, _ := bot.DG.Guild(cfg.ID); guild.OwnerID == member.User.ID {
+		return true
+	}
 	// Allow if no role has been set
 	if cfg.ModeratorRoleSettingID == "" {
 		log.Infof("Allowing %s(%s) to use function because moderator role is not defined in server %s(%s)",
