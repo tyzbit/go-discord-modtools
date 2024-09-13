@@ -309,16 +309,14 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 	var fields []*discordgo.MessageEmbedField
 	var messageType discordgo.InteractionResponseType
 	var authorID string
-	if len(message.Embeds) > 0 {
-		if len(message.Embeds[0].Fields) > 0 {
-			fields = message.Embeds[0].Fields
-			messageType = discordgo.InteractionResponseUpdateMessage
-			authorID = getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
-			for idx, field := range fields {
-				if field.Name == CurrentReputation {
-					user := bot.GetModeratedUser(i.GuildID, authorID)
-					fields[idx].Value = fmt.Sprintf("%v", *user.Reputation)
-				}
+	if len(message.Embeds) > 0 && len(message.Embeds[0].Fields) > 0 {
+		fields = message.Embeds[0].Fields
+		messageType = discordgo.InteractionResponseUpdateMessage
+		authorID = getUserIDFromDiscordReference(i.Interaction.Message.Embeds[0].Fields[0].Value)
+		for idx, field := range fields {
+			if field.Name == CurrentReputation {
+				user := bot.GetModeratedUser(i.GuildID, authorID)
+				fields[idx].Value = fmt.Sprintf("%v", *user.Reputation)
 			}
 		}
 	} else {
