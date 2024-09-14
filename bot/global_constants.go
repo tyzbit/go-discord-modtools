@@ -30,6 +30,12 @@ const (
 	// Errors
 	UnexpectedRowsAffected = "unexpected number of rows affected getting user reputation: %v"
 
+	// String for evidence from a message
+	MessageEvidenceDescription = "Document user behavior for <@%v> from as message - good, bad, or noteworthy"
+
+	// String for evidence from a user
+	UserEvidenceDescription = "Document user behavior for <@%v> - good, bad, or noteworthy"
+
 	// URLs
 	MessageURLTemplate = "https://discord.com/channels/%s/%s/%s"
 )
