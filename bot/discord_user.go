@@ -11,28 +11,23 @@ import (
 // called when the target is a user and not a message, therefore
 // this will be implicitly without any message reference
 func (bot *ModeratorBot) DocumentBehaviorFromUserContext(i *discordgo.InteractionCreate) {
-	// if i.Interaction.Member.User == nil {
-	// 	reason := "No user was provided"
-	// 	log.Warn(reason)
-	// 	err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-	// 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-	// 		Data: bot.generalErrorDisplayedToTheUser(reason)})
-	// 	return
-	// }
-
-	// data := *i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID]
-	// err = bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-	// 	Type: discordgo.InteractionResponseChannelMessageWithSource,
-	// 	Data: &discordgo.InteractionResponseData{
-	// 		Embeds: []*discordgo.MessageEmbed{
-	// 			{
-	// 				Title:       fmt.Sprintf("Log user behavior for %s (ID: %v)", data.Author.Username, data.Author.ID),
-	// 				Description: "Document user behavior, good bad or noteworthy",
-	// 			},
-	// 		},
-	// 		Flags: discordgo.MessageFlagsEphemeral,
-	// 	},
-	// })
+	user := i.Interaction.ApplicationCommandData().Resolved.Users[i.ApplicationCommandData().TargetID]
+	var err error
+	var cfg GuildConfig
+	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
+	if cfg.EvidenceChannelSettingID == "" {
+		err = bot.DG.InteractionRespond(i.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: bot.settingsErrorDisplayedToTheUser(),
+			})
+	} else {
+		err = bot.DG.InteractionRespond(i.Interaction,
+			bot.GenerateEvidenceReportFromUser(i, user))
+	}
+	if err != nil {
+		log.Warn("error responding to interaction: %w", err)
+	}
 }
 
 // Produces user info such as reputation and (PLANNED) stats

@@ -110,28 +110,32 @@ func (bot *ModeratorBot) SubmitReport(i *discordgo.InteractionCreate) {
 		Embeds: i.Interaction.Message.Embeds,
 	}
 
-	// Save attachments to the message because view links expire after 24h
-	attachmentURLs := getAttachmentURLs(i.Interaction.Message.Embeds[0].Fields[6].Value)
-	files := []*discordgo.File{}
-	for _, attachmentURL := range attachmentURLs {
-		client := http.Client{}
-		resp, err := client.Get(attachmentURL)
-		if err != nil {
-			log.Warnf("error getting attachment from message (%s), error: %s", i.Message.ID, err)
-			continue
+	// Only check for attachments if this evidence comes from a message,
+	// the number of fields are different
+	if i.Message.Embeds[0].Description == MessageEvidenceDescription {
+		// Save attachments to the message because view links expire after 24h
+		attachmentURLs := getAttachmentURLs(i.Interaction.Message.Embeds[0].Fields[6].Value)
+		files := []*discordgo.File{}
+		for _, attachmentURL := range attachmentURLs {
+			client := http.Client{}
+			resp, err := client.Get(attachmentURL)
+			if err != nil {
+				log.Warnf("error getting attachment from message (%s), error: %s", i.Message.ID, err)
+				continue
+			}
+			defer resp.Body.Close()
+
+			filename := path.Base(resp.Request.URL.Path)
+			files = append(files, &discordgo.File{
+				Name:        Spoiler + filename,
+				ContentType: resp.Header.Get("content-type"),
+				Reader:      resp.Body,
+			})
 		}
-		defer resp.Body.Close()
 
-		filename := path.Base(resp.Request.URL.Path)
-		files = append(files, &discordgo.File{
-			Name:        Spoiler + filename,
-			ContentType: resp.Header.Get("content-type"),
-			Reader:      resp.Body,
-		})
+		// Add files to the attachment
+		ms.Files = files
 	}
-
-	// Add files to the attachment
-	ms.Files = files
 
 	var cfg GuildConfig
 	bot.DB.Where(&GuildConfig{ID: i.GuildID}).FirstOrCreate(&cfg)
@@ -381,7 +385,87 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Evidence Report",
-					Description: fmt.Sprintf("Document user behavior for for <@%v> - good, bad, or noteworthy", authorID),
+					Description: fmt.Sprintf(MessageEvidenceDescription, authorID),
+					Color:       Purple,
+					Fields:      fields,
+				},
+			},
+			Flags: discordgo.MessageFlagsEphemeral,
+			Components: []discordgo.MessageComponent{discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{
+					discordgo.Button{
+						CustomID: DecreaseUserReputation,
+						Label:    DecreaseUserReputation,
+						Style:    discordgo.PrimaryButton,
+					},
+					discordgo.Button{
+						CustomID: IncreaseUserReputation,
+						Label:    IncreaseUserReputation,
+						Style:    discordgo.PrimaryButton,
+					},
+					discordgo.Button{
+						CustomID: ShowEvidenceCollectionModal,
+						Label:    ShowEvidenceCollectionModal,
+						Style:    discordgo.PrimaryButton,
+					},
+					discordgo.Button{
+						CustomID: SubmitReport,
+						Label:    SubmitReport,
+						Style:    discordgo.PrimaryButton,
+					},
+				},
+			}},
+		},
+	}
+}
+
+// Returns a discordgo.InteractionResponse with an evidence report based on a message provided
+func (bot *ModeratorBot) GenerateEvidenceReportFromUser(i *discordgo.InteractionCreate, user *discordgo.User) (resp *discordgo.InteractionResponse) {
+	modUser := bot.GetModeratedUser(i.GuildID, user.ID)
+	var fields []*discordgo.MessageEmbedField
+	var messageType discordgo.InteractionResponseType
+	var authorID string
+	messageType = discordgo.InteractionResponseChannelMessageWithSource
+	authorID = user.ID
+	fields = []*discordgo.MessageEmbedField{
+		{
+			Name:   "Author of message",
+			Value:  fmt.Sprintf("<@%s>", user.ID),
+			Inline: true,
+		},
+		{
+			Name:   PreviousReputation,
+			Value:  fmt.Sprintf("%v", *modUser.Reputation),
+			Inline: true,
+		},
+		{
+			Name:   CurrentReputation,
+			Value:  fmt.Sprintf("%v", *modUser.Reputation),
+			Inline: true,
+		},
+		{
+			Name:   "Link to original message",
+			Value:  "There is no original message as this evidence was collected by referencing the user directly.",
+			Inline: true,
+		},
+	}
+
+	fields = append(fields, &discordgo.MessageEmbedField{
+		Name: "Collected by",
+		Value: fmt.Sprintf(`<@%s>
+									%s (<t:%v:R>)`,
+			i.Interaction.Member.User.ID,
+			time.Now().UTC().Format(time.RFC1123Z),
+			time.Now().Unix()),
+	})
+
+	return &discordgo.InteractionResponse{
+		Type: messageType,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Evidence Report",
+					Description: fmt.Sprintf(UserEvidenceDescription, authorID),
 					Color:       Purple,
 					Fields:      fields,
 				},
@@ -447,10 +531,15 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 // User information and stats produced for the /query command and
 // "Get info" when right clicking users
 func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
-	user := i.Interaction.ApplicationCommandData().Resolved.Messages[i.ApplicationCommandData().TargetID].Author
+	user := i.Interaction.ApplicationCommandData().Resolved.Users[i.ApplicationCommandData().TargetID]
 
-	if i.Interaction.Member.User.ID == "" {
+	if user.ID == "" {
 		log.Warn("user was not provided")
+		return &discordgo.InteractionResponseData{
+			CustomID: GetUserInfoFromUserContext,
+			Flags:    discordgo.MessageFlagsEphemeral,
+			Content:  "There was an error getting user info.",
+		}
 	}
 
 	moderatedUser := bot.GetModeratedUser(i.GuildID, user.ID)
