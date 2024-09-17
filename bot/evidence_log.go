@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -324,6 +325,10 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 			}
 		}
 	} else {
+		messageContentNameField := OriginalMessageContent
+		if len(message.Content) > 1024 {
+			messageContentNameField = strings.Join([]string{OriginalMessageContent, "(truncated to 1024 characters)"}, " ")
+		}
 		messageType = discordgo.InteractionResponseChannelMessageWithSource
 		authorID = message.Author.ID
 		fields = []*discordgo.MessageEmbedField{
@@ -348,8 +353,8 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 				Inline: true,
 			},
 			{
-				Name:  OriginalMessageContent,
-				Value: message.Content,
+				Name:  messageContentNameField,
+				Value: message.Content[:1024],
 			},
 			{
 				Name:   "Original message timestamp",
