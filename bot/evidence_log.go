@@ -326,8 +326,12 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 		}
 	} else {
 		messageContentNameField := OriginalMessageContent
+		var messageContent string
 		if len(message.Content) > 1024 {
 			messageContentNameField = strings.Join([]string{OriginalMessageContent, "(truncated to 1024 characters)"}, " ")
+			messageContent = message.Content[:1024]
+		} else {
+			messageContent = message.Content
 		}
 		messageType = discordgo.InteractionResponseChannelMessageWithSource
 		authorID = message.Author.ID
@@ -354,7 +358,7 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 			},
 			{
 				Name:  messageContentNameField,
-				Value: message.Content[:1024],
+				Value: messageContent,
 			},
 			{
 				Name:   "Original message timestamp",
