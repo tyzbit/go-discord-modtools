@@ -143,6 +143,11 @@ func (bot *ModeratorBot) InteractionHandler(s *discordgo.Session, i *discordgo.I
 	}
 
 	customCommandHandlers := bot.GetCustomCommandHandlers()
+	// This is a DM
+	if i.Interaction.GuildID == "" {
+		bot.GetHelpFromChatCommandContext(i)
+		return
+	}
 	var cfg GuildConfig
 	bot.DB.Where(&GuildConfig{ID: i.GuildID}).First(&cfg)
 	switch i.Type {

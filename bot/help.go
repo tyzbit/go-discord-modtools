@@ -31,10 +31,18 @@ const (
 	Get this help message:
 	
 	` + "`/help`"
+
+	BotDMNotice = "# NOTICE: This bot only works in a Discord server, not in DMs"
 )
 
 // This produces the help text seen from the chat commant `/help`
 func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionCreate) {
+	helpText := BotHelpText
+	color := Purple
+	if i.Interaction.GuildID == "" {
+		helpText = BotDMNotice + "\n" + helpText
+		color = DarkRed
+	}
 	err := bot.DG.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -42,8 +50,8 @@ func (bot *ModeratorBot) GetHelpFromChatCommandContext(i *discordgo.InteractionC
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Moder8or Bot Help",
-					Description: BotHelpText,
-					Color:       Purple,
+					Description: helpText,
+					Color:       color,
 				},
 			},
 		},
