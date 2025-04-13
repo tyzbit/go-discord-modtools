@@ -326,8 +326,8 @@ func (bot *ModeratorBot) GenerateEvidenceReportFromMessage(i *discordgo.Interact
 		}
 	} else {
 		messageContentNameField := OriginalMessageContent
-		messageContent := message.Content
-		if len(message.Content) > 1024 {
+		messageContent := "```" + message.Content + "```"
+		if len(message.Content) > (1024 - 6) { // 6 backticks
 			messageContentNameField = strings.Join([]string{OriginalMessageContent, "(truncated to 1024 characters)"}, " ")
 			messageContent = message.Content[:1024]
 		}
