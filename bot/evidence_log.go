@@ -540,7 +540,7 @@ func (bot *ModeratorBot) SaveEvidenceNotes(i *discordgo.InteractionCreate) {
 func (bot *ModeratorBot) userInfoIntegrationresponse(i *discordgo.InteractionCreate) *discordgo.InteractionResponseData {
 	user := i.Interaction.ApplicationCommandData().Resolved.Users[i.ApplicationCommandData().TargetID]
 
-	if user != nil && user.ID == "" {
+	if user != nil || user.ID == "" {
 		log.Warn("user was not provided")
 		return &discordgo.InteractionResponseData{
 			CustomID: GetUserInfoFromUserContext,
