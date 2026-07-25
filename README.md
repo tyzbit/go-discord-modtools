@@ -1,3 +1,6 @@
+# ARCHIVED
+This project is no longer supported.
+
 # go-discord-modtools
 
 Discord moderation bot written in Go
